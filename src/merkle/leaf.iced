@@ -7,7 +7,7 @@ exports.Triple = class Triple
 
 #--------------------------
 
-class LeafParser 
+class Parser 
 
   constructor : (@val) ->
 
@@ -58,9 +58,10 @@ exports.Leaf = class Leaf
   constructor : ({@pub, @semipriv}) ->
 
   get_public : () -> @pub
+  get_semi_private : () -> @semipriv
 
   @parse: (version, val) ->
-    parser = new LeafParser version, val
+    parser = new Parser version, val
     err = leaf = null
     try leaf = parser.parse()
     catch e then err = e

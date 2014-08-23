@@ -10,7 +10,7 @@ lib/%.js: src/%.iced
 	$(ICED) -I node -c -o `dirname $@` $<
 
 $(BUILD_STAMP): \
-	lib/leaf.js \
+	lib/merkle/leaf.js \
 	lib/main.js
 	date > $@
 
