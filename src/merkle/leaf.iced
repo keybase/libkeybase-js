@@ -63,7 +63,7 @@ exports.Leaf = class Leaf
   get_semiprivate: () -> @semipriv
 
   to_json : () ->
-    [ C.versions.leaf.v2, @pub.to_json(), (if @priv? then @priv.to_json() else null) ]
+    [ C.versions.leaf.v2, @pub.to_json(), (if @semipriv? then @semipriv.to_json() else null) ]
   to_string : () -> JSON.stringify(@to_json())
 
   @parse: (version, val) ->
@@ -72,5 +72,22 @@ exports.Leaf = class Leaf
     try leaf = parser.parse()
     catch e then err = e
     [err, leaf]
+
+  seqno_assertion : () -> (rows) =>
+    found = {}
+    # Make sure that every sequence found in the DB is also in the LOL
+    for {seqno_type, seqno} in rows
+      triple = switch seqno_type
+        when C.seqno_types.PUBLIC then @pub
+        when C.seqno_types.SEMIPRIVATE then @semipriv
+        else null
+      if not triple? or (triple.seqno isnt seqno) then return false
+      found[seqno_type] = true
+      
+    # Make sure that every sequence found in the LOL is also in the DB.
+    if @semipriv?.seqno and (not found[C.seqno_types.SEMIPRIVATE]) then return false
+    if @pub?.seqno and (not found[C.seqno_types.PUBLIC]) then return false
+
+    return true
 
 #===========================================================
