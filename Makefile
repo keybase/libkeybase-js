@@ -11,6 +11,7 @@ lib/%.js: src/%.iced
 
 $(BUILD_STAMP): \
 	lib/merkle/leaf.js \
+	lib/constants.js \
 	lib/main.js
 	date > $@
 

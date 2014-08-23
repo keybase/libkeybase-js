@@ -1,9 +1,11 @@
 
+C = require '../constants'
 
 #===========================================================
 
 exports.Triple = class Triple 
   constructor : ({@seqno, @payload_hash, @sig_id}) ->
+  to_json : () -> [ @seqno, @payload_hash, @sig_id ]
 
 #--------------------------
 
@@ -24,8 +26,8 @@ class Parser
       version = @val[0]
 
     switch version
-      when 1 then @parse_v1()
-      when 2 then @parse_v2()
+      when C.versions.leaf.v1 then @parse_v1()
+      when C.versions.leaf.v2 then @parse_v2()
       else throw new Error "unknown leaf version: #{version}"
 
   parse_v1 : () ->
@@ -58,7 +60,11 @@ exports.Leaf = class Leaf
   constructor : ({@pub, @semipriv}) ->
 
   get_public : () -> @pub
-  get_semi_private : () -> @semipriv
+  get_semiprivate: () -> @semipriv
+
+  to_json : () ->
+    [ C.versions.leaf.v2, @pub.to_json(), (if @priv? then @priv.to_json() else null) ]
+  to_string : () -> JSON.stringify(@to_json())
 
   @parse: (version, val) ->
     parser = new Parser version, val
