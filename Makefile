@@ -27,8 +27,7 @@ clean:
 setup:
 	npm install -d
 
-test:
-	cd test && iced run.iced
+test: test-server test-browser
 
 build: $(BUILD_STAMP)
 
@@ -48,7 +47,5 @@ $(TEST_STAMP): test/browser/test.js
 
 test/browser/test.js: test/browser/main.iced $(BUILD_STAMP)
 	$(BROWSERIFY) -t icsify $< > $@
-
-test: test-server test-browser
 
 .PHONY: clean setup test  test-browser

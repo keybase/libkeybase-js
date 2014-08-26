@@ -25,3 +25,4 @@ build/Release
 node_modules
 Sat Aug 23 14:29:59 EDT 2014
 build-stamp
+test-stamp
