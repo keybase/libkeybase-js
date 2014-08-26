@@ -22,9 +22,12 @@
   },
   "homepage": "https://github.com/keybase/node-sig-tree",
   "dependencies": {
-    "iced-runtime": "^1.0.1"
+    "iced-runtime": "^1.0.1",
+    "kbpgp": "^1.0.2"
   },
   "devDependencies": {
-    "iced-coffee-script": "^1.7.1-f"
+    "browserify": "^5.10.1",
+    "iced-coffee-script": "^1.7.1-f",
+    "iced-test": "0.0.17"
   }
 }
