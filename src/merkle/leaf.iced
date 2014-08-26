@@ -3,13 +3,13 @@ C = require '../constants'
 
 #===========================================================
 
-exports.Triple = class Triple 
+exports.Triple = class Triple
   constructor : ({@seqno, @payload_hash, @sig_id}) ->
   to_json : () -> [ @seqno, @payload_hash, @sig_id ]
 
 #--------------------------
 
-class Parser 
+class Parser
 
   constructor : (@val) ->
 
@@ -34,7 +34,7 @@ class Parser
     pub = @parse_triple @val
     new Leaf { pub }
 
-  parse_v2 : () -> 
+  parse_v2 : () ->
     if @val.length < 2 then throw new Error "No public chain"
     pub = @parse_triple @val[1]
     semipriv = if (@val.length > 2) and @val[2]?.length then @parse_triple(@val[2]) else null
@@ -67,11 +67,11 @@ exports.Leaf = class Leaf
     ret = [ C.versions.leaf.v2, @pub.to_json() ]
     if @semipriv? then ret.push @semipriv.to_json()
     return ret
-    
+
   to_string : () -> JSON.stringify(@to_json())
 
-  @parse: (version, val) ->
-    parser = new Parser version, val
+  @parse: ( val) ->
+    parser = new Parser val
     err = leaf = null
     try leaf = parser.parse()
     catch e then err = e

@@ -1,1 +1,1 @@
-require('iced-test').run { mainfile : __filename }
+require('iced-test').main { mainfile : __filename }
