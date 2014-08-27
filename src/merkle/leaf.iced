@@ -64,7 +64,7 @@ exports.Leaf = class Leaf
 
   to_json : () ->
     # Save some space by not including semipriv if it's empty...
-    ret = [ C.versions.leaf.v2, @pub.to_json() ]
+    ret = [ C.versions.leaf.v2, (if @pub then @pub.to_json() else []) ]
     if @semipriv? then ret.push @semipriv.to_json()
     return ret
 
