@@ -79,6 +79,7 @@ exports.Leaf = class Leaf
 
   seqno_assertion : () -> (rows) =>
     found = {}
+
     # Make sure that every sequence found in the DB is also in the LOL
     for {seqno_type, seqno} in rows
       triple = switch seqno_type
