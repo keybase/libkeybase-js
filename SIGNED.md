@@ -4,13 +4,13 @@
 Version: GnuPG/MacGPG2 v2.0.22 (Darwin)
 Comment: GPGTools - https://gpgtools.org
 
-iQEcBAABCgAGBQJT/MQnAAoJEJgKPw0B/gTf7AkH/j5yPpjziXIEbBoQavNBietF
-1Pn6BgoZ/eRAfKg8QLBJ79nwcD281Kvyno+6IflFhlZeUOw+tYvbWBbdIyVDANZs
-4o5XkvralBDGAPxK1nPjLNDYn05QlSehrAnJbyqHU7G708Cr6I6zQVuyWD+o7AJ/
-AYn4lE4Hr80G0psHaMxJlf03046oWQlZ8HjCB6EJAaEmY3kGt9PEWDsPuKgCg8uB
-ZIo6XRkNj1UAlPP1Wc1/74ePhjfMFv7r5tqWoQSi4cWQNq0uWCSIX8SnHseuXnUt
-kSWlUjVF4cKJmEE4GdTo1RXHoViobN8EVuMpP+ljP9rYv/jurETkZwpJty5JE1Q=
-=oaaN
+iQEcBAABCgAGBQJT/zLcAAoJEJgKPw0B/gTfM94H/3S6NgoESwf1KiROawBlkLjf
+a1bBr9OSaTIuiBRkQoiLGEX43dpx9OsqBdnxzq+mZ2SECB46aOs5OCRXnwzYrYs4
+1fRTiwkWOU9Wvb02Iyw6h+KwX5KtDVEfTRUhoLocR8FZa1tkiLqz9SZ55GU1MJha
+omiWlV/r0uhr2mvA8qdl/iW2Z32FWCpykyQOiNfNbyThCCzDvav8HjtnkQtlD3pF
+UF6Ji2tywmNjx0JmphsphXfMew5WSNMcCyWzpN4exe7rB8a4Jwn7N79sRnVDn3qc
+Sf2/YNAd5j6MRgFfKH3TeJsDaPbuWCsohkXyITrkjonLy/52sDMW5ATmOKb3V/o=
+=Kfll
 -----END PGP SIGNATURE-----
 
 ```
@@ -33,13 +33,13 @@ size    exec  file                       contents
 267               constants.js           d53b266f88a692da238b75eca7edf4299f4869853219bcbc4e624604d22c4f11
 179               main.js                aa9508f13459b0644abd3437352e970d01ade1596e7f311c9600bfea012f1b22
                   merkle/                                                                                
-4618                leaf.js              5d1b73ac2ab2f95c0c6ba000ba6a3bbb4f20395554172b4662838ed1771a0a68
-760             package.json             78629f67ebd7149a5c09cfd14c3d4b648fe3aefd34d7d8b39e0456a85f59dbeb
+4636                leaf.js              55bc8b26b468766052c15ab485e13982cb61cba1b19f3e6ae46a6e1cec896461
+760             package.json             f8f769f87913d77689f69cc22b71c574de5ff8282bee4e142d19f1b662878d52
                 src/                                                                                     
 150               constants.iced         51334d9c4a8809755185ffa9363bc2bfd40582a78b18bf048136961b4385dfae
 97                main.iced              1dd0becdd1418bf1431607428152892aa0daf12d102a5c6aece232f55c5195e8
                   merkle/                                                                                
-3035                leaf.iced            259540db4476512840f1bdde61c414d170195cb7ca38470b35ac14aef101eced
+3059                leaf.iced            8401351328cfe79bea2019a091f411fb852be7b93d1354a766f01461db08cf45
                 test/                                                                                    
                   browser/                                                                               
 287                 index.html           e31387cfd94034901e89af59f0ad29a3e2f494eb7269f1806e757be21b3cf33e
