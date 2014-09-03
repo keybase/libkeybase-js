@@ -1,6 +1,6 @@
 
 libkb = require 'libkeybase'
-{User} = libkb
+{Assertion,User} = libkb
 
 # Your app needs to provide some idea of local storage that meets our requirements.
 {LocalStore} = require 'myapp'
@@ -46,7 +46,8 @@ await LocalStore.open defer err, store
 await User.load { store, query : { keybase : "max" }, opts : {} }, defer err, me
 
 # As in 4c above...
-await me.assert { assertions : [ { key : "aabbccdd" }, { "reddit" : "maxtaco" }, { "web" : "https://goobar.com" } ] }, defer err
+assertion = Assertion.compile "(key://aabbccdd && reddit://maxtaco && (https://goobar.com || http://goobar.com || dns://goobar.com)))"
+await me.assert { assertion }, defer err
 
 # Load a second user...
 await User.load { store, query : { "twitter" : "malgorithms" } }, defer err, chris
@@ -80,4 +81,4 @@ failures = idtab.get_failures_to_json()
 
 # Fetch a key manager for a particular app (or for the main app if none specified), and for
 # the given public key operations.
-await chris.fetch_key_manager { { app : "myencryptor" }, ops }, defer err, km
+await chris.load_key_manager { { app : "myencryptor" }, ops }, defer err, km
