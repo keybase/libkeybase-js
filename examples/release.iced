@@ -1,6 +1,20 @@
 
+libkb = require 'libkeybase'
+assert = require 'assert'
+{User,E} = libkb
+
+# Your app needs to provide some idea of local storage that meets our requirements.
+{LocalStore} = require 'myapp'
+
+# Open the LocalStore, which can create one if none existed beforehand.
+await LocalStore.open defer err, store
+
+# Load me...
+await User.load { store, query : { keybase : "max" } }, defer err, me
 
 # Loads a list of recruited users who are now ready to be verified.
+# Makes an API to the server and verifies that I've signed them and they
+# aren't expired..
 await me.load_recruited_user_list {}, defer err, recruits
 
 for r in recruits

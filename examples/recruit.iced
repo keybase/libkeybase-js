@@ -20,14 +20,14 @@ await User.load { store, query : { keybase : "max" } }, defer err, me
 
 # Come up with some secret to later release to the user...
 secret = # ....
-app = # id of our app.  Question: namespace or ID or what?
+app = # id of our app.  Question: name (in a contested namespace) or ID or what?
 
 assertion = Assertion.compile "twitter://maxtaco || github://maxtaco || reddit://peterpan"
 
 #
 # Alternative assertion representation in JSON-lisp form:
 #
-assertion = Assertion.create [ "and"
+assertion = Assertion.from_json [ "and"
   [ "or"
     [ "p", "twitter", "maxtaco" ],
     [ "p", "github",  "dbag2"   ]
