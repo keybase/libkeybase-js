@@ -7,7 +7,7 @@ assert = require 'assert'
 {LocalStore} = require 'myapp'
 
 # Open the LocalStore, which can create one if none existed beforehand.
-await LocalStore.open defer err, store
+await LocalStore.open {}, defer err, store
 
 # What if we fail to load a user?
 await User.load { store, query : { twitter : "chris_paradise" } }, defer err, user
@@ -20,7 +20,7 @@ await User.load { store, query : { keybase : "max" } }, defer err, me
 
 # Come up with some secret to later release to the user...
 secret = # ....
-app = # id of our app.  Question: name (in a contested namespace) or ID or what?
+subkey_name = # name of our app subkey
 
 assertion = Assertion.compile "twitter://chris_paradise || github://paradise_chris"
 
@@ -29,8 +29,8 @@ assertion = Assertion.compile "twitter://chris_paradise || github://paradise_chr
 #
 assertion = Assertion.from_json [ "and"
   [ "or"
-    [ "p", "twitter", "maxtaco" ],
-    [ "p", "github",  "dbag2"   ]
+    [ "p", "twitter", "chris_paradise" ],
+    [ "p", "github",  "paradise_chris"   ]
   ],
   [ "or"
     [ "p", "http",  "eatabag.com" ],
@@ -51,5 +51,5 @@ assertion = Assertion.from_json [ "and"
 # Note that you can provide an optional expire_in, which will tell the server when
 # to throw it away (and allows you to know when you're done with it.)
 #
-await me.recruit_user { assertion, expire_in, app, secret }, defer err, id
+await me.recruit_user { assertion, expire_in, subkey_name, secret }, defer err, id
 

@@ -6,7 +6,7 @@ libkb = require 'libkeybase'
 {LocalStore} = require 'myapp'
 
 # Open the LocalStore, which can create one if none existed beforehand.
-await LocalStore.open defer err, store
+await LocalStore.open {}, defer err, store
 
 # In this case, we assume that the user exists, and that we don't want to work
 # around a failure in loading him/her.  In contrast, we'll see other versions of
@@ -52,33 +52,39 @@ await me.assert { assertion }, defer err
 # Load a second user...
 await User.load { store, query : { "twitter" : "malgorithms" } }, defer err, chris
 
+#
+# Note that there is a 1-to-1 correspondence between the IdentityTable object and the
+# User object, but they are split apart for convenience.
+#
+idtab = chris.get_identity_table()
+
 # As in 4b above...
 #
 # State can be: NONE, if I haven't tracked Chris before; OK if my tracking
 # statement is fully up-to-date, STALE if my tracking statement is out-of-date,
 # or SUBSET, if it's a proper subset of the current state.
 #
-await chris.check_tracking { tracker : me }, defer err, state
+await idtab.check_tracking { tracker : me }, defer err, state
 
 # As in 4a above.
 #
 # An error will be returned if there was a catastrophic failure, not if
 # any one of the proofs failed. Check the status field for OK if all succeded, or
 # PARTIAL_FAILURE if some failed.
-#
-# Note that there is a 1-to-1 correspondence between the IdentityTable object and the
-# User object, but they are split apart for convenience.
-#
-idtab = chris.get_identity_table()
-await idtab.check_remotes {}, defer err, status
 
-# As in 4c, optional assertions against the identity table
-await idtab.assert { assertion : [ { "key" : "aabb" }, { "reddit" : "maxtaco" } ] }, defer err
+await idtab.check_remotes {}, defer err, status, failures
 
 # Outputs any failures in JSON format, though you can query the idtab in a number of different ways
 # (which aren't finalized yet...)
 failures = idtab.get_failures_to_json()
 
+# As in 4c, optional assertions against the identity table
+await idtab.assert { assertion : [ { "key" : "aabb" }, { "reddit" : "maxtaco" } ] }, defer err
+
 # Fetch a key manager for a particular app (or for the main app if none specified), and for
 # the given public key operations.
-await chris.load_key_manager { { app : "myencryptor" }, ops }, defer err, km
+await chris.load_key_manager { { subkey_name : "myencryptor" }, ops }, defer err, km
+
+# Also possible to list subkeys; will generate a list of active keys. Can query by
+# prefix, or regex, or exact match (name).
+await chris.list_keys { prefix : "myapp." }, defer err, keys
