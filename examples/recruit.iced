@@ -43,7 +43,7 @@ assertion = Assertion.create [ "and"
 #
 # Will perform the following steps:
 #
-#   1. Load the key manager for me with (ENCRYPT|SIGN) ops flags.
+#   1. Load the key manager for me for this app with (ENCRYPT|SIGN) ops flags.
 #   2. Make a JSON object with my assertions, and my encrypted secret
 #   3. Sign the JSON object with my public key
 #   4. Post it to the server, yielding the given ID

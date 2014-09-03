@@ -73,7 +73,7 @@ idtab = chris.get_identity_table()
 await idtab.check_remotes {}, defer err, status
 
 # As in 4c, optional assertions against the identity table
-await idtab.assert { assertions : [ { "key" : "aabb" }, { "reddit" : "maxtaco" } ] }, defer err
+await idtab.assert { assertion : [ { "key" : "aabb" }, { "reddit" : "maxtaco" } ] }, defer err
 
 # Outputs any failures in JSON format, though you can query the idtab in a number of different ways
 # (which aren't finalized yet...)
