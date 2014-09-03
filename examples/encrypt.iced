@@ -8,6 +8,11 @@ libkb = require 'libkeybase'
 # Open the LocalStore, which can create one if none existed beforehand.
 await LocalStore.open defer err, store
 
+# In this case, we assume that the user exists, and that we don't want to work
+# around a failure in loading him/her.  In contrast, we'll see other versions of
+# this process in which we make temporary provisions based on a user not existing
+# (see recruit.json).
+
 # Steps to loading a user:
 #
 #   1. Fetching all signature data from the server (or from local storage)
