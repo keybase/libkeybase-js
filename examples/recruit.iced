@@ -10,7 +10,7 @@ assert = require 'assert'
 await LocalStore.open defer err, store
 
 # What if we fail to load a user?
-await User.load { store, query : { keybase : "chris_paradise" } }, defer err, user
+await User.load { store, query : { twitter : "chris_paradise" } }, defer err, user
 
 # This example is only for users who aren't found
 assert (err? and (err instanceof E.NotFoundError))
@@ -22,7 +22,7 @@ await User.load { store, query : { keybase : "max" } }, defer err, me
 secret = # ....
 app = # id of our app.  Question: name (in a contested namespace) or ID or what?
 
-assertion = Assertion.compile "twitter://maxtaco || github://maxtaco || reddit://peterpan"
+assertion = Assertion.compile "twitter://chris_paradise || github://paradise_chris"
 
 #
 # Alternative assertion representation in JSON-lisp form:

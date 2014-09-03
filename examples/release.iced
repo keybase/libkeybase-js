@@ -7,7 +7,7 @@ assert = require 'assert'
 {LocalStore} = require 'myapp'
 
 # Open the LocalStore, which can create one if none existed beforehand.
-await LocalStore.open defer err, store
+await LocalStore.open {}, defer err, store
 
 # Load me...
 await User.load { store, query : { keybase : "max" } }, defer err, me
