@@ -28,6 +28,9 @@ clean:
 setup:
 	npm install -d
 
+coverage:
+	./node_modules/.bin/istanbul cover $(ICED) test/run.iced
+
 test: test-server test-browser
 
 build: $(BUILD_STAMP)
@@ -49,4 +52,4 @@ $(TEST_STAMP): test/browser/test.js
 test/browser/test.js: test/browser/main.iced $(BUILD_STAMP)
 	$(BROWSERIFY) -t icsify $< > $@
 
-.PHONY: clean setup test  test-browser
+.PHONY: clean setup test  test-browser coverage
