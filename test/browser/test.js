@@ -132,7 +132,7 @@
 
     Leaf.prototype.to_json = function() {
       var ret;
-      ret = [C.versions.leaf.v2, this.pub.to_json()];
+      ret = [C.versions.leaf.v2, (this.pub ? this.pub.to_json() : [])];
       if (this.semipriv != null) {
         ret.push(this.semipriv.to_json());
       }
@@ -3299,7 +3299,7 @@ function isNullOrUndefined(arg) {
 //# sourceMappingURL=index.map
 
 }).call(this,require('_process'))
-},{"_process":6,"colors":17,"deep-equal":18,"fs":4,"iced-runtime":23,"minimist":25,"path":5,"url":11}],17:[function(require,module,exports){
+},{"_process":6,"colors":17,"deep-equal":18,"fs":4,"iced-runtime":14,"minimist":21,"path":5,"url":11}],17:[function(require,module,exports){
 /*
 colors.js
 
@@ -3773,14 +3773,6 @@ function shim (obj) {
 }
 
 },{}],21:[function(require,module,exports){
-module.exports=require(12)
-},{}],22:[function(require,module,exports){
-module.exports=require(13)
-},{"./const":21,"./runtime":24}],23:[function(require,module,exports){
-module.exports=require(14)
-},{"./const":21,"./library":22,"./runtime":24}],24:[function(require,module,exports){
-module.exports=require(15)
-},{"./const":21,"_process":6}],25:[function(require,module,exports){
 module.exports = function (args, opts) {
     if (!opts) opts = {};
     
@@ -4001,7 +3993,7 @@ function isNumber (x) {
 }
 
 
-},{}],26:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var BrowserRunner, iced, mods, __iced_k, __iced_k_noop;
 
 iced = require('iced-runtime');
@@ -4039,7 +4031,7 @@ window.onload = function() {
 };
 
 
-},{"../files/30_merkle_leaf.iced":27,"iced-runtime":14,"iced-test":16}],27:[function(require,module,exports){
+},{"../files/30_merkle_leaf.iced":23,"iced-runtime":14,"iced-test":16}],23:[function(require,module,exports){
 var Leaf, Triple, _ref;
 
 _ref = require('../..').merkle.leaf, Leaf = _ref.Leaf, Triple = _ref.Triple;
@@ -4085,4 +4077,4 @@ exports.test_v2_3 = function(T, cb) {
 };
 
 
-},{"../..":2}]},{},[26]);
+},{"../..":2}]},{},[22]);
