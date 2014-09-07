@@ -237,7 +237,7 @@
       authority += "@";
       host = this.host || (full ? "keybase.io" : null);
       if (host != null) {
-        authority += "@" + host;
+        authority += "" + host;
       }
       if ((this.port != null) && this.port !== 443) {
         authority += ":" + this.port;

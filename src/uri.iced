@@ -35,7 +35,7 @@ exports.URI = class URI
     authority += ";fingerprint=#{@fingerprint}" if @fingerprint?
     authority += "@"
     host = @host or (if full then "keybase.io" else null)
-    if host? then authority += "@#{host}"
+    if host? then authority += "#{host}"
     if @port? and @port isnt 443 then authority += ":#{@port}"
     parts.push authority
 
@@ -89,7 +89,7 @@ exports.URI = class URI
 
   #--------------------------
 
-  eq : (uri2) -> (format { full : true }) is (uri2.format { full : true })
+  eq : (uri2) -> (@format { full : true }) is (uri2.format { full : true })
 
 #==================================================================================
 
