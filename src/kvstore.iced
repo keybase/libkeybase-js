@@ -17,9 +17,9 @@ exports.Base = class Base
   #========================
 
   # Base classes need to implement these...
-  open : (cb) -> @unimplemented('open', cb)
-  nuke : (cb) -> @unimplemented('nuke', cb)
-  close : (cb) -> @unimplemented('close', cb)
+  open : (opts, cb) -> @unimplemented('open', cb)
+  nuke : (opts, cb) -> @unimplemented('nuke', cb)
+  close : (opts, cb) -> @unimplemented('close', cb)
   _put : ({key,value},cb) -> @unimplemented('_put', cb)
   _get : ({key}, cb) -> @unimplemented("_get", cb)
   _resolve : ({name}, cb) -> @unimplemented("_resolve", cb)
@@ -105,17 +105,109 @@ exports.Flat = class Flat extends Base
     cb err
 
   _unlink_all : ({key}, cb) ->
-    log.debug "| Can't _unlink_all names for #{key} in Flat kvstore"
+    log.debug "| Can't _unlink_all names for #{key} in flat kvstore"
     cb null
 
   _resolve : ({name}, cb) ->
     await @_get { key : name }, defer err, value
     if err? and (err instanceof E.NotFoundError)
       err = new E.LookupNotFoundError "No lookup available for #{name}"
+    cb err, value
 
 ##=======================================================================
 
 # A memory-backed store, mainly for testing...
 exports.Memory = class Memory extends Base
 
+  constructor : () ->
+    super
+    @lookup = {}
+    @rlookup = {}
+    @kv = {}
+
+  open : (opts, cb) -> cb null
+  nuke : (opts, cb) -> cb null
+  close : (opts, cb) -> cb null
+
+  _put : ({key, value}, cb) ->
+    @kv[key] = value
+    cb null
+
+  _get : ({key}, cb) ->
+    err = null
+    if (val = @kv[key]) is undefined
+      err = new E.NotFoundError "key not found: '#{key}'"
+    cb err, val
+
+  _resolve : ({name}, cb) ->
+    err = null
+    unless (key = @lookup[name])?
+      err = new E.LookupNotFoundError "name not found: '#{name}'"
+    cb err, name
+
+  _link : ({key, name}, cb) ->
+    @lookup[name] = key
+    @rlookup[key] = set = {} unless (set = @rlookup[key])?
+    set[name] = true
+    cb null
+
+  _unlink : ({name}, cb) ->
+    if (key = @lookup[name])?
+      delete d[name] if (d = @rlookup[key])?
+      delete @lookup[name]
+      err = null
+    else
+      err = new E.LookupNotFoundError "cannot unlink '#{name}'"
+    cb err
+
+  _remove : ({key}, cb) ->
+    err = null
+    unless (v = @kv[key])?
+      err = new E.NotFoundError "key not found: '#{key}'"
+    else
+      delete @kv[key]
+    cb err
+
+  _unlink_all : ({key}, cb) ->
+    if (d = @rlookup[key])?
+      for name,_ of d
+        delete @lookup[name]
+      delete @rlookup[key]
+      err = null
+    else
+      err = new E.LookupNotFoundError "cannot find names for key '#{key}'"
+    cb err
+
+##=======================================================================
+
+# for testing, an in-memory flat store, that stores lookups and kv-pairs
+# in the same table, and doesn't have the ability to "unlink_all"
+exports.FlatMemory = class FlatMemory extends Flat
+
+  constructor : () ->
+    super 
+    @kv = {}
+
+  open : (opts, cb) -> cb null
+  nuke : (opts, cb) -> cb null
+  close : (opts, cb) -> cb null
+
+  _put : ({key, value}, cb) ->
+    @kv[key] = value
+    cb null
+
+  _get : ({key}, cb) ->
+    err = null
+    if (val = @kv[key]) is undefined
+      err = new E.NotFoundError "key not found: '#{key}'"
+    cb err, val
+
+  _remove : ({key}, cb) ->
+    err = null
+    unless (v = @kv[key])?
+      err = new E.NotFoundError "key not found: '#{key}'"
+    else
+      delete @kv[key]
+    cb err
+    
 ##=======================================================================
