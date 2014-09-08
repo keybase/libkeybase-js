@@ -89,6 +89,9 @@ exports.Base = class Base
 
 exports.Flat = class Flat extends Base
 
+  constructor : () ->
+    @flat_lock = new Lock
+
   make_kvstore_key : ({type,key}) -> 
     type or= key[-2...]
     "kv:" + super { type, key }
@@ -96,8 +99,27 @@ exports.Flat = class Flat extends Base
   make_lookup_name : ({type,name}) ->
     "lo:" + super { type, name }
 
+  _get_reverse_lookup : ({name}, cb) ->
+    await @_get { key : ("r" + name) }, defer err, rlookup
+    if err? and (err instanceof E.NotFoundError)
+      err = null
+      rlookup = []
+    cb err, rlookup
+
+  _put_reverse_lookup : ({name, list}, cb) ->
+    await @_put { key : ("r" + name), value : list }, defer err
+    cb err
+
   _link : ({key, name}, cb) ->
-    await @_put { key : name, value : key }, defer err
+    await @flat_lock.acquire defer()
+    esc = make_esc cb, "Flat::_link"
+    await @_get_reverse_lookup { name }, defer err, list
+    unless err?
+      list.push name
+      await @_put_reverse_lookup { name, list }, defer err
+    unless err?
+      await @_put { key : name, value : key }, defer err
+    @flat_lock.release() 
     cb err
 
   _unlink : ({name}, cb) ->
@@ -112,5 +134,10 @@ exports.Flat = class Flat extends Base
     await @_get { key : name }, defer err, value
     if err? and (err instanceof E.NotFoundError)
       err = new E.LookupNotFoundError "No lookup available for #{name}"
+
+##=======================================================================
+
+# A memory-backed store, mainly for testing...
+exports.Memory = class Memory extends Base
 
 ##=======================================================================
