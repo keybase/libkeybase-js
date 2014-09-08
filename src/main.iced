@@ -5,6 +5,8 @@ exports.merkle =
 # Export all of these modules as namespace extensions
 exports[k] = v for k,v of {
   constants : require('./constants')
+  err : require('./err')
+  kvstore : require('./kvstore')
 }
 
 # Export the exports of these modules to the top level
