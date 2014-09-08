@@ -16,6 +16,7 @@ lib/%.js: src/%.iced
 
 $(BUILD_STAMP): \
 	lib/constants.js \
+        lib/err.js \
         lib/kvstore.js \
 	lib/main.js \
 	lib/merkle/leaf.js \

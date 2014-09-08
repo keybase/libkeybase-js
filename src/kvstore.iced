@@ -12,7 +12,7 @@ class BaseKvStore
 
   #========================
 
-  unimplemented : (n, cb) -> cb new Error "BaseKvStore::#{n}: unimplemented"
+  unimplemented : (n, cb) -> cb new E.UnimplementedError "BaseKvStore::#{n}: unimplemented"
 
   #========================
 
