@@ -543,7 +543,6 @@
         });
       })(this)((function(_this) {
         return function() {
-          log.debug("| hkey is " + hkey);
           if ((name != null) && (names == null)) {
             names = [name];
           }
@@ -586,7 +585,7 @@
                         name: name,
                         key: kvsk
                       }, esc(__iced_deferrals.defer({
-                        lineno: 56
+                        lineno: 55
                       })));
                       __iced_deferrals._fulfill();
                     })(_next);
@@ -622,7 +621,7 @@
             funcname: "Base.remove"
           });
           _this.lock.acquire(__iced_deferrals.defer({
-            lineno: 64
+            lineno: 63
           }));
           __iced_deferrals._fulfill();
         });
@@ -643,7 +642,7 @@
                   return err = arguments[0];
                 };
               })(),
-              lineno: 68
+              lineno: 67
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -668,7 +667,7 @@
                         return err = arguments[0];
                       };
                     })(),
-                    lineno: 73
+                    lineno: 72
                   }));
                   __iced_deferrals._fulfill();
                 })(__iced_k);
@@ -707,7 +706,7 @@
                 return key = arguments[0];
               };
             })(),
-            lineno: 84
+            lineno: 83
           })));
           __iced_deferrals._fulfill();
         });
@@ -727,7 +726,7 @@
                   return value = arguments[0];
                 };
               })(),
-              lineno: 85
+              lineno: 84
             })));
             __iced_deferrals._fulfill();
           })(function() {
@@ -788,7 +787,7 @@
                 return err = arguments[0];
               };
             })(),
-            lineno: 100
+            lineno: 99
           }));
           __iced_deferrals._fulfill();
         });
@@ -819,7 +818,7 @@
                 return err = arguments[0];
               };
             })(),
-            lineno: 104
+            lineno: 103
           }));
           __iced_deferrals._fulfill();
         });
@@ -858,7 +857,7 @@
                 return value = arguments[1];
               };
             })(),
-            lineno: 112
+            lineno: 111
           }));
           __iced_deferrals._fulfill();
         });
@@ -881,9 +880,11 @@
 
     function Memory() {
       Memory.__super__.constructor.apply(this, arguments);
-      this.lookup = {};
-      this.rlookup = {};
-      this.kv = {};
+      this.data = {
+        lookup: {},
+        rlookup: {},
+        kv: {}
+      };
     }
 
     Memory.prototype.open = function(opts, cb) {
@@ -901,7 +902,7 @@
     Memory.prototype._put = function(_arg, cb) {
       var key, value;
       key = _arg.key, value = _arg.value;
-      this.kv[key] = value;
+      this.data.kv[key] = value;
       return cb(null);
     };
 
@@ -909,7 +910,7 @@
       var err, key, val;
       key = _arg.key;
       err = null;
-      if ((val = this.kv[key]) === void 0) {
+      if ((val = this.data.kv[key]) === void 0) {
         err = new E.NotFoundError("key not found: '" + key + "'");
       }
       return cb(err, val);
@@ -919,18 +920,18 @@
       var err, key, name;
       name = _arg.name;
       err = null;
-      if ((key = this.lookup[name]) == null) {
+      if ((key = this.data.lookup[name]) == null) {
         err = new E.LookupNotFoundError("name not found: '" + name + "'");
       }
-      return cb(err, name);
+      return cb(err, key);
     };
 
     Memory.prototype._link = function(_arg, cb) {
       var key, name, set;
       key = _arg.key, name = _arg.name;
-      this.lookup[name] = key;
-      if ((set = this.rlookup[key]) == null) {
-        this.rlookup[key] = set = {};
+      this.data.lookup[name] = key;
+      if ((set = this.data.rlookup[key]) == null) {
+        this.data.rlookup[key] = set = {};
       }
       set[name] = true;
       return cb(null);
@@ -939,11 +940,11 @@
     Memory.prototype._unlink = function(_arg, cb) {
       var d, err, key, name;
       name = _arg.name;
-      if ((key = this.lookup[name]) != null) {
-        if ((d = this.rlookup[key]) != null) {
+      if ((key = this.data.lookup[name]) != null) {
+        if ((d = this.data.rlookup[key]) != null) {
           delete d[name];
         }
-        delete this.lookup[name];
+        delete this.data.lookup[name];
         err = null;
       } else {
         err = new E.LookupNotFoundError("cannot unlink '" + name + "'");
@@ -955,10 +956,10 @@
       var err, key, v;
       key = _arg.key;
       err = null;
-      if ((v = this.kv[key]) == null) {
+      if ((v = this.data.kv[key]) == null) {
         err = new E.NotFoundError("key not found: '" + key + "'");
       } else {
-        delete this.kv[key];
+        delete this.data.kv[key];
       }
       return cb(err);
     };
@@ -966,12 +967,12 @@
     Memory.prototype._unlink_all = function(_arg, cb) {
       var d, err, key, name, _;
       key = _arg.key;
-      if ((d = this.rlookup[key]) != null) {
+      if ((d = this.data.rlookup[key]) != null) {
         for (name in d) {
           _ = d[name];
-          delete this.lookup[name];
+          delete this.data.lookup[name];
         }
-        delete this.rlookup[key];
+        delete this.data.rlookup[key];
         err = null;
       } else {
         err = new E.LookupNotFoundError("cannot find names for key '" + key + "'");

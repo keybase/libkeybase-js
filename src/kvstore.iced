@@ -49,7 +49,6 @@ exports.Base = class Base
     kvsk = @make_kvstore_key {type,key}
     log.debug "+ KvStore::put #{key}/#{kvsk}"
     await @_put { key : kvsk, value }, esc defer()
-    log.debug "| hkey is #{hkey}"
     names = [ name ] if name? and not names?
     if names and names.length
       for name in names
@@ -122,40 +121,41 @@ exports.Memory = class Memory extends Base
 
   constructor : () ->
     super
-    @lookup = {}
-    @rlookup = {}
-    @kv = {}
+    @data = 
+      lookup : {}
+      rlookup : {}
+      kv : {}
 
   open : (opts, cb) -> cb null
   nuke : (opts, cb) -> cb null
   close : (opts, cb) -> cb null
 
   _put : ({key, value}, cb) ->
-    @kv[key] = value
+    @data.kv[key] = value
     cb null
 
   _get : ({key}, cb) ->
     err = null
-    if (val = @kv[key]) is undefined
+    if (val = @data.kv[key]) is undefined
       err = new E.NotFoundError "key not found: '#{key}'"
     cb err, val
 
   _resolve : ({name}, cb) ->
     err = null
-    unless (key = @lookup[name])?
+    unless (key = @data.lookup[name])?
       err = new E.LookupNotFoundError "name not found: '#{name}'"
-    cb err, name
+    cb err, key
 
   _link : ({key, name}, cb) ->
-    @lookup[name] = key
-    @rlookup[key] = set = {} unless (set = @rlookup[key])?
+    @data.lookup[name] = key
+    @data.rlookup[key] = set = {} unless (set = @data.rlookup[key])?
     set[name] = true
     cb null
 
   _unlink : ({name}, cb) ->
-    if (key = @lookup[name])?
-      delete d[name] if (d = @rlookup[key])?
-      delete @lookup[name]
+    if (key = @data.lookup[name])?
+      delete d[name] if (d = @data.rlookup[key])?
+      delete @data.lookup[name]
       err = null
     else
       err = new E.LookupNotFoundError "cannot unlink '#{name}'"
@@ -163,17 +163,17 @@ exports.Memory = class Memory extends Base
 
   _remove : ({key}, cb) ->
     err = null
-    unless (v = @kv[key])?
+    unless (v = @data.kv[key])?
       err = new E.NotFoundError "key not found: '#{key}'"
     else
-      delete @kv[key]
+      delete @data.kv[key]
     cb err
 
   _unlink_all : ({key}, cb) ->
-    if (d = @rlookup[key])?
+    if (d = @data.rlookup[key])?
       for name,_ of d
-        delete @lookup[name]
-      delete @rlookup[key]
+        delete @data.lookup[name]
+      delete @data.rlookup[key]
       err = null
     else
       err = new E.LookupNotFoundError "cannot find names for key '#{key}'"
