@@ -53,3 +53,11 @@ exports.test_eq = (T,cb) ->
   test_eq T, 2, [ "keybase://max@:44/a/b/c", "keybase://max@keybase.io/a/b/c "], false
   cb()
 
+#exports.test_base = (T,cb) ->
+#  abstracts = [ "open", "nuke", "close", "_unlink", "_unlink_all", "_remove", "_put", "_get" ]
+#  # b = new Base {}
+#  # for method in abstracts
+#  #   await b[method] {}, defer err
+#  #   T.assert (err? and err instanceof E.UnimplementedError), "method #{method} failed"
+#  cb()
+#

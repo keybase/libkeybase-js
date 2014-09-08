@@ -1,12 +1,12 @@
 
 
 top = require '../..'
-{FlatMemory,Memory} = top.kvstore 
+{Base,FlatMemory,Memory} = top.kvstore 
 {E} = top.err
 
 # Turn this on for debugging output...
-# log = require 'iced-logger'
-# log.package().env().set_level(0)
+#log = require 'iced-logger'
+#log.package().env().set_level(0)
 
 #========================================================
 
@@ -29,7 +29,6 @@ class Tester
 
   test : (cb) ->
     await @open defer()
-    await @close defer()
     await @puts defer()
     await @gets defer()
     await @lookups defer()
@@ -37,11 +36,20 @@ class Tester
     await @unlink defer()
     await @resolve defer()
     await @remove defer()
+    await @unlink_all defer()
+    await @close defer()
+    await @nuke defer()
     cb null
 
   close : (cb) ->
     await @obj.close {}, defer err
     @T.waypoint "close"
+    @T.no_error err
+    cb()
+
+  nuke : (cb) ->
+    await @obj.nuke {}, defer err
+    @T.waypoint "nuke"
     @T.no_error err
     cb()
 
@@ -55,6 +63,8 @@ class Tester
     for o in OBJS
       await @obj.put o, defer err
       @T.no_error err
+    await @obj.put { key : "aabb03", value : "value-aabb03" }, defer err
+    @T.no_error err
     @T.waypoint "puts"
     cb()
 
@@ -63,6 +73,9 @@ class Tester
       await @obj.get o, defer err, value
       @T.no_error err
       @T.equal value, o.value, "get test object #{i}"
+    await @obj.get { type : "03", key : "aabb03" }, defer err, value
+    @T.no_error err
+    @T.equal value, "value-aabb03", "fetch of implicit type worked"
     @T.waypoint "gets"
     cb()
 
@@ -88,6 +101,9 @@ class Tester
     cb()
 
   unlink : (cb) ->
+    if @obj.can_unlink()
+      await @obj.unlink { type : "a", name : "zooot" }, defer err
+      @T.assert (err? and err instanceof E.LookupNotFoundError), "unlink fails on name not found"
     await @obj.unlink { type : "a", name : "foob" }, defer err
     @T.no_error err
     await @obj.lookup { type : "a", name : "name-a1" }, defer err, value
@@ -107,6 +123,12 @@ class Tester
     cb()
 
   remove : (cb) ->
+    # First try 2 failures to remove
+    await @obj.remove { type : "a", key : "zoo" }, defer err
+    @T.assert (err? and err instanceof E.NotFoundError), "right error on failed delete"
+    await @obj.remove { type : "a", key : "zoo", optional : true }, defer err
+    @T.no_error err
+
     await @obj.remove { type : "a" , key : "3" }, defer err
     @T.no_error err
     await @obj.get { type : "a", key : "3" }, defer err, value
@@ -122,6 +144,18 @@ class Tester
     @T.waypoint "remove"
     cb()
 
+  unlink_all : (cb) ->
+    await @obj.link { type : "b", key : "2", name : "cat" }, defer err
+    @T.no_error err
+    await @obj.link { type : "b", key : "2", name : "dog" }, defer err
+    @T.no_error err
+    if @obj.can_unlink()
+      await @obj.unlink_all { type : "b", key : "cat" }, defer err
+      @T.assert (err? and err instanceof E.LookupNotFoundError), "can't unlink what's not there"
+    await @obj.unlink_all { type : "b", key : "2" }, defer err
+    @T.no_error err
+    cb()
+
 #========================================================
 
 test_store = ({T,klass},cb) ->
@@ -135,4 +169,15 @@ exports.test_flat_memory = (T,cb) ->
 
 exports.test_memory = (T,cb) ->
   await test_store { T, klass : Memory }, defer()
+  cb()
+
+exports.test_base = (T,cb) ->
+  abstracts = [ 
+    "open", "nuke", "close", "_unlink", "_unlink_all", 
+    "_remove", "_put", "_get", "_resolve", "_link" 
+  ]
+  b = new Base {}
+  for method in abstracts
+    await b[method] {}, defer err
+    T.assert (err? and err instanceof E.UnimplementedError), "method #{method} failed"
   cb()

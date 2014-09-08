@@ -31,7 +31,9 @@ exports.Base = class Base
 
   #=========================
 
-  make_kvstore_key : ( {type, key } ) -> [ type, key ].join(":").toLowerCase()
+  make_kvstore_key : ( {type, key } ) -> 
+    type or= key[-2...]
+    [ type, key ].join(":").toLowerCase()
   make_lookup_name : ( {type, name} ) -> [ type, name ].join(":").toLowerCase()
 
   unmake_kvstore_key : ( {key}) -> 
@@ -83,7 +85,7 @@ exports.Base = class Base
     if err? and (err instanceof E.NotFoundError) and optional
       log.debug "| No object found for #{k}"
       err = null
-    if not err?
+    else if not err?
       await @_unlink_all { type, key : k }, defer err
 
     log.debug "- DB remove #{key}/#{k} -> #{if err? then 'ok' else #{err.message}}"
@@ -104,7 +106,6 @@ exports.Base = class Base
 exports.Flat = class Flat extends Base
 
   make_kvstore_key : ({type,key}) -> 
-    type or= key[-2...]
     "kv:" + super { type, key }
 
   make_lookup_name : ({type,name}) ->
