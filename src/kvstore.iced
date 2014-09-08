@@ -1,147 +1,85 @@
 
-{mkdirp} = require './fs'
-iutils = require 'iced-utils'
-{Lock} = iutils.lock
-{util} = require 'pgp-utils'
-log = require './log'
-{constants} = require './constants'
-idb = require 'iced-db'
+log = require 'iced-logger'
+{E} = require './err'
+{make_esc} = require 'iced-error'
 
 ##=======================================================================
 
-make_key = ({ table, type, id }) -> [ table, type, id].join(":").toLowerCase()
-make_kvstore_key = ( {type, key } ) -> 
-  type or= key[-2...]
-  make_key { table : "kv", type, id : key }
-make_lookup_key = ( {type, name} ) -> make_key { table : "lo", type, id : name }
+class BaseKvStore
 
-##=======================================================================
-
-class DB
-
-  constructor : ({@filename}) ->
+  constructor : () ->
     @lock = new Lock
 
+  #========================
 
-  #-----
+  unimplemented : (n, cb) -> cb new Error "BaseKvStore::#{n}: unimplemented"
 
-  get_db : () ->
-    db = new idb.DB { root : @get_filename(), json : true }
+  #========================
 
-  #----
+  # Base classes need to implement these...
+  open : (cb) -> @unimplemented('open', cb)
+  nuke : (cb) -> @unimplemented('nuke', cb)
+  close : (cb) -> @unimplemented('close', cb)
+  _put : ({key,value},cb) -> @unimplemented('_put', cb)
+  _get : ({key}, cb) -> @unimplemented("_get", cb)
+  _resolve : ({name}, cb) -> @unimplemented("_resolve", cb)
+  _link : ({name,key}, cb) -> @unimplemented('_link', cb) 
+  _unlink : ({name}, cb) -> @unimplemented('_unlink', cb)
+  _unlink_all : ({key}, cb) -> @unimplemented('_unlink_all', cb)
+  _remove : ({key}, cb) -> @unimplemented('_remove', cb)
 
-  get_filename : () ->
-    @filename or= env().get_db_filename()
-    return @filename
+  #=========================
 
-  #----
+  make_kvstore_key : ( {type, key } ) -> [ type, key ].join(":").toLowerCase()
+  make_lookup_name : ( {type, name} ) -> [ type, name ].join(":").toLowerCase()
 
-  _upgrade : (cb) ->
-    f = env().get_nedb_filename()
-    await fs.stat f, defer err, so
-    unless err?
-      await fs.unlink f, defer err
-      if err?
-        log.warn "Error deleting old DB file #{f}: #{err}"  
-      else
-        log.info "Deleting old DB #{f}"
-    cb err
-    
-  #----
+  #=========================
 
-  open : (cb) ->
-    err = null
-    await @_upgrade defer err
-    await @_open defer err unless @db?
-    cb err
+  link : ({type, name, key}, cb) -> @_link { name : @make_lookup_name({ type, name }), key }, cb
+  unlink : ({type, name}, cb) -> @_unlink { name : @make_lookup_name({ type, name }) }, cb
+  unlink_all : ({type, key}, cb) -> @_unlink_all { key : @make_kvstore_key({type, key}) }, cb
+  get : ({type,key}, cb) -> @_get { key : @make_kvstore_key({type, key}) }, cb
+  resolve : ({type, name}, cb) -> @_resolve { name : @make_lookup_name({type,name})}, cb
 
-  #----
-
-  unlink : (cb) ->
-    db = @get_db()
-    log.info "Purging local cache: #{db.root}"
-    await db.drop defer err
-    cb err
-
-  #----
-
-  close : (cb) ->
+  #=========================
+  
+  put : ({type, key, value, name, names}, cb) ->
+    esc = make_esc cb, "BaseKvStore::put"
+    kvsk = @make_kvstore_key {type,key}
+    log.debug "+ KvStore::put #{key}/#{kvsk}"
+    await @_put { key : kvsk, value }, esc defer()
+    log.debug "| hkey is #{hkey}"
+    names = [ name ] if name? and not names?
+    if names and names.length
+      for name in names
+        log.debug "| KvStore::link #{name} -> #{key}"
+        await @link { type, name, key : kvsk }, esc defer()
+    log.debug "- KvStore::put #{key} -> ok"
     cb null
-  #-----
-
-  put : ({type, key, value, name, names, debug}, cb) ->
-    kvsk = make_kvstore_key {type,key}
-    log.debug "| DB put value #{kvsk}" if debug
-    await @db.put { key : kvsk, value }, defer err, obj
-    unless err?
-      {hkey} = obj
-      names  = [ name ] if name? and not names?
-      if names and names.length
-        for name in names
-          lk = make_lookup_key(name)
-          log.debug "| DB put lookup: #{lk} -> #{hkey}" if debug
-          await @db.put { key : lk, value : hkey }, defer tmp
-          if tmp? and not err? then err = tmp
-    cb err
 
   #-----
 
   remove : ({type, key, optional}, cb) ->
-    k = make_kvstore_key { type, key }
-    err = null
-    log.debug "+ DB remove #{k}"
+    k = @make_kvstore_key { type, key }
 
-    # XXX error -- we're leaking all of the pointer that pointed to this object.
-    # I think it's OK since we're not ever calling remove.
-    await @db.del { key : k }, defer err
+    log.debug "+ DB remove #{key}/#{kvsk}"
 
-    if err? and (err instanceof idb.E.NotFoundError) and optional
+    await @_remove { key : k }, defer err
+    if err? and (err instanceof E.NotFoundError) and optional
       log.debug "| No object found for #{k}"
       err = null
+    if not err?
+      await @_unlink_all { type, key : k }, defer err
 
-    log.debug "- DB remove #{k} -> #{err}"
-    cb null
-
-  #-----
-
-  find1 : (q, cb) ->
-    err = value = null
-    await @db.get q, defer err, value
-    if err? and (err instanceof idb.E.NotFoundError) then err = null
-    else if err? then # noop
-    cb err, value
-
-  #-----
-
-  get : ({type, key}, cb) ->
-    k = make_kvstore_key { type, key }
-    await @find1 { key : k }, defer err, value
-    cb err, value
+    log.debug "- DB remove #{key}/#{kvsk} -> #{if err? then 'ok' else #{err.message}}"
+    cb err
 
   #-----
 
   lookup : ({type, name}, cb) ->
-    k = make_lookup_key { type, name }
-    err = value = null
-    await @find1 { key : k }, defer err, value
-    if not err? and value?
-      await @find1 { hkey : value }, defer err, value
-    cb err, value
-
-  #-----
-
-  _init_db : (cb) ->
-    log.debug "+ DB::_init_db"
-    esc = make_esc cb, "DB::_init_db"
-    await @db.create esc defer made
-    log.debug "- DB::_init_db -> #{made}"
-    cb null
-
-##=======================================================================
-
-exports.db = _db = new DB {}
-exports.DB = DB 
-for k,v of DB.prototype
-  ((key) -> exports[key] = (args...) -> _db[key](args...) )(k)
+    esc = make_esc cb, "BaseKvStore::lookup"
+    await @resolve { name, type }, esc defer key
+    await @_get { key }, esc defer value
+    cb null, value
 
 ##=======================================================================
