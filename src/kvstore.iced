@@ -2,6 +2,7 @@
 log = require 'iced-logger'
 {E} = require './err'
 {make_esc} = require 'iced-error'
+{Lock} = require 'iced-lock'
 
 ##=======================================================================
 
@@ -209,5 +210,5 @@ exports.FlatMemory = class FlatMemory extends Flat
     else
       delete @kv[key]
     cb err
-    
+
 ##=======================================================================

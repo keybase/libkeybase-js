@@ -1,27 +1,43 @@
 
 
-stores_klasses = require('../..').kvstore
+{FlatMemory,Memory}= require('../..').kvstore
 
-stores = {}
+#========================================================
 
-exports.init = (T,cb) ->
-  for klassname in [ "FlatMemory", "Memory"] 
-    klass = stores_klasses[klassname]
-    obj = new klass()
-    stores[klassname] = obj
-    await obj.init {}, defer err
-    T.no_error err
-  cb()
+class Tester
 
-test_store = ({T,store,name},cb) ->
-  tester = new Tester { T, store, name }
+  constructor : ({@T, klass}) ->
+    @obj = new klass()
+    @name = klass.name
+
+  test : (cb) ->
+    await @open defer()
+    await @close defer()
+    cb null
+
+  close : (cb) ->
+    await @obj.close {}, defer err
+    @T.waypoint "close"
+    @T.no_error err
+    cb()
+
+  open : (cb) ->
+    await @obj.open {}, defer err
+    @T.waypoint "open"
+    @T.no_error err
+    cb()
+
+#========================================================
+
+test_store = ({T,klass},cb) ->
+  tester = new Tester { T, klass }
   await tester.test defer()
   cb()
 
 exports.test_flat_memory = (T,cb) ->
-  await test_store { T, store : stores.FlatMemory, name : "flat_memory" }, defer()
+  await test_store { T, klass : FlatMemory }, defer()
   cb()
 
-exports.test__memory = (T,cb) ->
-  await test_store { T, store : stores.Memory, name : "memory" }, defer()
+exports.test_memory = (T,cb) ->
+  await test_store { T, klass : Memory }, defer()
   cb()
