@@ -34,13 +34,27 @@ exports.Base = class Base
   make_kvstore_key : ( {type, key } ) -> [ type, key ].join(":").toLowerCase()
   make_lookup_name : ( {type, name} ) -> [ type, name ].join(":").toLowerCase()
 
+  unmake_kvstore_key : ( {key}) -> 
+    parts = key.split(":")
+    { type : parts[0], key : parts[1...].join(":") }
+
+  can_unlink : () -> true
+
   #=========================
 
-  link : ({type, name, key}, cb) -> @_link { name : @make_lookup_name({ type, name }), key }, cb
+  link : ({type, name, key}, cb) -> 
+    @_link { 
+      name : @make_lookup_name({ type, name }), 
+      key : @make_kvstore_key({ key, type }) 
+    }, cb
   unlink : ({type, name}, cb) -> @_unlink { name : @make_lookup_name({ type, name }) }, cb
   unlink_all : ({type, key}, cb) -> @_unlink_all { key : @make_kvstore_key({type, key}) }, cb
   get : ({type,key}, cb) -> @_get { key : @make_kvstore_key({type, key}) }, cb
-  resolve : ({type, name}, cb) -> @_resolve { name : @make_lookup_name({type,name})}, cb
+  resolve : ({type, name}, cb) -> 
+    await @_resolve { name : @make_lookup_name({type,name})}, defer err, key
+    if not err? and key?
+      { key } = @unmake_kvstore_key { key }
+    cb err, key
 
   #=========================
   
@@ -53,7 +67,7 @@ exports.Base = class Base
     if names and names.length
       for name in names
         log.debug "| KvStore::link #{name} -> #{key}"
-        await @link { type, name, key : kvsk }, esc defer()
+        await @link { type, name, key }, esc defer()
     log.debug "- KvStore::put #{key} -> ok"
     cb null
 
@@ -63,7 +77,7 @@ exports.Base = class Base
     k = @make_kvstore_key { type, key }
     await @lock.acquire defer()
 
-    log.debug "+ DB remove #{key}/#{kvsk}"
+    log.debug "+ DB remove #{key}/#{k}"
 
     await @_remove { key : k }, defer err
     if err? and (err instanceof E.NotFoundError) and optional
@@ -72,7 +86,7 @@ exports.Base = class Base
     if not err?
       await @_unlink_all { type, key : k }, defer err
 
-    log.debug "- DB remove #{key}/#{kvsk} -> #{if err? then 'ok' else #{err.message}}"
+    log.debug "- DB remove #{key}/#{k} -> #{if err? then 'ok' else #{err.message}}"
     @lock.release()
 
     cb err
@@ -82,7 +96,7 @@ exports.Base = class Base
   lookup : ({type, name}, cb) ->
     esc = make_esc cb, "BaseKvStore::lookup"
     await @resolve { name, type }, esc defer key
-    await @_get { key }, esc defer value
+    await @get { type, key }, esc defer value
     cb null, value
 
 ##=======================================================================
@@ -95,6 +109,10 @@ exports.Flat = class Flat extends Base
 
   make_lookup_name : ({type,name}) ->
     "lo:" + super { type, name }
+
+  unmake_kvstore_key : ( {key}) -> 
+    parts = key.split(":")
+    { type : parts[1], key : parts[2...].join(":") }
 
   _link : ({key, name}, cb) ->
     await @_put { key : name, value : key }, defer err
@@ -113,6 +131,8 @@ exports.Flat = class Flat extends Base
     if err? and (err instanceof E.NotFoundError)
       err = new E.LookupNotFoundError "No lookup available for #{name}"
     cb err, value
+
+  can_unlink : () -> false
 
 ##=======================================================================
 

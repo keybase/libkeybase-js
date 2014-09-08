@@ -459,6 +459,20 @@
       return [type, name].join(":").toLowerCase();
     };
 
+    Base.prototype.unmake_kvstore_key = function(_arg) {
+      var key, parts;
+      key = _arg.key;
+      parts = key.split(":");
+      return {
+        type: parts[0],
+        key: parts.slice(1).join(":")
+      };
+    };
+
+    Base.prototype.can_unlink = function() {
+      return true;
+    };
+
     Base.prototype.link = function(_arg, cb) {
       var key, name, type;
       type = _arg.type, name = _arg.name, key = _arg.key;
@@ -467,7 +481,10 @@
           type: type,
           name: name
         }),
-        key: key
+        key: this.make_kvstore_key({
+          key: key,
+          type: type
+        })
       }, cb);
     };
 
@@ -505,14 +522,43 @@
     };
 
     Base.prototype.resolve = function(_arg, cb) {
-      var name, type;
+      var err, key, name, type, ___iced_passed_deferral, __iced_deferrals, __iced_k;
+      __iced_k = __iced_k_noop;
+      ___iced_passed_deferral = iced.findDeferral(arguments);
       type = _arg.type, name = _arg.name;
-      return this._resolve({
-        name: this.make_lookup_name({
-          type: type,
-          name: name
-        })
-      }, cb);
+      (function(_this) {
+        return (function(__iced_k) {
+          __iced_deferrals = new iced.Deferrals(__iced_k, {
+            parent: ___iced_passed_deferral,
+            filename: "/Users/max/src/keybase/libkeybase-js/src/kvstore.iced",
+            funcname: "Base.resolve"
+          });
+          _this._resolve({
+            name: _this.make_lookup_name({
+              type: type,
+              name: name
+            })
+          }, __iced_deferrals.defer({
+            assign_fn: (function() {
+              return function() {
+                err = arguments[0];
+                return key = arguments[1];
+              };
+            })(),
+            lineno: 53
+          }));
+          __iced_deferrals._fulfill();
+        });
+      })(this)((function(_this) {
+        return function() {
+          if ((typeof err === "undefined" || err === null) && (typeof key !== "undefined" && key !== null)) {
+            key = _this.unmake_kvstore_key({
+              key: key
+            }).key;
+          }
+          return cb(err, key);
+        };
+      })(this));
     };
 
     Base.prototype.put = function(_arg, cb) {
@@ -537,7 +583,7 @@
             key: kvsk,
             value: value
           }, esc(__iced_deferrals.defer({
-            lineno: 50
+            lineno: 64
           })));
           __iced_deferrals._fulfill();
         });
@@ -583,9 +629,9 @@
                       _this.link({
                         type: type,
                         name: name,
-                        key: kvsk
+                        key: key
                       }, esc(__iced_deferrals.defer({
-                        lineno: 55
+                        lineno: 69
                       })));
                       __iced_deferrals._fulfill();
                     })(_next);
@@ -621,13 +667,13 @@
             funcname: "Base.remove"
           });
           _this.lock.acquire(__iced_deferrals.defer({
-            lineno: 63
+            lineno: 77
           }));
           __iced_deferrals._fulfill();
         });
       })(this)((function(_this) {
         return function() {
-          log.debug("+ DB remove " + key + "/" + kvsk);
+          log.debug("+ DB remove " + key + "/" + k);
           (function(__iced_k) {
             __iced_deferrals = new iced.Deferrals(__iced_k, {
               parent: ___iced_passed_deferral,
@@ -642,7 +688,7 @@
                   return err = arguments[0];
                 };
               })(),
-              lineno: 67
+              lineno: 81
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -667,7 +713,7 @@
                         return err = arguments[0];
                       };
                     })(),
-                    lineno: 72
+                    lineno: 86
                   }));
                   __iced_deferrals._fulfill();
                 })(__iced_k);
@@ -675,7 +721,7 @@
                 return __iced_k();
               }
             })(function() {
-              log.debug("- DB remove " + key + "/" + kvsk + " -> " + (err != null ? 'ok' : void 0));
+              log.debug("- DB remove " + key + "/" + k + " -> " + (err != null ? 'ok' : void 0));
               _this.lock.release();
               return cb(err);
             });
@@ -706,7 +752,7 @@
                 return key = arguments[0];
               };
             })(),
-            lineno: 83
+            lineno: 97
           })));
           __iced_deferrals._fulfill();
         });
@@ -718,7 +764,8 @@
               filename: "/Users/max/src/keybase/libkeybase-js/src/kvstore.iced",
               funcname: "Base.lookup"
             });
-            _this._get({
+            _this.get({
+              type: type,
               key: key
             }, esc(__iced_deferrals.defer({
               assign_fn: (function() {
@@ -726,7 +773,7 @@
                   return value = arguments[0];
                 };
               })(),
-              lineno: 84
+              lineno: 98
             })));
             __iced_deferrals._fulfill();
           })(function() {
@@ -766,6 +813,16 @@
       });
     };
 
+    Flat.prototype.unmake_kvstore_key = function(_arg) {
+      var key, parts;
+      key = _arg.key;
+      parts = key.split(":");
+      return {
+        type: parts[1],
+        key: parts.slice(2).join(":")
+      };
+    };
+
     Flat.prototype._link = function(_arg, cb) {
       var err, key, name, ___iced_passed_deferral, __iced_deferrals, __iced_k;
       __iced_k = __iced_k_noop;
@@ -787,7 +844,7 @@
                 return err = arguments[0];
               };
             })(),
-            lineno: 99
+            lineno: 117
           }));
           __iced_deferrals._fulfill();
         });
@@ -818,7 +875,7 @@
                 return err = arguments[0];
               };
             })(),
-            lineno: 103
+            lineno: 121
           }));
           __iced_deferrals._fulfill();
         });
@@ -857,7 +914,7 @@
                 return value = arguments[1];
               };
             })(),
-            lineno: 111
+            lineno: 129
           }));
           __iced_deferrals._fulfill();
         });
@@ -869,6 +926,10 @@
           return cb(err, value);
         };
       })(this));
+    };
+
+    Flat.prototype.can_unlink = function() {
+      return false;
     };
 
     return Flat;
