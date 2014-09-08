@@ -5,7 +5,7 @@ log = require 'iced-logger'
 
 ##=======================================================================
 
-class BaseKvStore
+exports.Base = class Base
 
   constructor : () ->
     @lock = new Lock
@@ -61,6 +61,7 @@ class BaseKvStore
 
   remove : ({type, key, optional}, cb) ->
     k = @make_kvstore_key { type, key }
+    await @lock.acquire defer()
 
     log.debug "+ DB remove #{key}/#{kvsk}"
 
@@ -72,6 +73,8 @@ class BaseKvStore
       await @_unlink_all { type, key : k }, defer err
 
     log.debug "- DB remove #{key}/#{kvsk} -> #{if err? then 'ok' else #{err.message}}"
+    @lock.release()
+
     cb err
 
   #-----
@@ -81,5 +84,33 @@ class BaseKvStore
     await @resolve { name, type }, esc defer key
     await @_get { key }, esc defer value
     cb null, value
+
+##=======================================================================
+
+exports.Flat = class Flat extends Base
+
+  make_kvstore_key : ({type,key}) -> 
+    type or= key[-2...]
+    "kv:" + super { type, key }
+
+  make_lookup_name : ({type,name}) ->
+    "lo:" + super { type, name }
+
+  _link : ({key, name}, cb) ->
+    await @_put { key : name, value : key }, defer err
+    cb err
+
+  _unlink : ({name}, cb) ->
+    await @_remove { key : name }, defer err
+    cb err
+
+  _unlink_all : ({key}, cb) ->
+    log.debug "| Can't _unlink_all names for #{key} in Flat kvstore"
+    cb null
+
+  _resolve : ({name}, cb) ->
+    await @_get { key : name }, defer err, value
+    if err? and (err instanceof E.NotFoundError)
+      err = new E.LookupNotFoundError "No lookup available for #{name}"
 
 ##=======================================================================

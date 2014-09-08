@@ -7,7 +7,7 @@ exports.E = E = ie.make_errors
   GENERIC : "Generic error"
   INVAL : "Invalid value"
   NOT_FOUND : "Key not found"
-  BAD_LOOKUP : "Lookup failed"
+  LOOKUP_NOT_FOUND : "Lookup failed"
   BAD_QUERY : "Bad query"
   DUPLICATE : "Duplicated value"
   BAD_MAC : "Message authentication failure"
