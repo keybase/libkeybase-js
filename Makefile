@@ -17,10 +17,12 @@ lib/%.js: src/%.iced
 $(BUILD_STAMP): \
 	lib/constants.js \
         lib/err.js \
+        lib/env.js \
         lib/kvstore.js \
 	lib/main.js \
 	lib/merkle/leaf.js \
-        lib/uri.js
+        lib/uri.js \
+        lib/util.js
 	date > $@
 
 clean:

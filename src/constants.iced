@@ -9,3 +9,7 @@ module.exports =
     PUBLIC : 1
     PRIVATE : 2
     SEMIPRIVATE : 3
+  server : 
+    port : 443
+    hostname : "keybase.io"
+    no_tls : false
