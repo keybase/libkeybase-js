@@ -2,6 +2,7 @@ default: build
 all: build
 
 ICED=node_modules/.bin/iced
+JISON=node_modules/.bin/jison
 BUILD_STAMP=build-stamp
 TEST_STAMP=test-stamp
 TEST_STAMP=test-stamp
@@ -11,16 +12,20 @@ BROWSERIFY=node_modules/.bin/browserify
 
 BROWSER=browser/libkeybase.js
 
+lib/assertion_parser.js: src/assertion.jison
+	$(JISON) -o $@ $<
+
 lib/%.js: src/%.iced
 	$(ICED) -I browserify -c -o `dirname $@` $<
 
 $(BUILD_STAMP): \
+	lib/assertion_parser.js \
 	lib/constants.js \
-        lib/err.js \
-        lib/kvstore.js \
+	lib/err.js \
+	lib/kvstore.js \
 	lib/main.js \
 	lib/merkle/leaf.js \
-        lib/uri.js
+	lib/uri.js
 	date > $@
 
 clean:

@@ -33,6 +33,7 @@
     "iced-coffee-script": "^1.7.1-f",
     "iced-test": "0.0.17",
     "icsify": "^0.6.0",
-    "istanbul": "^0.3.2"
+    "istanbul": "^0.3.2",
+    "jison": "^0.4.15"
   }
 }
