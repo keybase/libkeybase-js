@@ -12,7 +12,7 @@ BROWSERIFY=node_modules/.bin/browserify
 
 BROWSER=browser/libkeybase.js
 
-lib/assertion_parser.js: src/assertion.jison
+lib/assertion_parser.js: src/assertion_parser.jison
 	$(JISON) -o $@ $<
 
 lib/%.js: src/%.iced
