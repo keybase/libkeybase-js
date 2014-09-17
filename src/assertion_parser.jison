@@ -3,9 +3,9 @@
 %%
 
 [ \t\n]+             /* ignore */
-[^ \t\n()&|]+        return 'URL';
-&&                   return 'AND';
-||                   return 'OR';
+[^ \t\n()&|]+        return 'URI';
+'&&'                 return 'AND';
+'||'                 return 'OR';
 '('                  return 'LPAREN';
 ')'                  return 'RPAREN';
 .                    return 'UNHANDLED';
@@ -21,12 +21,12 @@
 %% /* language grammar */
 
 expressions
-    : e EOF { $$ = $1; }
+    : e EOF { return $1; }
     ;
 
 e
-    : e OR e    { $$ = new yy.OR($1, $3); }
-    | e AND e   { $$ = new yy.AND($1, $3); }
-    | '(' e ')' { $$ = $2; }
-    | URL       { $$ = new yy.URL($1); }
+    : e OR e          { $$ = new yy.OR($1, $3); }
+    | e AND e         { $$ = new yy.AND($1, $3); }
+    | LPAREN e RPAREN { $$ = $2; }
+    | URI             { $$ = yy.URI.parse($1); }
     ;

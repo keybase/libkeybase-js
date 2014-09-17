@@ -19,6 +19,7 @@ lib/%.js: src/%.iced
 	$(ICED) -I browserify -c -o `dirname $@` $<
 
 $(BUILD_STAMP): \
+	lib/assertion.js \
 	lib/assertion_parser.js \
 	lib/constants.js \
 	lib/err.js \
