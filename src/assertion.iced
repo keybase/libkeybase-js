@@ -25,7 +25,12 @@ class URI extends Expr
     if not (value = obj.hostname)? or value.length is 0
       throw new Error "Bad URL, no 'hostname' found: #{s}"
 
-    new URI {key, value}
+    if key is 'web'
+      new OR (new URI {key : k, value} for k in ['http', 'https', 'dns' ])...
+    else if key is 'http'
+      new OR (new URI {key : k, value} for k in ['http', 'https'])...
+    else
+      new URI {key, value}
 
   toString : () -> "#{@key}://#{@value}"
 
@@ -33,17 +38,17 @@ class URI extends Expr
 
 class AND extends Expr
 
-  constructor : (@a, @b) ->
+  constructor : (args...) -> @factors = args
 
-  toString : () -> "(#{@a.toString()} && #{@b.toString()})"
+  toString : () -> "(" + (f.toString() for f in @factors).join(" && ") + ")"
 
 #==================================================================
 
 class OR extends Expr
 
-  constructor : (@a, @b) ->
+  constructor : (args...) -> @terms = args
 
-  toString : () -> "(#{@a.toString()} || #{@b.toString()})"
+  toString : () -> "(" + (t.toString() for t in @terms).join(" || ") + ")"
 
 #==================================================================
 
@@ -53,4 +58,4 @@ exports.parse = parse = (s) ->
   console.log parser.parse(s).toString()
 
 
-parse "http://foo.com && a://b && c://d || twitter://shit || reddit://bar && github://foo && http://a1 && http://b2"
+parse "web://foo.com && http://nutflex.com && (reddit://maxtaco || twitter://maxtaco) && keybase://max && fingerprint://8EFBE2E4DD56B35273634E8F6052B2AD31A6631C"
