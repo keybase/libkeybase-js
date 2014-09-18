@@ -134,5 +134,3 @@ exports.parse = parse = (s) ->
   return parser.parse(s)
 
 #==================================================================
-
-parse "web://foo.com && http://nutflex.com && (reddit://maxtaco || twitter://maxtaco) && keybase://max && fingerprint://8EFBE2E4DD56B35273634E8F6052B2AD31A6631C"
