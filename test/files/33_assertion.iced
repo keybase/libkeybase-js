@@ -55,13 +55,16 @@ exports.parse_2 = (T,cb) ->
 
 exports.parse_bad_1 = (T,cb) ->
   bads = [
-    "foo"
-    "foo://"
-    "foo://aa ||"
-    "foo://aa &&"
-    "foo:// && ()"
+    "reddit"
+    "reddit://"
+    "reddit://aa ||"
+    "reddit://aa &&"
+    "reddit:// && ()"
     "fingerprint://aaXXxx"
     "dns://shoot"
+    "http://nothing"
+    "foo://bar"
+    "keybase://ok || dns://fine.io || (twitter://still_good || bad://one)"
   ]
   for bad in bads
     try

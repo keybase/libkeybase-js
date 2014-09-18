@@ -26,7 +26,11 @@ class URI extends Expr
 
   check : () ->
     if not @value and @value.length?
-      throw new Error "Bad #{@key}, no 'value' found: #{s}"
+      throw new Error "Bad '#{@key}' assertion, no value found"
+
+    throw new Error "Unknown assertion type '#{@key}'" unless @key in [
+      'twitter', 'github', 'hackernews', 'reddit', 'keybase', 'coinbase'
+    ]
 
   #----------------------------------------
 

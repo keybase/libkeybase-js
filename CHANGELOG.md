@@ -1,3 +1,9 @@
+## 0.0.5 (2014-09-19)
+
+Bugfixes:
+
+  - Throw an error on assertions that can't possibly be useful.
+
 ## 0.0.4 (2014-09-19)
 
 Bugfixes:
