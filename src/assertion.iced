@@ -24,26 +24,34 @@ class URI extends Expr
 
   #----------------------------------------
 
+  check : () ->
+    if not @value and @value.length?
+      throw new Error "Bad #{@key}, no 'value' found: #{s}"
+
+  #----------------------------------------
+
   @parse : (s) ->
     obj = urlmod.parse(s)
 
-    if not (key = obj.protocol)? or key.length is 0
-      throw new Error "Bad URL, no 'protocol' found: #{s}"
-    else if key[-1...] is ':'
-      key = key[0...-1]
-    key = key.toLowerCase()
+    if (key = obj.protocol)? and key.length
+      key = key.toLowerCase()
+      key = key[0...-1] if key? and key[-1...] is ':'
+    else
+      throw new Error "Bad assertion, no 'type' given: #{s}"
 
-    if not (value = obj.hostname)? or value.length is 0
-      throw new Error "Bad URL, no 'hostname' found: #{s}"
-    value = value.toLowerCase()
+    value = value.toLowerCase() if (value = obj.hostname)?
 
     klasses =
       web : Web
       http : Http
+      dns : Host
+      https : Host
       fingerprint : Fingerprint
 
     klass = URI unless (klass = klasses[key])?
-    new klass { key, value }
+    ret = new klass { key, value }
+    ret.check()
+    return ret
 
   #----------------------------------------
 
@@ -64,15 +72,23 @@ class URI extends Expr
 
 #==================================================================
 
-class Web extends URI
+class Host extends URI
+  check : () ->
+    if @value.indexOf(".") < 0
+      throw new Error "Bad hostname given: #{@value}"
+
+class Web extends Host
   keys : () -> [ 'http', 'https', 'dns' ]
 
-class Http extends URI
+class Http extends Host
   keys : () -> [ 'http', 'https' ]
 
 class Fingerprint extends URI
   match_proof : (proof) ->
     ((@key is proof.key.toLowerCase()) and (@value is proof.value[(-1 * @value.length)...].toLowerCase()))
+  check : () ->
+    unless @value.match /^[a-fA-F0-9]+$/
+      throw new Error "Bad fingerprint given: #{@value}"
 
 #==================================================================
 

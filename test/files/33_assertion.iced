@@ -14,15 +14,15 @@ exports.match_0 = (T,cb) ->
 
 exports.parse_1 = (T,cb) ->
   expr = parse """
-    web://foo || (reddit://a && twitter://bbbbb && fingerprint://aabbcc)
+    web://foo.io || (reddit://a && twitter://bbbbb && fingerprint://aabbcc)
   """
-  T.equal expr.toString(), '(web://foo || ((reddit://a && twitter://bbbbb) && fingerprint://aabbcc))'
+  T.equal expr.toString(), '(web://foo.io || ((reddit://a && twitter://bbbbb) && fingerprint://aabbcc))'
   cb()
 
 exports.match_1 = (T,cb) ->
-  ps = new ProofSet [(new Proof { key : "https", value : "foo" }) ]
+  ps = new ProofSet [(new Proof { key : "https", value : "foo.io" }) ]
   T.assert expr.match_set(ps), "first one matched"
-  ps = new ProofSet [(new Proof { key : "https", value : "foob" }) ]
+  ps = new ProofSet [(new Proof { key : "https", value : "foob.io" }) ]
   T.assert not(expr.match_set(ps)), "second didn't"
   ps = new ProofSet [
     (new Proof { key : "reddit", value : "a" })
@@ -60,11 +60,13 @@ exports.parse_bad_1 = (T,cb) ->
     "foo://aa ||"
     "foo://aa &&"
     "foo:// && ()"
+    "fingerprint://aaXXxx"
+    "dns://shoot"
   ]
   for bad in bads
     try
       parse bad
-      T.assert false, "shouldn't have parsed"
+      T.assert false, "#{bad}: shouldn't have parsed"
     catch error
       T.assert error?, "we got an error"
   cb()
