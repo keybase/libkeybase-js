@@ -7,6 +7,7 @@ exports[k] = v for k,v of {
   constants : require('./constants')
   err : require('./err')
   kvstore : require('./kvstore')
+  assertion : require('./assertion')
 }
 
 # Export the exports of these modules to the top level
