@@ -34,6 +34,13 @@ exports.URI = class URI extends Expr
 
   #----------------------------------------
 
+  to_lookup_query : () ->
+    d = {}
+    d[@key] = @value
+    return d
+
+  #----------------------------------------
+
   @parse_to_kv_pair : (s) ->
     obj = urlmod.parse(s)
 
@@ -63,6 +70,7 @@ exports.URI = class URI extends Expr
       dns : Host
       https : Host
       fingerprint : Fingerprint
+      keybase : Keybase
 
     klass = URI unless (klass = klasses[key])?
     ret = new klass { key, value }
@@ -86,6 +94,10 @@ exports.URI = class URI extends Expr
   match_proof : (proof) ->
     (proof.key.toLowerCase() in @keys()) and (@value is proof.value.toLowerCase())
 
+  #----------------------------------------
+
+  is_keybase : () -> false
+
 #==================================================================
 
 class Host extends URI
@@ -105,6 +117,10 @@ class Fingerprint extends URI
   check : () ->
     unless @value.match /^[a-fA-F0-9]+$/
       throw new Error "Bad fingerprint given: #{@value}"
+  to_lookup_query : () -> { key_suffix : @value }
+
+class Keybase extends URI
+  is_keybase : () -> true
 
 #==================================================================
 
