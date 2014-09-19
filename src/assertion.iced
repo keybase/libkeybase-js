@@ -12,7 +12,7 @@ class Expr
 
 #==================================================================
 
-class URI extends Expr
+exports.URI = class URI extends Expr
 
   #----------------------------------------
 
@@ -34,16 +34,28 @@ class URI extends Expr
 
   #----------------------------------------
 
-  @parse : (s) ->
+  @parse_to_kv_pair : (s) ->
     obj = urlmod.parse(s)
 
     if (key = obj.protocol)? and key.length
       key = key.toLowerCase()
       key = key[0...-1] if key? and key[-1...] is ':'
+
+    value = obj.hostname
+    value = obj.pathname if not key? and not value?
+    value = value.toLowerCase() if value?
+
+    { key, value }
+
+  #----------------------------------------
+
+  @parse : ({s,strict}) ->
+    {key,value} = URI.parse_to_kv_pair(s)
+
+    if key?.length then # noop
+    else if not strict then key = "keybase"
     else
       throw new Error "Bad assertion, no 'type' given: #{s}"
-
-    value = value.toLowerCase() if (value = obj.hostname)?
 
     klasses =
       web : Web
@@ -96,7 +108,7 @@ class Fingerprint extends URI
 
 #==================================================================
 
-class AND extends Expr
+exports.AND = class AND extends Expr
 
   constructor : (args...) -> @factors = args
 
