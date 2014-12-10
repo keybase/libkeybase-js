@@ -4,13 +4,13 @@
 Version: GnuPG/MacGPG2 v2
 Comment: GPGTools - https://gpgtools.org
 
-iQEcBAABCgAGBQJUiI5fAAoJEJgKPw0B/gTfb38H/2ec6LrRvEB5Fk5xtNKHUjrJ
-gVfpVrdgWRRCPQuOfTflZVJh8V1bjiJU3ZDtYN5VsawYkZvBiK5+DG0g5lgfPE3G
-+l3UXDMtpMDuij9YO4U8BDZYzVWYCtk/cNnmRenDm6rSJnjllTK8x1OrvELkP5U8
-qS/JduEKN1jarD1tMw1EVZmR3FRJTCYDdhf+YL3qNp7ILlw56VPRuofim/GedYxJ
-JSi6WbrVdlXLdkWTgDf9zysmU2kAtcLDpGBIuhOGlOFIDcDeyz/+WDLX9tb2sVCu
-9fCaepFWkEuyE0KhBjuFHaQPv4WSVvnik4xQXRW2GwjT/r7x4tK0wmi+Sy2e6Wg=
-=P6kF
+iQEcBAABCgAGBQJUiI9gAAoJEJgKPw0B/gTfqVkH/2/atnu0javxXPbz+34r68Jg
+/tusOMnmADxvOFMkLwQ0YXNz5bFWmXVwa2aBr3YF9FLFlK1+Xz44VbdDsPDT+vSQ
+nB6z/wfBi0dXSKf6IqVzNNsQpqPVUBtCI/NV88mnHl/RYDnr/jKU8RU8v28NZzwE
++FyTT83RXQhTAorKyvt24Eo9dNowa3UhUL0L2wwMRUU+leFPLc/88HrGsEwTNcRF
+EVify7LwsSxpOtCMKO1s/QJYku+xBUGIRVOmzxQdwHaGAs/+kuHEH1HZTw5xF/wp
+g+CYxo4hpPmA0fd3MA9IGysONjsNAqspKuwhRpb61jJJY4feMEqyhlS08JJDKlc=
+=xqIn
 -----END PGP SIGNATURE-----
 
 ```
@@ -48,7 +48,7 @@ size    exec  file                        contents
 3795              uri.js                  7b652935243bb267183eda31dd1fafe28ae177c80c563a8289d5a7257599859b
                 notes/                                                                                    
 2129              tweetnacl.md            099fac68f7caebd05b6060781e7fcfb32726309bb4bd67aa35b10134a280e049
-893             package.json              05d1638272bc821fa3211ddf9b42ab8975f3c964fdbd9be5ba15174b872a8c12
+893             package.json              dce0c6442b6aa91e0cbe884eaa3fae9fcd90dd388546c24cf7a0392259eee7a6
                 src/                                                                                      
 4407              assertion.iced          fac9d95f8915318ec94dcd9f57f0f6a1b65b210429e6a5f6ac2ad8d33b97cd10
 634               assertion_parser.jison  65624a141081113074e6c778af7df8fad6769d3c5b2fb96e8edcd31444f8706f
