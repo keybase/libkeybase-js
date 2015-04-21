@@ -1859,16 +1859,11 @@ if (typeof module !== 'undefined' && require.main === module) {
 
   exports.ChainTail = ChainTail = (function() {
     function ChainTail(_arg) {
-      this.seqno = _arg.seqno, this.payload_hash = _arg.payload_hash, this.sig_id = _arg.sig_id, this.eldest_kid = _arg.eldest_kid;
+      this.seqno = _arg.seqno, this.payload_hash = _arg.payload_hash, this.sig_id = _arg.sig_id;
     }
 
     ChainTail.prototype.to_json = function() {
-      var ret;
-      ret = [this.seqno, this.payload_hash, this.sig_id];
-      if (this.eldest_kid != null) {
-        ret.push(this.eldest_kid);
-      }
-      return ret;
+      return [this.seqno, this.payload_hash, this.sig_id];
     };
 
     return ChainTail;
@@ -1910,20 +1905,29 @@ if (typeof module !== 'undefined' && require.main === module) {
     };
 
     Parser.prototype.parse_v2 = function() {
-      var pub, semipriv, _ref;
+      var eldest_kid, pub, semipriv, _ref;
       if (this.val.length < 2) {
         throw new Error("No public chain");
       }
       pub = this.parse_chain_tail(this.val[1]);
       semipriv = (this.val.length > 2) && ((_ref = this.val[2]) != null ? _ref.length : void 0) ? this.parse_chain_tail(this.val[2]) : null;
+      eldest_kid = this.val.length > 3 && (this.val[3] != null) ? this.parse_kid(this.val[3]) : null;
       return new Leaf({
         pub: pub,
-        semipriv: semipriv
+        semipriv: semipriv,
+        eldest_kid: eldest_kid
       });
     };
 
     Parser.prototype.match_hex = function(s) {
       return (typeof s === 'string') && !!(s.match(/^([a-fA-F0-9]*)$/)) && (s.length % 2 === 0);
+    };
+
+    Parser.prototype.parse_kid = function(x) {
+      if (!this.match_hex(x)) {
+        throw new Error("bad kid: " + x);
+      }
+      return x;
     };
 
     Parser.prototype.parse_chain_tail = function(val) {
@@ -1934,7 +1938,7 @@ if (typeof module !== 'undefined' && require.main === module) {
       } else if (typeof val[0] !== 'number') {
         msg = "Bad sequence #";
       } else {
-        _ref = val.slice(1, 4);
+        _ref = val.slice(1, 3);
         for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
           v = _ref[i];
           if ((v != null) && v.length) {
@@ -1951,8 +1955,7 @@ if (typeof module !== 'undefined' && require.main === module) {
       return new ChainTail({
         seqno: val[0],
         payload_hash: val[1],
-        sig_id: val[2],
-        eldest_kid: val[3]
+        sig_id: val[2]
       });
     };
 
@@ -1962,7 +1965,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 
   exports.Leaf = Leaf = (function() {
     function Leaf(_arg) {
-      this.pub = _arg.pub, this.semipriv = _arg.semipriv;
+      this.pub = _arg.pub, this.semipriv = _arg.semipriv, this.eldest_kid = _arg.eldest_kid;
     }
 
     Leaf.prototype.get_public = function() {
@@ -1973,12 +1976,13 @@ if (typeof module !== 'undefined' && require.main === module) {
       return this.semipriv;
     };
 
+    Leaf.prototype.get_eldest_kid = function() {
+      return this.eldest_kid;
+    };
+
     Leaf.prototype.to_json = function() {
       var ret;
-      ret = [C.versions.leaf.v2, (this.pub ? this.pub.to_json() : [])];
-      if (this.semipriv != null) {
-        ret.push(this.semipriv.to_json());
-      }
+      ret = [C.versions.leaf.v2, (this.pub ? this.pub.to_json() : []), (this.semipriv != null ? ret.push(this.semipriv.to_json()) : []), this.eldest_kid];
       return ret;
     };
 
@@ -8617,7 +8621,7 @@ exports.test_v1 = function(T, cb) {
 
 exports.test_v2_1 = function(T, cb) {
   var err, leaf, raw, _ref1;
-  raw = [2, [1, "aabb", "ccdd", "4455"], [2, "eeff", "0011"]];
+  raw = [2, [1, "aabb", "ccdd"], [2, "eeff", "0011"]];
   _ref1 = Leaf.parse(raw), err = _ref1[0], leaf = _ref1[1];
   T.no_error(err);
   T.equal(leaf.get_public().to_json(), raw[1], "the right public leaf value came back");
@@ -8637,12 +8641,45 @@ exports.test_v2_2 = function(T, cb) {
 
 exports.test_v2_3 = function(T, cb) {
   var err, i, leaf, raw, raws, _i, _len, _ref1;
-  raws = [[2, null, [10, "aabb", "ee"]], [2, [10, "aaa", "bbb"]], [2, [10, "aa", "bbb"]], [2, [10, "aaa", "bb"]], [2, ["a", "aaa", "bb"]], [2, [10, "aa", "bb", "c"]]];
+  raws = [[2, null, [10, "aabb", "ee"]], [2, [10, "aaa", "bbb"]], [2, [10, "aa", "bbb"]], [2, [10, "aaa", "bb"]], [2, ["a", "aaa"]], [2, [10, "aa", "bb"], null, "a"], [2, [10, "aa", "bb"], [], "a"]];
   for (i = _i = 0, _len = raws.length; _i < _len; i = ++_i) {
     raw = raws[i];
     _ref1 = Leaf.parse(raw), err = _ref1[0], leaf = _ref1[1];
     T.assert(err != null, "parse error on object " + i);
   }
+  return cb();
+};
+
+exports.test_v2_4 = function(T, cb) {
+  var err, leaf, raw, _ref1;
+  raw = [
+    2, [
+      1, "aabb", "ccdd", "4455", "other", "stuff", [1, 2, 3], {
+        a: 3
+      }
+    ], [2, "eeff", "0011"]
+  ];
+  _ref1 = Leaf.parse(raw), err = _ref1[0], leaf = _ref1[1];
+  T.no_error(err);
+  T.equal(leaf.get_public().to_json(), raw[1].slice(0, 3), "the right public leaf value came back");
+  T.equal(leaf.get_semiprivate().to_json(), raw[2], "the right semiprivate leaf value came back");
+  return cb();
+};
+
+exports.test_v2_5 = function(T, cb) {
+  var err, leaf, raw, _ref1;
+  raw = [
+    2, [
+      1, "aabb", "ccdd", "4455", "other", "stuff", [1, 2, 3], {
+        a: 3
+      }
+    ], [2, "eeff", "0011"], "112233"
+  ];
+  _ref1 = Leaf.parse(raw), err = _ref1[0], leaf = _ref1[1];
+  T.no_error(err);
+  T.equal(leaf.get_public().to_json(), raw[1].slice(0, 3), "the right public leaf value came back");
+  T.equal(leaf.get_semiprivate().to_json(), raw[2], "the right semiprivate leaf value came back");
+  T.equal(leaf.get_eldest_kid(), raw[3], "the right eldest kid leaf value came back");
   return cb();
 };
 

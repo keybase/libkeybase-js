@@ -1,9 +1,9 @@
 ## 0.0.7
 
 Features:
-  - Allow eldest_kid as 4th element in "triple", meaning the server
-    should commit to an eldest KID for all users in all chains.
-  - Aside from that, further slots can be purely open-ended
+  - Eldest_kid is now 3rd (0-indexed) slot in top-level array
+  - If we add more slots to "triples" in the future, they can
+    take any form.
 
 ## 0.0.6 (2014-09-19)
 

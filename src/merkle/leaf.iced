@@ -4,11 +4,8 @@ C = require '../constants'
 #===========================================================
 
 exports.ChainTail = class ChainTail
-  constructor : ({@seqno, @payload_hash, @sig_id, @eldest_kid }) ->
-  to_json : () ->
-    ret = [ @seqno, @payload_hash, @sig_id ]
-    ret.push @eldest_kid if @eldest_kid?
-    return ret
+  constructor : ({@seqno, @payload_hash, @sig_id }) ->
+  to_json : () -> [ @seqno, @payload_hash, @sig_id ]
 
 #--------------------------
 
@@ -41,37 +38,46 @@ class Parser
     if @val.length < 2 then throw new Error "No public chain"
     pub = @parse_chain_tail @val[1]
     semipriv = if (@val.length > 2) and @val[2]?.length then @parse_chain_tail(@val[2]) else null
-    return new Leaf { pub, semipriv }
+    eldest_kid = if (@val.length > 3 and @val[3]?) then @parse_kid(@val[3]) else null
+    return new Leaf { pub, semipriv, eldest_kid }
 
   match_hex : (s) ->
     (typeof(s) is 'string') and !!(s.match(/^([a-fA-F0-9]*)$/)) and (s.length % 2 is 0)
+
+  parse_kid : (x) ->
+    throw new Error "bad kid: #{x}" unless @match_hex x
+    return x
 
   parse_chain_tail : (val) ->
     msg = null
     if (val.length < 2) then msg = "Bad chain tail with < 2 values"
     else if typeof(val[0]) isnt 'number' then msg = "Bad sequence #"
     else
-      # Slots #1,2,3 are all HexIds. We don't know what 4+ will be
-      for v,i in val[1..3] when v? and v.length
+      # Slots #1,2 are both HexIds. We don't know what 3+ will be
+      for v,i in val[1..2] when v? and v.length
         unless @match_hex v
           msg = "bad value[#{i}]"
           break
     throw new Error msg if msg?
-    new ChainTail { seqno : val[0], payload_hash : val[1], sig_id : val[2], eldest_kid : val[3] }
+    new ChainTail { seqno : val[0], payload_hash : val[1], sig_id : val[2] }
 
 #--------------------------
 
 exports.Leaf = class Leaf
 
-  constructor : ({@pub, @semipriv}) ->
+  constructor : ({@pub, @semipriv, @eldest_kid}) ->
 
   get_public : () -> @pub
   get_semiprivate: () -> @semipriv
+  get_eldest_kid : () -> @eldest_kid
 
   to_json : () ->
-    # Save some space by not including semipriv if it's empty...
-    ret = [ C.versions.leaf.v2, (if @pub then @pub.to_json() else []) ]
-    if @semipriv? then ret.push @semipriv.to_json()
+    ret = [
+      C.versions.leaf.v2,
+      (if @pub then @pub.to_json() else []),
+      (if @semipriv? then ret.push @semipriv.to_json() else []),
+      @eldest_kid
+    ]
     return ret
 
   to_string : () -> JSON.stringify(@to_json())
