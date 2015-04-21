@@ -1,3 +1,9 @@
+## 0.0.7 (2015-04-21)
+
+Features:
+  - Allow eldest_kid as 4th element in "triple", meaning the server
+    should commit to an eldest KID for all users in all chains
+
 ## 0.0.6 (2014-09-19)
 
 Features:

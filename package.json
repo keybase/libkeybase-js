@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/keybase/node-sig-tree",
   "dependencies": {
+    "iced-error": "0.0.9",
     "iced-lock": "^1.0.1",
     "iced-logger": "0.0.5",
     "iced-runtime": "^1.0.1",

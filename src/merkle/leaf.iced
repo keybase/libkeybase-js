@@ -3,9 +3,12 @@ C = require '../constants'
 
 #===========================================================
 
-exports.Triple = class Triple
-  constructor : ({@seqno, @payload_hash, @sig_id}) ->
-  to_json : () -> [ @seqno, @payload_hash, @sig_id ]
+exports.ChainTail = class ChainTail
+  constructor : ({@seqno, @payload_hash, @sig_id, @eldest_kid }) ->
+  to_json : () -> 
+    ret = [ @seqno, @payload_hash, @sig_id ]
+    ret.push @eldest_kid if @eldest_kid?
+    return ret
 
 #--------------------------
 
@@ -31,27 +34,29 @@ class Parser
       else throw new Error "unknown leaf version: #{version}"
 
   parse_v1 : () ->
-    pub = @parse_triple @val
+    pub = @parse_chain_tail @val
     new Leaf { pub }
 
   parse_v2 : () ->
     if @val.length < 2 then throw new Error "No public chain"
-    pub = @parse_triple @val[1]
-    semipriv = if (@val.length > 2) and @val[2]?.length then @parse_triple(@val[2]) else null
+    pub = @parse_chain_tail @val[1]
+    semipriv = if (@val.length > 2) and @val[2]?.length then @parse_chain_tail(@val[2]) else null
     return new Leaf { pub, semipriv }
 
   match_hex : (s) ->
     (typeof(s) is 'string') and !!(s.match(/^([a-fA-F0-9]*)$/)) and (s.length % 2 is 0)
 
-  parse_triple : (val) ->
-    msg = if (val.length < 2) then "Bad triple with < 2 values"
-    else if val.length > 3 then "Bad triple with > 3 values"
-    else if typeof(val[0]) isnt 'number' then "Bad sequence #"
-    else if not @match_hex(val[1]) then "bad value[1]"
-    else if val.length > 2 and val[2].length and not @match_hex(val[2]) then "bad value[2]"
-    else null
+  parse_chain_tail : (val) ->
+    msg = null
+    if (val.length < 2) then msg = "Bad chain tail with < 2 values"
+    else if typeof(val[0]) isnt 'number' then msg = "Bad sequence #"
+    else 
+      for v,i in val[1...] when v? and v.length
+        unless @match_hex v 
+          msg = "bad value[#{i}]"
+          break
     throw new Error msg if msg?
-    new Triple { seqno : val[0], payload_hash : val[1], sig_id : val[2] }
+    new ChainTail { seqno : val[0], payload_hash : val[1], sig_id : val[2], eldest_kid : val[3] }
 
 #--------------------------
 
@@ -82,11 +87,11 @@ exports.Leaf = class Leaf
 
     # Make sure that every sequence found in the DB is also in the LOL
     for {seqno_type, seqno} in rows
-      triple = switch seqno_type
+      chain_tail = switch seqno_type
         when C.seqno_types.PUBLIC then @pub
         when C.seqno_types.SEMIPRIVATE then @semipriv
         else null
-      if not triple? or (triple.seqno isnt seqno) then return false
+      if not chain_tail? or (chain_tail.seqno isnt seqno) then return false
       found[seqno_type] = true
 
     # Make sure that every sequence found in the LOL is also in the DB.
