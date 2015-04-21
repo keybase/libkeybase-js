@@ -1,4 +1,4 @@
-## 0.0.7 (2015-04-21)
+## 0.0.7
 
 Features:
   - Allow eldest_kid as 4th element in "triple", meaning the server
