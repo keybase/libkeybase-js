@@ -48,3 +48,13 @@ exports.test_v2_3 = (T,cb) ->
 
 #====================================================
 
+# test that beyond slots 1,2,3, it's open-ended
+exports.test_v2_4 = (T,cb) ->
+  raw = [ 2, [ 1, "aabb", "ccdd", "4455", "other", "stuff", [ 1,2,3 ], { a: 3} ], [ 2, "eeff", "0011" ] ]
+  [err,leaf] = Leaf.parse raw
+  T.no_error err
+  T.equal leaf.get_public().to_json(), raw[1][0...4], "the right public leaf value came back"
+  T.equal leaf.get_semiprivate().to_json(), raw[2], "the right semiprivate leaf value came back"
+  cb()
+
+#====================================================

@@ -5,7 +5,7 @@ C = require '../constants'
 
 exports.ChainTail = class ChainTail
   constructor : ({@seqno, @payload_hash, @sig_id, @eldest_kid }) ->
-  to_json : () -> 
+  to_json : () ->
     ret = [ @seqno, @payload_hash, @sig_id ]
     ret.push @eldest_kid if @eldest_kid?
     return ret
@@ -50,9 +50,10 @@ class Parser
     msg = null
     if (val.length < 2) then msg = "Bad chain tail with < 2 values"
     else if typeof(val[0]) isnt 'number' then msg = "Bad sequence #"
-    else 
-      for v,i in val[1...] when v? and v.length
-        unless @match_hex v 
+    else
+      # Slots #1,2,3 are all HexIds. We don't know what 4+ will be
+      for v,i in val[1..3] when v? and v.length
+        unless @match_hex v
           msg = "bad value[#{i}]"
           break
     throw new Error msg if msg?
