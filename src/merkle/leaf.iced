@@ -15,8 +15,8 @@ class Parser
 
   parse : () ->
 
-    if not Array.isArray(@val) or @val.length < 2
-      throw new Error "Expected an array of length 2 or more"
+    if not Array.isArray(@val) or @val.length < 1
+      throw new Error "Expected an array of length 1 or more"
     else if typeof(@val[0]) isnt 'number'
       throw new Error "Need a number for first slot"
     else if typeof(@val[1]) is 'string'
@@ -36,7 +36,7 @@ class Parser
 
   parse_v2 : () ->
     if @val.length < 2 then throw new Error "No public chain"
-    pub = @parse_chain_tail @val[1]
+    pub = if (@val.length > 1 and @val[1]?.length) then @parse_chain_tail(@val[1]) else null
     semipriv = if (@val.length > 2) and @val[2]?.length then @parse_chain_tail(@val[2]) else null
     eldest_kid = if (@val.length > 3 and @val[3]?) then @parse_kid(@val[3]) else null
     return new Leaf { pub, semipriv, eldest_kid }
@@ -75,7 +75,7 @@ exports.Leaf = class Leaf
     ret = [
       C.versions.leaf.v2,
       (if @pub then @pub.to_json() else []),
-      (if @semipriv? then ret.push @semipriv.to_json() else []),
+      (if @semipriv? then @semipriv.to_json() else []),
       @eldest_kid
     ]
     return ret
