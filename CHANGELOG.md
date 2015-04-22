@@ -1,4 +1,4 @@
-## 0.0.7 (2015-04-21)
+## 1.0.2 (2015-04-21)
 
 Features:
   - Eldest_kid is now 3rd (0-indexed) slot in top-level array
