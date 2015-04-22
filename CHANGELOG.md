@@ -1,9 +1,10 @@
-## 0.0.7
+## 0.0.7 (2015-04-21)
 
 Features:
   - Eldest_kid is now 3rd (0-indexed) slot in top-level array
   - If we add more slots to "triples" in the future, they can
     take any form.
+  - Complete test coverage of Merkle leaf decoding
 
 ## 0.0.6 (2014-09-19)
 
