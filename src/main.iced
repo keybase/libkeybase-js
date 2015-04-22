@@ -12,7 +12,7 @@ exports[k] = v for k,v of {
 
 # Export the exports of these modules to the top level
 mods = [
-  require('./uri')
+  require('./sigchain/sigchain')
 ]
 for mod in mods
   for k,v of mod
