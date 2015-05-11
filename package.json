@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "browserify": "^5.10.1",
+    "forge-sigchain": "keybase/node-forge-sigchain#cson",
     "iced-coffee-script": "^1.7.1-f",
     "iced-test": "0.0.17",
     "icsify": "^0.6.0",
