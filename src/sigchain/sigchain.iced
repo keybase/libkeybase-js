@@ -185,6 +185,7 @@ exports.SigChain = class SigChain
       err = new Error "not a valid sibkey: #{link.kid} valid sibkeys: #{JSON.stringify(@_valid_sibkeys)}"
     else if link.ctime_seconds < @_sibkeys_to_etime_seconds[link.kid]
       err = new Error "expired sibkey: #{link.kid}"
+    # TODO: Check against key ctime too?
     cb err
 
   _check_link_belongs_here : ({link}, cb) ->
