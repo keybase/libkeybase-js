@@ -147,7 +147,6 @@ exports.SigChain = class SigChain
   get_links : () ->
     return (link for link in @_links when link.sig_id of @_unrevoked_links)
 
-
   _add_new_link : ({sig_blob, parsed_keys}, cb) ->
     esc = make_esc cb, "SigChain._add_new_link"
 
