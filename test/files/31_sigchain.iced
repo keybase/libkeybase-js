@@ -9,6 +9,7 @@ ralph_all_sigs = require '../data/ralph_sig_chain.json'
 ralph_all_keys = require '../data/ralph_all_keys.json'
 simple_chain = require '../data/simple_chain.json'
 bad_ctime_chain = require '../data/bad_ctime_chain.json'
+bad_signature_chain = require '../data/bad_signature_chain.json'
 
 #====================================================
 
@@ -61,6 +62,21 @@ exports.test_error_unknown_keys = (T, cb) ->
     username: "max32"
     eldest_kid: "0120224a6cc658cba6a6d2feac1a930b4d907598daa382063ce79150c343b82fca360a"
   }, defer err, sigchain
+  T.assert err?, "expected error"
+  cb()
+
+exports.test_error_bad_signature = (T, cb) ->
+  # Change some bytes from the valid signature, and confirm it gets rejected.
+  esc = make_esc cb, "test_error_bad_signature"
+  {chain, keys} = bad_signature_chain
+  await ParsedKeys.parse {bundles_list: (bundle for kid, bundle of keys)}, esc defer parsed_keys
+  await SigChain.replay {
+    sig_blobs: chain
+    parsed_keys
+    uid: "74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19"
+    username: "max32"
+    eldest_kid: "0120224a6cc658cba6a6d2feac1a930b4d907598daa382063ce79150c343b82fca360a"
+  }, defer err, sig
   T.assert err?, "expected error"
   cb()
 
