@@ -7,6 +7,7 @@ fs = require('fs')
 
 ralph_all_sigs = require '../data/ralph_sig_chain.json'
 ralph_all_keys = require '../data/ralph_all_keys.json'
+simple_chain = require '../data/simple_chain.json'
 
 #====================================================
 
@@ -28,17 +29,17 @@ exports.test_ralph_sig_chain = (T,cb) ->
   T.assert links.length == 5, "Expected exactly 5 links, got #{links.length}"
   cb()
 
-exports.test_forge_sig_chain = (T, cb) ->
-  esc = make_esc cb, "test_forge_sig_chain"
-  example0 = fs.readFileSync "node_modules/forge-sigchain/examples/0.cson"
-  forged_chain = execSync("node_modules/forge-sigchain/bin/main.js -f cson", {input: example0})
-  {chain, keys} = JSON.parse(forged_chain)
+exports.test_simple_chain = (T, cb) ->
+  esc = make_esc cb, "test_simple_chain"
+  {chain, keys} = simple_chain
   await ParsedKeys.parse {bundles_list: (bundle for kid, bundle of keys)}, esc defer parsed_keys
   await SigChain.replay {
     sig_blobs: chain
     parsed_keys
-    uid: "bf65266d0d8df3ad5d1b367f578e6819"
-    username: "ralph"
-    eldest_kid: "0101c304e8c86c8f4b6773478eed4d05e9ffdddc81c7068c50db1b5bad9a904f5f890a"
+    uid: "74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19"
+    username: "max32"
+    eldest_kid: "0120224a6cc658cba6a6d2feac1a930b4d907598daa382063ce79150c343b82fca360a"
   }, esc defer sigchain
+  links = sigchain.get_links()
+  T.assert links.length == 1, "Expected exactly 1 link, got #{links.length}"
   cb()
