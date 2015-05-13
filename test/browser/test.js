@@ -2061,26 +2061,19 @@ if (typeof module !== 'undefined' && require.main === module) {
 
   exports.ParsedKeys = ParsedKeys = (function() {
     ParsedKeys.parse = function(_arg, cb) {
-      var all_keys, blob, esc, fingerprint, fingerprint_str, key_manager, key_managers, kid, kid_str, kid_to_pgp, parsed_keys, pgp_to_kid, _, ___iced_passed_deferral, __iced_deferrals, __iced_k;
+      var bundle, bundles_list, esc, fingerprint, fingerprint_str, key_manager, key_managers, kid, kid_str, kid_to_pgp, parsed_keys, pgp_to_kid, ___iced_passed_deferral, __iced_deferrals, __iced_k;
       __iced_k = __iced_k_noop;
       ___iced_passed_deferral = iced.findDeferral(arguments);
-      all_keys = _arg.all_keys;
-      esc = make_esc(cb, "key_managers_from_all_keys");
+      bundles_list = _arg.bundles_list;
+      esc = make_esc(cb, "ParsedKeys.parse");
       key_managers = {};
       pgp_to_kid = {};
       kid_to_pgp = {};
       (function(_this) {
         return (function(__iced_k) {
-          var _i, _k, _keys, _ref1, _results, _while;
-          _ref1 = all_keys;
-          _keys = (function() {
-            var _results1;
-            _results1 = [];
-            for (_k in _ref1) {
-              _results1.push(_k);
-            }
-            return _results1;
-          })();
+          var _i, _len, _ref1, _results, _while;
+          _ref1 = bundles_list;
+          _len = _ref1.length;
           _i = 0;
           _results = [];
           _while = function(__iced_k) {
@@ -2098,11 +2091,10 @@ if (typeof module !== 'undefined' && require.main === module) {
               _results.push(__iced_next_arg);
               return _continue();
             };
-            if (!(_i < _keys.length)) {
+            if (!(_i < _len)) {
               return _break();
             } else {
-              _ = _keys[_i];
-              blob = _ref1[_];
+              bundle = _ref1[_i];
               (function(__iced_k) {
                 __iced_deferrals = new iced.Deferrals(__iced_k, {
                   parent: ___iced_passed_deferral,
@@ -2110,14 +2102,14 @@ if (typeof module !== 'undefined' && require.main === module) {
                   funcname: "ParsedKeys.parse"
                 });
                 kbpgp.ukm.import_armored_public({
-                  armored: blob.bundle
+                  armored: bundle
                 }, esc(__iced_deferrals.defer({
                   assign_fn: (function() {
                     return function() {
                       return key_manager = arguments[0];
                     };
                   })(),
-                  lineno: 13
+                  lineno: 17
                 })));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -2173,7 +2165,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                 funcname: "ChainLink.parse"
               });
               athrow(new Error("link signed by nonexistent kid " + kid), esc(__iced_deferrals.defer({
-                lineno: 48
+                lineno: 50
               })));
               __iced_deferrals._fulfill();
             })(__iced_k);
@@ -2195,7 +2187,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                   return payload_buffer = arguments[0];
                 };
               })(),
-              lineno: 51
+              lineno: 53
             })), {
               now: ctime_seconds
             });
@@ -2215,7 +2207,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                     return payload = arguments[0];
                   };
                 })(),
-                lineno: 57
+                lineno: 59
               })));
               __iced_deferrals._fulfill();
             })(function() {
@@ -2231,7 +2223,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                   payload: payload,
                   parsed_keys: parsed_keys
                 }, esc(__iced_deferrals.defer({
-                  lineno: 60
+                  lineno: 62
                 })));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -2245,7 +2237,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                     payload: payload,
                     parsed_keys: parsed_keys
                   }, esc(__iced_deferrals.defer({
-                    lineno: 62
+                    lineno: 64
                   })));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -2304,7 +2296,7 @@ if (typeof module !== 'undefined' && require.main === module) {
             json: payload,
             subkm: key_manager
           }, esc(__iced_deferrals.defer({
-            lineno: 87
+            lineno: 89
           })));
           __iced_deferrals._fulfill();
         });
@@ -2365,7 +2357,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                 funcname: "SigChain.replay"
               });
               athrow(new Error("eldest_kid must not be null"), esc(__iced_deferrals.defer({
-                lineno: 125
+                lineno: 127
               })));
               __iced_deferrals._fulfill();
             })(__iced_k);
@@ -2415,7 +2407,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                     sig_blob: sig_blob,
                     parsed_keys: parsed_keys
                   }, esc(__iced_deferrals.defer({
-                    lineno: 128
+                    lineno: 130
                   })));
                   __iced_deferrals._fulfill();
                 })(_next);
@@ -2480,7 +2472,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                 return link = arguments[0];
               };
             })(),
-            lineno: 154
+            lineno: 156
           })));
           __iced_deferrals._fulfill();
         });
@@ -2499,7 +2491,7 @@ if (typeof module !== 'undefined' && require.main === module) {
             _this._check_key_is_valid({
               link: link
             }, esc(__iced_deferrals.defer({
-              lineno: 165
+              lineno: 167
             })));
             __iced_deferrals._fulfill();
           })(function() {
@@ -2512,7 +2504,7 @@ if (typeof module !== 'undefined' && require.main === module) {
               _this._check_link_belongs_here({
                 link: link
               }, esc(__iced_deferrals.defer({
-                lineno: 168
+                lineno: 170
               })));
               __iced_deferrals._fulfill();
             })(function() {
@@ -2527,7 +2519,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                 _this._delegate_keys({
                   link: link
                 }, esc(__iced_deferrals.defer({
-                  lineno: 175
+                  lineno: 177
                 })));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -2540,7 +2532,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                   _this._revoke_keys_and_sigs({
                     link: link
                   }, esc(__iced_deferrals.defer({
-                    lineno: 177
+                    lineno: 179
                   })));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -71859,24 +71851,33 @@ execSync = require('child_process').execSync;
 fs = require('fs');
 
 get_ralph_sig_blobs_and_keys = function(cb) {
-  var esc, parsed_keys, ___iced_passed_deferral, __iced_deferrals, __iced_k;
+  var blob, bundles_list, esc, kid, parsed_keys, ___iced_passed_deferral, __iced_deferrals, __iced_k;
   __iced_k = __iced_k_noop;
   ___iced_passed_deferral = iced.findDeferral(arguments);
   esc = make_esc(cb, "get_ralph_sig_blobs_and_keys");
+  bundles_list = (function() {
+    var _results;
+    _results = [];
+    for (kid in ralph_all_keys) {
+      blob = ralph_all_keys[kid];
+      _results.push(blob.bundle);
+    }
+    return _results;
+  })();
   (function(_this) {
     return (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral
       });
       ParsedKeys.parse({
-        all_keys: ralph_all_keys
+        bundles_list: bundles_list
       }, esc(__iced_deferrals.defer({
         assign_fn: (function() {
           return function() {
             return parsed_keys = arguments[0];
           };
         })(),
-        lineno: 13
+        lineno: 14
       })));
       __iced_deferrals._fulfill();
     });
@@ -71905,7 +71906,7 @@ exports.test_replay_sig_chain = function(T, cb) {
             return parsed_keys = arguments[1];
           };
         })(),
-        lineno: 18
+        lineno: 19
       })));
       __iced_deferrals._fulfill();
     });
@@ -71928,7 +71929,7 @@ exports.test_replay_sig_chain = function(T, cb) {
               return sigchain = arguments[0];
             };
           })(),
-          lineno: 25
+          lineno: 26
         })));
         __iced_deferrals._fulfill();
       })(function() {
@@ -71941,7 +71942,7 @@ exports.test_replay_sig_chain = function(T, cb) {
 };
 
 exports.test_forge_sig_chain = function(T, cb) {
-  var bundle, chain, esc, example0, forged_chain, keys, keys_in_server_format, kid, parsed_keys, sigchain, ___iced_passed_deferral, __iced_deferrals, __iced_k, _ref1;
+  var bundle, chain, esc, example0, forged_chain, keys, kid, parsed_keys, sigchain, ___iced_passed_deferral, __iced_deferrals, __iced_k, _ref1;
   __iced_k = __iced_k_noop;
   ___iced_passed_deferral = iced.findDeferral(arguments);
   esc = make_esc(cb, "test_forge_sig_chain");
@@ -71950,13 +71951,6 @@ exports.test_forge_sig_chain = function(T, cb) {
     input: example0
   });
   _ref1 = JSON.parse(forged_chain), chain = _ref1.chain, keys = _ref1.keys;
-  keys_in_server_format = {};
-  for (kid in keys) {
-    bundle = keys[kid];
-    keys_in_server_format[kid] = {
-      bundle: bundle
-    };
-  }
   (function(_this) {
     return (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
@@ -71964,14 +71958,22 @@ exports.test_forge_sig_chain = function(T, cb) {
         funcname: "test_forge_sig_chain"
       });
       ParsedKeys.parse({
-        all_keys: keys_in_server_format
+        bundles_list: (function() {
+          var _results;
+          _results = [];
+          for (kid in keys) {
+            bundle = keys[kid];
+            _results.push(bundle);
+          }
+          return _results;
+        })()
       }, esc(__iced_deferrals.defer({
         assign_fn: (function() {
           return function() {
             return parsed_keys = arguments[0];
           };
         })(),
-        lineno: 38
+        lineno: 36
       })));
       __iced_deferrals._fulfill();
     });
@@ -71994,7 +71996,7 @@ exports.test_forge_sig_chain = function(T, cb) {
               return sigchain = arguments[0];
             };
           })(),
-          lineno: 45
+          lineno: 43
         })));
         __iced_deferrals._fulfill();
       })(function() {

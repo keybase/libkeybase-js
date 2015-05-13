@@ -11,7 +11,8 @@ fs = require('fs')
 
 get_ralph_sig_blobs_and_keys = (cb) ->
   esc = make_esc cb, "get_ralph_sig_blobs_and_keys"
-  await ParsedKeys.parse {all_keys: ralph_all_keys}, esc defer parsed_keys
+  bundles_list = (blob.bundle for kid, blob of ralph_all_keys)
+  await ParsedKeys.parse {bundles_list}, esc defer parsed_keys
   cb null, ralph_all_sigs, parsed_keys
 
 exports.test_replay_sig_chain = (T,cb) ->
@@ -33,10 +34,7 @@ exports.test_forge_sig_chain = (T, cb) ->
   example0 = fs.readFileSync "node_modules/forge-sigchain/examples/0.cson"
   forged_chain = execSync("node_modules/forge-sigchain/bin/main.js -f cson", {input: example0})
   {chain, keys} = JSON.parse(forged_chain)
-  keys_in_server_format = {}
-  for kid, bundle of keys
-    keys_in_server_format[kid] = {bundle}
-  await ParsedKeys.parse {all_keys: keys_in_server_format}, esc defer parsed_keys
+  await ParsedKeys.parse {bundles_list: (bundle for kid, bundle of keys)}, esc defer parsed_keys
   await SigChain.replay {
     sig_blobs: chain
     parsed_keys

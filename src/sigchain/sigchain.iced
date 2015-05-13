@@ -5,15 +5,17 @@ proofs = require('keybase-proofs')
 
 
 exports.ParsedKeys = class ParsedKeys
-  @parse : ({all_keys}, cb) ->
-    esc = make_esc cb, "key_managers_from_all_keys"
+  @parse : ({bundles_list}, cb) ->
+    # We only take key bundles from the server, either hex NaCl public keys, or
+    # ascii-armored PGP public key strings. We compute the KIDs and
+    # fingerprints ourselves, because we don't trust the server to do it for
+    # us.
+    esc = make_esc cb, "ParsedKeys.parse"
     key_managers = {}
     pgp_to_kid = {}
     kid_to_pgp = {}
-    for _, blob of all_keys
-      await kbpgp.ukm.import_armored_public {armored: blob.bundle}, esc defer key_manager
-      # Note that we don't trust any of the IDs provided by the server; instead
-      # we compute them all here.
+    for bundle in bundles_list
+      await kbpgp.ukm.import_armored_public {armored: bundle}, esc defer key_manager
       kid = key_manager.get_ekid()
       kid_str = kid.toString "hex"
       key_managers[kid_str] = key_manager
