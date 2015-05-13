@@ -2,24 +2,23 @@
 fs = require('fs')
 {ParsedKeys, SigChain, key_managers_from_all_keys} = require('../..')
 C = require('../..').constants
-ralph_all_sigs = require '../data/ralph_sig_chain.json'
-ralph_all_keys = require '../data/ralph_all_keys.json'
 execSync = require('child_process').execSync
 fs = require('fs')
 
+ralph_all_sigs = require '../data/ralph_sig_chain.json'
+ralph_all_keys = require '../data/ralph_all_keys.json'
+
 #====================================================
 
-get_ralph_sig_blobs_and_keys = (cb) ->
-  esc = make_esc cb, "get_ralph_sig_blobs_and_keys"
+exports.test_ralph_sig_chain = (T,cb) ->
+  # Ralph is a test user I created by hand on my local server. This test is
+  # mainly to make sure that the generated chains we're using in other tests
+  # bear some relationship to reality.  - Jack
+  esc = make_esc cb, "test_ralph_sig_chain"
   bundles_list = (blob.bundle for kid, blob of ralph_all_keys)
   await ParsedKeys.parse {bundles_list}, esc defer parsed_keys
-  cb null, ralph_all_sigs, parsed_keys
-
-exports.test_replay_sig_chain = (T,cb) ->
-  esc = make_esc cb, "test_replay_sig_chain"
-  await get_ralph_sig_blobs_and_keys esc defer all_sigs, parsed_keys
   await SigChain.replay {
-    sig_blobs: all_sigs
+    sig_blobs: ralph_all_sigs
     parsed_keys
     uid: "bf65266d0d8df3ad5d1b367f578e6819"
     username: "ralph"

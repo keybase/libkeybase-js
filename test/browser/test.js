@@ -71829,7 +71829,7 @@ exports.test_seqno_assertion = function(T, cb) {
 
 
 },{"../..":6}],418:[function(require,module,exports){
-var C, ParsedKeys, SigChain, execSync, fs, get_ralph_sig_blobs_and_keys, iced, key_managers_from_all_keys, make_esc, ralph_all_keys, ralph_all_sigs, __iced_k, __iced_k_noop, _ref;
+var C, ParsedKeys, SigChain, execSync, fs, iced, key_managers_from_all_keys, make_esc, ralph_all_keys, ralph_all_sigs, __iced_k, __iced_k_noop, _ref;
 
 iced = require('iced-runtime');
 __iced_k = __iced_k_noop = function() {};
@@ -71842,19 +71842,19 @@ _ref = require('../..'), ParsedKeys = _ref.ParsedKeys, SigChain = _ref.SigChain,
 
 C = require('../..').constants;
 
-ralph_all_sigs = require('../data/ralph_sig_chain.json');
-
-ralph_all_keys = require('../data/ralph_all_keys.json');
-
 execSync = require('child_process').execSync;
 
 fs = require('fs');
 
-get_ralph_sig_blobs_and_keys = function(cb) {
-  var blob, bundles_list, esc, kid, parsed_keys, ___iced_passed_deferral, __iced_deferrals, __iced_k;
+ralph_all_sigs = require('../data/ralph_sig_chain.json');
+
+ralph_all_keys = require('../data/ralph_all_keys.json');
+
+exports.test_ralph_sig_chain = function(T, cb) {
+  var blob, bundles_list, esc, kid, links, parsed_keys, sigchain, ___iced_passed_deferral, __iced_deferrals, __iced_k;
   __iced_k = __iced_k_noop;
   ___iced_passed_deferral = iced.findDeferral(arguments);
-  esc = make_esc(cb, "get_ralph_sig_blobs_and_keys");
+  esc = make_esc(cb, "test_ralph_sig_chain");
   bundles_list = (function() {
     var _results;
     _results = [];
@@ -71867,7 +71867,8 @@ get_ralph_sig_blobs_and_keys = function(cb) {
   (function(_this) {
     return (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
-        parent: ___iced_passed_deferral
+        parent: ___iced_passed_deferral,
+        funcname: "test_ralph_sig_chain"
       });
       ParsedKeys.parse({
         bundles_list: bundles_list
@@ -71877,36 +71878,7 @@ get_ralph_sig_blobs_and_keys = function(cb) {
             return parsed_keys = arguments[0];
           };
         })(),
-        lineno: 14
-      })));
-      __iced_deferrals._fulfill();
-    });
-  })(this)((function(_this) {
-    return function() {
-      return cb(null, ralph_all_sigs, parsed_keys);
-    };
-  })(this));
-};
-
-exports.test_replay_sig_chain = function(T, cb) {
-  var all_sigs, esc, links, parsed_keys, sigchain, ___iced_passed_deferral, __iced_deferrals, __iced_k;
-  __iced_k = __iced_k_noop;
-  ___iced_passed_deferral = iced.findDeferral(arguments);
-  esc = make_esc(cb, "test_replay_sig_chain");
-  (function(_this) {
-    return (function(__iced_k) {
-      __iced_deferrals = new iced.Deferrals(__iced_k, {
-        parent: ___iced_passed_deferral,
-        funcname: "test_replay_sig_chain"
-      });
-      get_ralph_sig_blobs_and_keys(esc(__iced_deferrals.defer({
-        assign_fn: (function() {
-          return function() {
-            all_sigs = arguments[0];
-            return parsed_keys = arguments[1];
-          };
-        })(),
-        lineno: 19
+        lineno: 18
       })));
       __iced_deferrals._fulfill();
     });
@@ -71915,7 +71887,7 @@ exports.test_replay_sig_chain = function(T, cb) {
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          funcname: "test_replay_sig_chain"
+          funcname: "test_ralph_sig_chain"
         });
         SigChain.replay({
           sig_blobs: all_sigs,
@@ -71929,7 +71901,7 @@ exports.test_replay_sig_chain = function(T, cb) {
               return sigchain = arguments[0];
             };
           })(),
-          lineno: 26
+          lineno: 25
         })));
         __iced_deferrals._fulfill();
       })(function() {
@@ -71973,7 +71945,7 @@ exports.test_forge_sig_chain = function(T, cb) {
             return parsed_keys = arguments[0];
           };
         })(),
-        lineno: 36
+        lineno: 35
       })));
       __iced_deferrals._fulfill();
     });
@@ -71996,7 +71968,7 @@ exports.test_forge_sig_chain = function(T, cb) {
               return sigchain = arguments[0];
             };
           })(),
-          lineno: 43
+          lineno: 42
         })));
         __iced_deferrals._fulfill();
       })(function() {
