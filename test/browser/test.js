@@ -2472,7 +2472,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                 return link = arguments[0];
               };
             })(),
-            lineno: 156
+            lineno: 155
           })));
           __iced_deferrals._fulfill();
         });
@@ -2491,7 +2491,7 @@ if (typeof module !== 'undefined' && require.main === module) {
             _this._check_key_is_valid({
               link: link
             }, esc(__iced_deferrals.defer({
-              lineno: 167
+              lineno: 166
             })));
             __iced_deferrals._fulfill();
           })(function() {
@@ -2504,7 +2504,7 @@ if (typeof module !== 'undefined' && require.main === module) {
               _this._check_link_belongs_here({
                 link: link
               }, esc(__iced_deferrals.defer({
-                lineno: 170
+                lineno: 169
               })));
               __iced_deferrals._fulfill();
             })(function() {
@@ -2519,7 +2519,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                 _this._delegate_keys({
                   link: link
                 }, esc(__iced_deferrals.defer({
-                  lineno: 177
+                  lineno: 176
                 })));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -2532,7 +2532,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                   _this._revoke_keys_and_sigs({
                     link: link
                   }, esc(__iced_deferrals.defer({
-                    lineno: 179
+                    lineno: 178
                   })));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -71339,7 +71339,7 @@ window.onload = function() {
 };
 
 
-},{"../files/30_merkle_leaf.iced":417,"../files/31_sigchain.iced":418,"iced-runtime":199,"iced-test":201}],415:[function(require,module,exports){
+},{"../files/30_merkle_leaf.iced":418,"../files/31_sigchain.iced":419,"iced-runtime":199,"iced-test":201}],415:[function(require,module,exports){
 module.exports={
     "0120afac9383132b317336866b4ce48836906cad88de18a92bddf29ffb949db8bc420a": {
         "kid": "0120afac9383132b317336866b4ce48836906cad88de18a92bddf29ffb949db8bc420a",
@@ -71660,6 +71660,8 @@ module.exports=[
 ]
 
 },{}],417:[function(require,module,exports){
+module.exports={"chain":[{"seqno":1,"prev":null,"sig":"g6Rib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEgIkpsxljLpqbS/qwakwtNkHWY2qOCBjznkVDDQ7gvyjYKp3BheWxvYWTFAUx7ImJvZHkiOnsia2V5Ijp7Imhvc3QiOiJrZXliYXNlLmlvIiwia2lkIjoiMDEyMDIyNGE2Y2M2NThjYmE2YTZkMmZlYWMxYTkzMGI0ZDkwNzU5OGRhYTM4MjA2M2NlNzkxNTBjMzQzYjgyZmNhMzYwYSIsInVpZCI6Ijc0YzM4Y2Y3Y2ViOTQ3ZjU2MzIwNDVkOGNhNWQ0OGQzMDE3ZWFiODU5MGJiOTZlYWQ1OGQzMTdiMGViNzA5ZGYxOSIsInVzZXJuYW1lIjoibWF4MzIifSwidHlwZSI6ImVsZGVzdCIsInZlcnNpb24iOjF9LCJjdGltZSI6MTQzMTUzNzI1NCwiZXhwaXJlX2luIjoxMDAwMDAwMCwicHJldiI6bnVsbCwic2VxX3R5cGUiOjEsInNlcW5vIjoxLCJ0YWciOiJzaWduYXR1cmUifaNzaWfEQFz28YVbaZ8tTg2WT3fUSODAGQIXtcgBEZhHQdTyeHxtz0dosMQoBuuekaxeC2izYMzTw6KwkQyGDJD2boeyVQSoc2lnX3R5cGUgo3RhZ80CAqd2ZXJzaW9uAQ==","payload_hash":"2539c316d4e9208d8a920a602a6a3796fe43ded6a79c54dcb0af5358ca292bb3","sig_id":"c43b0c08bda565637efba4098ba1ae4ba4ec1bc812e2654965ad498f8f44b536","payload_json":"{\"body\":{\"key\":{\"host\":\"keybase.io\",\"kid\":\"0120224a6cc658cba6a6d2feac1a930b4d907598daa382063ce79150c343b82fca360a\",\"uid\":\"74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19\",\"username\":\"max32\"},\"type\":\"eldest\",\"version\":1},\"ctime\":1431537254,\"expire_in\":10000000,\"prev\":null,\"seq_type\":1,\"seqno\":1,\"tag\":\"signature\"}","kid":"0120224a6cc658cba6a6d2feac1a930b4d907598daa382063ce79150c343b82fca360a","ctime":1431537254}],"keys":{"0120224a6cc658cba6a6d2feac1a930b4d907598daa382063ce79150c343b82fca360a":"0120224a6cc658cba6a6d2feac1a930b4d907598daa382063ce79150c343b82fca360a"}}
+},{}],418:[function(require,module,exports){
 var C, Leaf, Triple, _ref;
 
 _ref = require('../..').merkle.leaf, Leaf = _ref.Leaf, Triple = _ref.Triple;
@@ -71828,8 +71830,8 @@ exports.test_seqno_assertion = function(T, cb) {
 };
 
 
-},{"../..":6}],418:[function(require,module,exports){
-var C, ParsedKeys, SigChain, execSync, fs, iced, key_managers_from_all_keys, make_esc, ralph_all_keys, ralph_all_sigs, __iced_k, __iced_k_noop, _ref;
+},{"../..":6}],419:[function(require,module,exports){
+var C, ParsedKeys, SigChain, execSync, fs, iced, key_managers_from_all_keys, make_esc, ralph_all_keys, ralph_all_sigs, simple_chain, __iced_k, __iced_k_noop, _ref;
 
 iced = require('iced-runtime');
 __iced_k = __iced_k_noop = function() {};
@@ -71849,6 +71851,8 @@ fs = require('fs');
 ralph_all_sigs = require('../data/ralph_sig_chain.json');
 
 ralph_all_keys = require('../data/ralph_all_keys.json');
+
+simple_chain = require('../data/simple_chain.json');
 
 exports.test_ralph_sig_chain = function(T, cb) {
   var blob, bundles_list, esc, kid, links, parsed_keys, sigchain, ___iced_passed_deferral, __iced_deferrals, __iced_k;
@@ -71878,7 +71882,7 @@ exports.test_ralph_sig_chain = function(T, cb) {
             return parsed_keys = arguments[0];
           };
         })(),
-        lineno: 18
+        lineno: 19
       })));
       __iced_deferrals._fulfill();
     });
@@ -71890,7 +71894,7 @@ exports.test_ralph_sig_chain = function(T, cb) {
           funcname: "test_ralph_sig_chain"
         });
         SigChain.replay({
-          sig_blobs: all_sigs,
+          sig_blobs: ralph_all_sigs,
           parsed_keys: parsed_keys,
           uid: "bf65266d0d8df3ad5d1b367f578e6819",
           username: "ralph",
@@ -71901,7 +71905,7 @@ exports.test_ralph_sig_chain = function(T, cb) {
               return sigchain = arguments[0];
             };
           })(),
-          lineno: 25
+          lineno: 26
         })));
         __iced_deferrals._fulfill();
       })(function() {
@@ -71913,21 +71917,17 @@ exports.test_ralph_sig_chain = function(T, cb) {
   })(this));
 };
 
-exports.test_forge_sig_chain = function(T, cb) {
-  var bundle, chain, esc, example0, forged_chain, keys, kid, parsed_keys, sigchain, ___iced_passed_deferral, __iced_deferrals, __iced_k, _ref1;
+exports.test_simple_chain = function(T, cb) {
+  var bundle, chain, esc, keys, kid, links, parsed_keys, sigchain, ___iced_passed_deferral, __iced_deferrals, __iced_k;
   __iced_k = __iced_k_noop;
   ___iced_passed_deferral = iced.findDeferral(arguments);
-  esc = make_esc(cb, "test_forge_sig_chain");
-  example0 = fs.readFileSync("node_modules/forge-sigchain/examples/0.cson");
-  forged_chain = execSync("node_modules/forge-sigchain/bin/main.js -f cson", {
-    input: example0
-  });
-  _ref1 = JSON.parse(forged_chain), chain = _ref1.chain, keys = _ref1.keys;
+  esc = make_esc(cb, "test_simple_chain");
+  chain = simple_chain.chain, keys = simple_chain.keys;
   (function(_this) {
     return (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        funcname: "test_forge_sig_chain"
+        funcname: "test_simple_chain"
       });
       ParsedKeys.parse({
         bundles_list: (function() {
@@ -71954,14 +71954,14 @@ exports.test_forge_sig_chain = function(T, cb) {
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          funcname: "test_forge_sig_chain"
+          funcname: "test_simple_chain"
         });
         SigChain.replay({
           sig_blobs: chain,
           parsed_keys: parsed_keys,
-          uid: "bf65266d0d8df3ad5d1b367f578e6819",
-          username: "ralph",
-          eldest_kid: "0101c304e8c86c8f4b6773478eed4d05e9ffdddc81c7068c50db1b5bad9a904f5f890a"
+          uid: "74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19",
+          username: "max32",
+          eldest_kid: "0120224a6cc658cba6a6d2feac1a930b4d907598daa382063ce79150c343b82fca360a"
         }, esc(__iced_deferrals.defer({
           assign_fn: (function() {
             return function() {
@@ -71972,6 +71972,63 @@ exports.test_forge_sig_chain = function(T, cb) {
         })));
         __iced_deferrals._fulfill();
       })(function() {
+        links = sigchain.get_links();
+        T.assert(links.length === 1, "Expected exactly 1 link, got " + links.length);
+        return cb();
+      });
+    };
+  })(this));
+};
+
+exports.test_error_unknown_keys = function(T, cb) {
+  var chain, err, esc, keys, parsed_keys, sigchain, ___iced_passed_deferral, __iced_deferrals, __iced_k;
+  __iced_k = __iced_k_noop;
+  ___iced_passed_deferral = iced.findDeferral(arguments);
+  esc = make_esc(cb, "test_signing_with_unknown_keys");
+  chain = simple_chain.chain, keys = simple_chain.keys;
+  (function(_this) {
+    return (function(__iced_k) {
+      __iced_deferrals = new iced.Deferrals(__iced_k, {
+        parent: ___iced_passed_deferral,
+        funcname: "test_error_unknown_keys"
+      });
+      ParsedKeys.parse({
+        bundles_list: []
+      }, esc(__iced_deferrals.defer({
+        assign_fn: (function() {
+          return function() {
+            return parsed_keys = arguments[0];
+          };
+        })(),
+        lineno: 54
+      })));
+      __iced_deferrals._fulfill();
+    });
+  })(this)((function(_this) {
+    return function() {
+      (function(__iced_k) {
+        __iced_deferrals = new iced.Deferrals(__iced_k, {
+          parent: ___iced_passed_deferral,
+          funcname: "test_error_unknown_keys"
+        });
+        SigChain.replay({
+          sig_blobs: chain,
+          parsed_keys: parsed_keys,
+          uid: "74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19",
+          username: "max32",
+          eldest_kid: "0120224a6cc658cba6a6d2feac1a930b4d907598daa382063ce79150c343b82fca360a"
+        }, __iced_deferrals.defer({
+          assign_fn: (function() {
+            return function() {
+              err = arguments[0];
+              return sigchain = arguments[1];
+            };
+          })(),
+          lineno: 61
+        }));
+        __iced_deferrals._fulfill();
+      })(function() {
+        T.assert(typeof err !== "undefined" && err !== null, "expected error");
         return cb();
       });
     };
@@ -71979,4 +72036,4 @@ exports.test_forge_sig_chain = function(T, cb) {
 };
 
 
-},{"../..":6,"../data/ralph_all_keys.json":415,"../data/ralph_sig_chain.json":416,"child_process":9,"fs":9,"iced-error":193,"iced-runtime":199}]},{},[414]);
+},{"../..":6,"../data/ralph_all_keys.json":415,"../data/ralph_sig_chain.json":416,"../data/simple_chain.json":417,"child_process":9,"fs":9,"iced-error":193,"iced-runtime":199}]},{},[414]);

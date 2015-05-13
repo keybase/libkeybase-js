@@ -8,6 +8,7 @@ fs = require('fs')
 ralph_all_sigs = require '../data/ralph_sig_chain.json'
 ralph_all_keys = require '../data/ralph_all_keys.json'
 simple_chain = require '../data/simple_chain.json'
+bad_ctime_chain = require '../data/bad_ctime_chain.json'
 
 #====================================================
 
@@ -53,6 +54,25 @@ exports.test_error_unknown_keys = (T, cb) ->
   {chain, keys} = simple_chain
   # empty keys here
   await ParsedKeys.parse {bundles_list: []}, esc defer parsed_keys
+  await SigChain.replay {
+    sig_blobs: chain
+    parsed_keys
+    uid: "74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19"
+    username: "max32"
+    eldest_kid: "0120224a6cc658cba6a6d2feac1a930b4d907598daa382063ce79150c343b82fca360a"
+  }, defer err, sigchain
+  T.assert err?, "expected error"
+  cb()
+
+exports.test_error_bad_server_ctime = (T, cb) ->
+  # We need to use the server-provided ctime to unbox a signature (PGP key
+  # expiry is checked at the signature level, although NaCl expiry is checked
+  # as we replay the chain). We always need to check back after unboxing to
+  # make sure the internal ctime matches what the server said. This test
+  # exercises that check.
+  esc = make_esc cb, "test_error_bad_server_ctime "
+  {chain, keys} = bad_ctime_chain
+  await ParsedKeys.parse {bundles_list: (bundle for kid, bundle of keys)}, esc defer parsed_keys
   await SigChain.replay {
     sig_blobs: chain
     parsed_keys
