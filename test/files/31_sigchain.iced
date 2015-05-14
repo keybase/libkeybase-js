@@ -11,6 +11,7 @@ missing_kid_chain = require '../data/missing_kid_chain.json'
 missing_reverse_kid_chain = require '../data/missing_reverse_kid_chain.json'
 mismatched_ctime_chain = require '../data/mismatched_ctime_chain.json'
 mismatched_kid_chain = require '../data/mismatched_kid_chain.json'
+mismatched_fingerprint_chain = require '../data/mismatched_fingerprint_chain.json'
 bad_signature_chain = require '../data/bad_signature_chain.json'
 bad_reverse_signature_chain = require '../data/bad_reverse_signature_chain.json'
 
@@ -96,3 +97,9 @@ exports.test_error_mismatched_kid = (T, cb) ->
   # to check back after unboxing to make sure the internal KID matches the one
   # we actually used. This test exercises that check.
   do_sigchain_test {T, input: mismatched_kid_chain, err_type: "KID_MISMATCH"}, cb
+
+exports.test_error_mismatched_fingerprint = (T, cb) ->
+  # We don't use fingerprints in unboxing, but nonetheless we want to make sure
+  # that if a chain link claims to have been signed by a given fingerprint,
+  # that does in fact correspond to the KID of the PGP key that signed it.
+  do_sigchain_test {T, input: mismatched_fingerprint_chain, err_type: "FINGERPRINT_MISMATCH"}, cb
