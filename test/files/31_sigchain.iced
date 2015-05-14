@@ -52,15 +52,15 @@ exports.test_error_unknown_keys = (T, cb) ->
   # available keys (as opposed to invalid for some other reason, like having
   # been revoked).
   esc = make_esc cb, "test_signing_with_unknown_keys"
-  {chain, keys} = simple_chain
+  {chain, keys, username, uid} = simple_chain
   # empty keys here
   await ParsedKeys.parse {bundles_list: []}, esc defer parsed_keys
   await SigChain.replay {
     sig_blobs: chain
     parsed_keys
-    uid: "74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19"
-    username: "max32"
-    eldest_kid: "0120224a6cc658cba6a6d2feac1a930b4d907598daa382063ce79150c343b82fca360a"
+    uid
+    username
+    eldest_kid: keys[0]
   }, defer err, sigchain
   T.assert err?, "expected error"
   cb()
@@ -68,14 +68,14 @@ exports.test_error_unknown_keys = (T, cb) ->
 exports.test_error_bad_signature = (T, cb) ->
   # Change some bytes from the valid signature, and confirm it gets rejected.
   esc = make_esc cb, "test_error_bad_signature"
-  {chain, keys} = bad_signature_chain
+  {chain, keys, username, uid} = bad_signature_chain
   await ParsedKeys.parse {bundles_list: (bundle for kid, bundle of keys)}, esc defer parsed_keys
   await SigChain.replay {
     sig_blobs: chain
     parsed_keys
-    uid: "74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19"
-    username: "max32"
-    eldest_kid: "0120224a6cc658cba6a6d2feac1a930b4d907598daa382063ce79150c343b82fca360a"
+    uid
+    username
+    eldest_kid: keys[0]
   }, defer err, sig
   T.assert err?, "expected error"
   cb()
@@ -87,14 +87,14 @@ exports.test_error_bad_server_ctime = (T, cb) ->
   # make sure the internal ctime matches what the server said. This test
   # exercises that check.
   esc = make_esc cb, "test_error_bad_server_ctime "
-  {chain, keys} = bad_ctime_chain
+  {chain, keys, username, uid} = bad_ctime_chain
   await ParsedKeys.parse {bundles_list: (bundle for kid, bundle of keys)}, esc defer parsed_keys
   await SigChain.replay {
     sig_blobs: chain
     parsed_keys
-    uid: "74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19"
-    username: "max32"
-    eldest_kid: "0120224a6cc658cba6a6d2feac1a930b4d907598daa382063ce79150c343b82fca360a"
+    uid
+    username
+    eldest_kid: keys[0]
   }, defer err, sigchain
   T.assert err?, "expected error"
   cb()
