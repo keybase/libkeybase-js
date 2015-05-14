@@ -5,32 +5,13 @@ C = require('../..').constants
 execSync = require('child_process').execSync
 fs = require('fs')
 
-ralph_all_sigs = require '../data/ralph_sig_chain.json'
-ralph_all_keys = require '../data/ralph_all_keys.json'
+ralph_chain = require '../data/ralph_chain.json'
 simple_chain = require '../data/simple_chain.json'
 missing_kid_chain = require '../data/missing_kid_chain.json'
 bad_ctime_chain = require '../data/bad_ctime_chain.json'
 bad_signature_chain = require '../data/bad_signature_chain.json'
 
 #====================================================
-
-exports.test_ralph_sig_chain = (T,cb) ->
-  # Ralph is a test user I created by hand on my local server. This test is
-  # mainly to make sure that the generated chains we're using in other tests
-  # bear some relationship to reality.  - Jack
-  esc = make_esc cb, "test_ralph_sig_chain"
-  bundles_list = (blob.bundle for kid, blob of ralph_all_keys)
-  await ParsedKeys.parse {bundles_list}, esc defer parsed_keys
-  await SigChain.replay {
-    sig_blobs: ralph_all_sigs
-    parsed_keys
-    uid: "bf65266d0d8df3ad5d1b367f578e6819"
-    username: "ralph"
-    eldest_kid: "0101c304e8c86c8f4b6773478eed4d05e9ffdddc81c7068c50db1b5bad9a904f5f890a"
-  }, esc defer sigchain
-  links = sigchain.get_links()
-  T.assert links.length == 5, "Expected exactly 5 links, got #{links.length}"
-  cb()
 
 do_sigchain_test = ({T, input, err_type, len, eldest_index}, cb) ->
   esc = make_esc cb, "do_sigchain_test"
@@ -44,7 +25,7 @@ do_sigchain_test = ({T, input, err_type, len, eldest_index}, cb) ->
     parsed_keys
     uid
     username
-    eldest_kid: keys[eldest_index]
+    eldest_kid: parsed_keys.kids_in_order[eldest_index]
   }, defer err, sigchain
   if err?
     if not err_type? or err_type != err.type
@@ -64,6 +45,16 @@ do_sigchain_test = ({T, input, err_type, len, eldest_index}, cb) ->
   if len?
     T.assert links.length == len, "Expected exactly #{len} links, got #{links.length}"
   cb()
+
+exports.test_ralph_sig_chain = (T,cb) ->
+  # Ralph is a test user I created by hand on my local server. I fetched his
+  # sigs and keys from the API, and then massaged them into our input format.
+  # This test is mainly to make sure that the generated chains we're using in
+  # other tests bear some relationship to reality.  - Jack
+
+  # The eldest key for this test is not the first in the list, it's the 2nd
+  # (index 1).
+  do_sigchain_test {T, input: ralph_chain, len: 5, eldest_index: 1}, cb
 
 exports.test_simple_chain = (T, cb) ->
   # Test a simple chain, just one link.

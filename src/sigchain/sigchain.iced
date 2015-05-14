@@ -14,11 +14,13 @@ exports.ParsedKeys = class ParsedKeys
     key_managers = {}
     pgp_to_kid = {}
     kid_to_pgp = {}
+    kids_in_order = []  # for testing
     for bundle in bundles_list
       await kbpgp.ukm.import_armored_public {armored: bundle}, esc defer key_manager
       kid = key_manager.get_ekid()
       kid_str = kid.toString "hex"
       key_managers[kid_str] = key_manager
+      kids_in_order.push(kid_str)
       fingerprint = key_manager.get_pgp_fingerprint()
       if fingerprint?
         # Only PGP keys have a non-null fingerprint.
@@ -26,10 +28,10 @@ exports.ParsedKeys = class ParsedKeys
         key_managers[fingerprint.toString "hex"] = key_manager
         pgp_to_kid[fingerprint_str] = kid_str
         kid_to_pgp[kid_str] = fingerprint_str
-    parsed_keys = new ParsedKeys {key_managers, pgp_to_kid, kid_to_pgp}
+    parsed_keys = new ParsedKeys {key_managers, pgp_to_kid, kid_to_pgp, kids_in_order}
     cb null, parsed_keys
 
-  constructor : ({@key_managers, @pgp_to_kid, @kid_to_pgp}) ->
+  constructor : ({@key_managers, @pgp_to_kid, @kid_to_pgp, @kids_in_order}) ->
 
 
 class ChainLink
