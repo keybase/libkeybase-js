@@ -35,13 +35,13 @@ exports.test_simple_chain = (T, cb) ->
   # Test a simple chain, just one link.
   esc = make_esc cb, "test_simple_chain"
   {chain, keys, username, uid} = simple_chain
-  await ParsedKeys.parse {bundles_list: (bundle for kid, bundle of keys)}, esc defer parsed_keys
+  await ParsedKeys.parse {bundles_list: keys}, esc defer parsed_keys
   await SigChain.replay {
     sig_blobs: chain
     parsed_keys
-    uid: uid
-    username: username
-    eldest_kid: "0120eff3096e9529a299b274689213707c38f6027cf78a37c84d2b97268a16e8f5980a"
+    uid
+    username
+    eldest_kid: keys[0]
   }, esc defer sigchain
   links = sigchain.get_links()
   T.assert links.length == 1, "Expected exactly 1 link, got #{links.length}"
