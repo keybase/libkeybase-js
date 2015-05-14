@@ -1,6 +1,6 @@
 {make_esc} = require 'iced-error'
 fs = require('fs')
-{ParsedKeys, SigChain, key_managers_from_all_keys} = require('../..')
+node_sigchain = require('../..')
 C = require('../..').constants
 execSync = require('child_process').execSync
 fs = require('fs')
@@ -22,8 +22,8 @@ do_sigchain_test = ({T, input, err_type, len, eldest_index}, cb) ->
     # By default, use the first key as the eldest.
     eldest_index = 0
   {chain, keys, username, uid} = input
-  await ParsedKeys.parse {bundles_list: keys}, esc defer parsed_keys
-  await SigChain.replay {
+  await node_sigchain.ParsedKeys.parse {bundles_list: keys}, esc defer parsed_keys
+  await node_sigchain.SigChain.replay {
     sig_blobs: chain
     parsed_keys
     uid
@@ -31,7 +31,7 @@ do_sigchain_test = ({T, input, err_type, len, eldest_index}, cb) ->
     eldest_kid: parsed_keys.kids_in_order[eldest_index]
   }, defer err, sigchain
   if err?
-    if not err_type? or err_type != err.type
+    if not err_type? or err_type != node_sigchain.E.name[err.code]
       # Not an error we expected.
       cb err
       return

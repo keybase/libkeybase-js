@@ -2,6 +2,7 @@
 {make_esc} = require 'iced-error'
 kbpgp = require('kbpgp')
 proofs = require('keybase-proofs')
+ie = require('iced-error')
 
 
 exports.ParsedKeys = class ParsedKeys
@@ -50,13 +51,13 @@ class ChainLink
     # during unbox, using the ctime of the chainlink.
     key_manager = parsed_keys.key_managers[kid]
     if not key_manager?
-      await athrow (new NonexistentKidError "link signed by nonexistent kid #{kid}"), esc defer()
+      await athrow (new E.NonexistentKidError "link signed by nonexistent kid #{kid}"), esc defer()
     await key_manager.make_sig_eng().unbox(
       sig_blob.sig,
       defer(err, payload_buffer),
       {now: ctime_seconds})
     if err?
-      await athrow (new VerifyFailedError err.message), esc defer()
+      await athrow (new E.VerifyFailedError err.message), esc defer()
     # Compute the payload_hash ourselves.
     payload_hash = kbpgp.hash.SHA256(payload_buffer).toString("hex")
     # Parse the payload.
@@ -76,11 +77,11 @@ class ChainLink
     payload_ctime = payload.ctime
     err = null
     if payload_kid? and payload_kid isnt signing_kid
-      err = new KIDMismatchError "signing kid (#{signing_kid}) and payload kid (#{payload_kid}) mismatch"
+      err = new E.KidMismatchError "signing kid (#{signing_kid}) and payload kid (#{payload_kid}) mismatch"
     else if payload_fingerprint? and payload_fingerprint isnt parsed_keys.kid_to_pgp[signing_kid]
-      err = new FingerprintMismatchError "signing kid (#{signing_kid}) and payload fingerprint (#{payload_fingerprint}) mismatch"
+      err = new E.FingerprintMismatchError "signing kid (#{signing_kid}) and payload fingerprint (#{payload_fingerprint}) mismatch"
     else if payload_ctime isnt signing_ctime
-      err = new CtimeMismatchError "payload ctime (#{payload_ctime}) doesn't match signing ctime (#{signing_ctime})"
+      err = new E.CtimeMismatchError "payload ctime (#{payload_ctime}) doesn't match signing ctime (#{signing_ctime})"
     cb err
 
   @_check_reverse_signatures : ({payload, parsed_keys}, cb) ->
@@ -91,11 +92,11 @@ class ChainLink
     kid = payload.body.sibkey.kid
     key_manager = parsed_keys.key_managers[kid]
     if not key_manager?
-      await athrow (new NonexistentKidError "link reverse-signed by nonexistent kid #{kid}"), esc defer()
+      await athrow (new E.NonexistentKidError "link reverse-signed by nonexistent kid #{kid}"), esc defer()
     sibkey_proof = new proofs.Sibkey {}
     await sibkey_proof.reverse_sig_check {json: payload, subkm: key_manager}, defer err
     if err?
-      await athrow (new VerifyFailedError err.message), esc defer()
+      await athrow (new E.VerifyFailedError err.message), esc defer()
     cb null
 
   constructor : ({@kid, @sig_id, @payload, @payload_hash}) ->
@@ -190,28 +191,28 @@ exports.SigChain = class SigChain
   _check_key_is_valid : ({link}, cb) ->
     err = null
     if link.kid not of @_valid_sibkeys
-      err = new InvalidSibkeyError "not a valid sibkey: #{link.kid} valid sibkeys: #{JSON.stringify(@_valid_sibkeys)}"
+      err = new E.InvalidSibkeyError "not a valid sibkey: #{link.kid} valid sibkeys: #{JSON.stringify(@_valid_sibkeys)}"
     else if link.ctime_seconds < @_sibkeys_to_etime_seconds[link.kid]
-      err = new ExpiredSibkeyError "expired sibkey: #{link.kid}"
+      err = new E.ExpiredSibkeyError "expired sibkey: #{link.kid}"
     cb err
 
   _check_link_belongs_here : ({link}, cb) ->
     last_link = @_links[@_links.length-1]  # null if this is the first link
     err = null
     if link.uid isnt @_uid
-      err = new WrongUIDError """link doesn't refer to the right uid
+      err = new E.WrongUIDError """link doesn't refer to the right uid
                                  expected: #{link.uid}
                                       got: #{@_uid}"""
     else if link.username isnt @_username
-      err = new WrongUsernameError """link doesn't refer to the right username
+      err = new E.WrongUsernameError """link doesn't refer to the right username
                                       expected: #{link.username}
                                            got: #{@_username}"""
     else if last_link? and link.seqno isnt last_link.seqno + 1
-      err = new WrongSeqnoError """link sequence number is wrong
+      err = new E.WrongSeqnoError """link sequence number is wrong
                                    expected: #{last_link.seqno + 1}
                                         got: #{link.seqno}"""
     else if last_link? and link.prev isnt last_link.payload_hash
-      err = new WrongPrevError """previous payload hash doesn't match,
+      err = new E.WrongPrevError """previous payload hash doesn't match,
                                   expected: #{last_link.payload_hash}
                                        got: #{link.prev}"""
     cb err
@@ -243,38 +244,16 @@ exports.SigChain = class SigChain
           delete @_valid_sibkeys[revoked_kid]
     cb()
 
-# NOTE: These classes MUST each have a constructor, or isinstance will not
-# work.
-class NonexistentKidError extends Error
-  constructor : () ->
-    @type = "NONEXISTENT_KID"
-class VerifyFailedError extends Error
-  constructor : () ->
-    @type = "VERIFY_FAILED"
-class KIDMismatchError extends Error
-  constructor : () ->
-    @type = "KID_MISMATCH"
-class FingerprintMismatchError extends Error
-  constructor : () ->
-    @type = "FINGERPRINT_MISMATCH"
-class CtimeMismatchError extends Error
-  constructor : () ->
-    @type = "CTIME_MISMATCH"
-class InvalidSibkeyError extends Error
-  constructor : () ->
-    @type = "INVALID_SIBKEY"
-class ExpiredSibkeyError extends Error
-  constructor : () ->
-    @type = "EXPIRED_SIBKEY"
-class WrongUIDError extends Error
-  constructor : () ->
-    @type = "WRONG_UID"
-class WrongUsernameError extends Error
-  constructor : () ->
-    @type = "WRONG_USERNAME"
-class WrongSeqnoError extends Error
-  constructor : () ->
-    @type = "WRONG_SEQNO"
-class WrongPrevError extends Error
-  constructor : () ->
-    @type = "WRONG_PREV"
+exports.E = E = ie.make_errors {
+  "NONEXISTENT_KID": ""
+  "VERIFY_FAILED": ""
+  "KID_MISMATCH": ""
+  "FINGERPRINT_MISMATCH": ""
+  "CTIME_MISMATCH": ""
+  "INVALID_SIBKEY": ""
+  "EXPIRED_SIBKEY": ""
+  "WRONG_UID": ""
+  "WRONG_USERNAME": ""
+  "WRONG_SEQNO": ""
+  "WRONG_PREV": ""
+}
