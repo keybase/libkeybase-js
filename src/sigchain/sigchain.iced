@@ -100,6 +100,11 @@ class ChainLink
       return
     kid = payload.body.sibkey.kid
     key_manager = parsed_keys.key_managers[kid]
+    if not key_manager?
+      await athrow error({
+        type: "NONEXISTENT_KID"
+        msg: "link reverse-signed by nonexistent kid #{kid}"
+      }), esc defer()
     sibkey_proof = new proofs.Sibkey {}
     await sibkey_proof.reverse_sig_check {json: payload, subkm: key_manager}, esc defer()
     cb null

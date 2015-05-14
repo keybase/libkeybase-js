@@ -1,0 +1,20 @@
+
+chain :
+  user : "max32"
+  ctime : "now"
+  expire_in : 10000000
+  links : [
+    {
+      type : "eldest"
+      label : "e"
+      key : gen : "eddsa"
+    },
+    # We will delete this subkey from the result to cause a missing key error.
+    {
+      ctime : "+100"
+      label : "sib1"
+      type : "sibkey"
+      key : gen : "eddsa"
+      signer : "e"
+    },
+  ]

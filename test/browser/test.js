@@ -2318,25 +2318,46 @@ if (typeof module !== 'undefined' && require.main === module) {
       }
       kid = payload.body.sibkey.kid;
       key_manager = parsed_keys.key_managers[kid];
-      sibkey_proof = new proofs.Sibkey({});
       (function(_this) {
         return (function(__iced_k) {
-          __iced_deferrals = new iced.Deferrals(__iced_k, {
-            parent: ___iced_passed_deferral,
-            filename: "/home/jacko/libkeybase-js/src/sigchain/sigchain.iced",
-            funcname: "ChainLink._check_reverse_signatures"
-          });
-          sibkey_proof.reverse_sig_check({
-            json: payload,
-            subkm: key_manager
-          }, esc(__iced_deferrals.defer({
-            lineno: 103
-          })));
-          __iced_deferrals._fulfill();
+          if (key_manager == null) {
+            (function(__iced_k) {
+              __iced_deferrals = new iced.Deferrals(__iced_k, {
+                parent: ___iced_passed_deferral,
+                filename: "/home/jacko/libkeybase-js/src/sigchain/sigchain.iced",
+                funcname: "ChainLink._check_reverse_signatures"
+              });
+              athrow(error({
+                type: "NONEXISTENT_KID",
+                msg: "link reverse-signed by nonexistent kid " + kid
+              }), esc(__iced_deferrals.defer({
+                lineno: 106
+              })));
+              __iced_deferrals._fulfill();
+            })(__iced_k);
+          } else {
+            return __iced_k();
+          }
         });
       })(this)((function(_this) {
         return function() {
-          return cb(null);
+          sibkey_proof = new proofs.Sibkey({});
+          (function(__iced_k) {
+            __iced_deferrals = new iced.Deferrals(__iced_k, {
+              parent: ___iced_passed_deferral,
+              filename: "/home/jacko/libkeybase-js/src/sigchain/sigchain.iced",
+              funcname: "ChainLink._check_reverse_signatures"
+            });
+            sibkey_proof.reverse_sig_check({
+              json: payload,
+              subkm: key_manager
+            }, esc(__iced_deferrals.defer({
+              lineno: 108
+            })));
+            __iced_deferrals._fulfill();
+          })(function() {
+            return cb(null);
+          });
         };
       })(this));
     };
@@ -2394,7 +2415,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                 type: "MISSING_ELDEST_KID",
                 msg: "eldest_kid must not be null"
               }), esc(__iced_deferrals.defer({
-                lineno: 143
+                lineno: 148
               })));
               __iced_deferrals._fulfill();
             })(__iced_k);
@@ -2444,7 +2465,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                     sig_blob: sig_blob,
                     parsed_keys: parsed_keys
                   }, esc(__iced_deferrals.defer({
-                    lineno: 146
+                    lineno: 151
                   })));
                   __iced_deferrals._fulfill();
                 })(_next);
@@ -2509,7 +2530,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                 return link = arguments[0];
               };
             })(),
-            lineno: 171
+            lineno: 176
           })));
           __iced_deferrals._fulfill();
         });
@@ -2528,7 +2549,7 @@ if (typeof module !== 'undefined' && require.main === module) {
             _this._check_key_is_valid({
               link: link
             }, esc(__iced_deferrals.defer({
-              lineno: 182
+              lineno: 187
             })));
             __iced_deferrals._fulfill();
           })(function() {
@@ -2541,7 +2562,7 @@ if (typeof module !== 'undefined' && require.main === module) {
               _this._check_link_belongs_here({
                 link: link
               }, esc(__iced_deferrals.defer({
-                lineno: 185
+                lineno: 190
               })));
               __iced_deferrals._fulfill();
             })(function() {
@@ -2556,7 +2577,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                 _this._delegate_keys({
                   link: link
                 }, esc(__iced_deferrals.defer({
-                  lineno: 192
+                  lineno: 197
                 })));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -2569,7 +2590,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                   _this._revoke_keys_and_sigs({
                     link: link
                   }, esc(__iced_deferrals.defer({
-                    lineno: 194
+                    lineno: 199
                   })));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -71402,13 +71423,15 @@ window.onload = function() {
 };
 
 
-},{"../files/30_merkle_leaf.iced":420,"../files/31_sigchain.iced":421,"iced-runtime":199,"iced-test":201}],415:[function(require,module,exports){
+},{"../files/30_merkle_leaf.iced":421,"../files/31_sigchain.iced":422,"iced-runtime":199,"iced-test":201}],415:[function(require,module,exports){
 module.exports={"chain":[{"seqno":1,"prev":null,"sig":"g6Rib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEgwe8rtTroItrTBUC1SuBrV4SM0RqptHQtSBLfA94h9DYKp3BheWxvYWTFAUx7ImJvZHkiOnsia2V5Ijp7Imhvc3QiOiJrZXliYXNlLmlvIiwia2lkIjoiMDEyMGMxZWYyYmI1M2FlODIyZGFkMzA1NDBiNTRhZTA2YjU3ODQ4Y2QxMWFhOWI0NzQyZDQ4MTJkZjAzZGUyMWY0MzYwYSIsInVpZCI6Ijc0YzM4Y2Y3Y2ViOTQ3ZjU2MzIwNDVkOGNhNWQ0OGQzMDE3ZWFiODU5MGJiOTZlYWQ1OGQzMTdiMGViNzA5ZGYxOSIsInVzZXJuYW1lIjoibWF4MzIifSwidHlwZSI6ImVsZGVzdCIsInZlcnNpb24iOjF9LCJjdGltZSI6MTQzMTYxNTQ2OSwiZXhwaXJlX2luIjoxMDAwMDAwMCwicHJldiI6bnVsbCwic2VxX3R5cGUiOjEsInNlcW5vIjoxLCJ0YWciOiJzaWduYXR1cmUifaNzaWfEQPqzUEJcHR0vMQosiqWlyP3KsZiNA/gLX+zl8d4pobIMbR4o2IIhNtNSiXniEu+qlHmegw4TBvfnLUFcTkXr9gGoc2lnX3R5cGUgo3RhZ80CAqd2ZXJzaW9uAQ==","payload_hash":"cd48a2d5cd292c2f051b1b35c0dd9bf01933f7955e8a1ec5c9073ebe6d1b96cc","sig_id":"e83a58adb7d0530bdc9b814d21ea4adcb2966b84e914374f6beb24b8910268d0","payload_json":"{\"body\":{\"key\":{\"host\":\"keybase.io\",\"kid\":\"0120c1ef2bb53ae822dad30540b54ae06b57848cd11aa9b4742d4812df03de21f4360a\",\"uid\":\"74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19\",\"username\":\"max32\"},\"type\":\"eldest\",\"version\":1},\"ctime\":1431615469,\"expire_in\":10000000,\"prev\":null,\"seq_type\":1,\"seqno\":1,\"tag\":\"signature\"}","kid":"0120c1ef2bb53ae822dad30540b54ae06b57848cd11aa9b4742d4812df03de21f4360a","ctime":1431615470}],"keys":["0120c1ef2bb53ae822dad30540b54ae06b57848cd11aa9b4742d4812df03de21f4360a"],"uid":"74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19","username":"max32"}
 
 },{}],416:[function(require,module,exports){
 module.exports={"chain":[{"seqno":1,"prev":null,"sig":"g6d2ZXJzaW9uAaN0YWfNAgKkYm9keYapaGFzaF90eXBlCqhzaWdfdHlwZSCjc2lnxEBnYXJiYWdlLU4Nlk931EjgwBkCF7XIARGYR0HU8nh8bc9HaLDEKAbrnpGsXgtos2DM08OisJEMhgyQ9m6HslUEqGRldGFjaGVkw6NrZXnEIwEgIkpsxljLpqbS/qwakwtNkHWY2qOCBjznkVDDQ7gvyjYKp3BheWxvYWTFAUx7ImJvZHkiOnsia2V5Ijp7Imhvc3QiOiJrZXliYXNlLmlvIiwia2lkIjoiMDEyMDIyNGE2Y2M2NThjYmE2YTZkMmZlYWMxYTkzMGI0ZDkwNzU5OGRhYTM4MjA2M2NlNzkxNTBjMzQzYjgyZmNhMzYwYSIsInVpZCI6Ijc0YzM4Y2Y3Y2ViOTQ3ZjU2MzIwNDVkOGNhNWQ0OGQzMDE3ZWFiODU5MGJiOTZlYWQ1OGQzMTdiMGViNzA5ZGYxOSIsInVzZXJuYW1lIjoibWF4MzIifSwidHlwZSI6ImVsZGVzdCIsInZlcnNpb24iOjF9LCJjdGltZSI6MTQzMTUzNzI1NCwiZXhwaXJlX2luIjoxMDAwMDAwMCwicHJldiI6bnVsbCwic2VxX3R5cGUiOjEsInNlcW5vIjoxLCJ0YWciOiJzaWduYXR1cmUifQ==","payload_hash":"2539c316d4e9208d8a920a602a6a3796fe43ded6a79c54dcb0af5358ca292bb3","payload_hash":"cd48a2d5cd292c2f051b1b35c0dd9bf01933f7955e8a1ec5c9073ebe6d1b96cc","sig_id":"e83a58adb7d0530bdc9b814d21ea4adcb2966b84e914374f6beb24b8910268d0","payload_json":"{\"body\":{\"key\":{\"host\":\"keybase.io\",\"kid\":\"0120c1ef2bb53ae822dad30540b54ae06b57848cd11aa9b4742d4812df03de21f4360a\",\"uid\":\"74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19\",\"username\":\"max32\"},\"type\":\"eldest\",\"version\":1},\"ctime\":1431615469,\"expire_in\":10000000,\"prev\":null,\"seq_type\":1,\"seqno\":1,\"tag\":\"signature\"}","kid":"0120c1ef2bb53ae822dad30540b54ae06b57848cd11aa9b4742d4812df03de21f4360a","ctime":1431615469}],"keys":["0120c1ef2bb53ae822dad30540b54ae06b57848cd11aa9b4742d4812df03de21f4360a"],"uid":"74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19","username":"max32"}
 
 },{}],417:[function(require,module,exports){
+module.exports={"chain":[{"seqno":1,"prev":null,"sig":"g6Rib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEgkM2tequmPqJt3zNaFg9ENe5J2Vj7woKXd6QIug9ByvQKp3BheWxvYWTFAUx7ImJvZHkiOnsia2V5Ijp7Imhvc3QiOiJrZXliYXNlLmlvIiwia2lkIjoiMDEyMDkwY2RhZDdhYWJhNjNlYTI2ZGRmMzM1YTE2MGY0NDM1ZWU0OWQ5NThmYmMyODI5Nzc3YTQwOGJhMGY0MWNhZjQwYSIsInVpZCI6Ijc0YzM4Y2Y3Y2ViOTQ3ZjU2MzIwNDVkOGNhNWQ0OGQzMDE3ZWFiODU5MGJiOTZlYWQ1OGQzMTdiMGViNzA5ZGYxOSIsInVzZXJuYW1lIjoibWF4MzIifSwidHlwZSI6ImVsZGVzdCIsInZlcnNpb24iOjF9LCJjdGltZSI6MTQzMTYyNTgzMywiZXhwaXJlX2luIjoxMDAwMDAwMCwicHJldiI6bnVsbCwic2VxX3R5cGUiOjEsInNlcW5vIjoxLCJ0YWciOiJzaWduYXR1cmUifaNzaWfEQDoRQn1VAeVk/Dl3fpGSQCdIzgA0KijZJZ7ZRe2x1b4l+rfzwzIBucIcBWO0+3LvxzrA67s+p838I9vAZfpBWQmoc2lnX3R5cGUgo3RhZ80CAqd2ZXJzaW9uAQ==","payload_hash":"56c5a4ceec391668ef031ca207601e06708804f0835f9a5e2f964dd7a065042d","sig_id":"76da2f548d4ed0153fe7e17cfe321d29f828fac997968989dc63a5aae0812b93","payload_json":"{\"body\":{\"key\":{\"host\":\"keybase.io\",\"kid\":\"012090cdad7aaba63ea26ddf335a160f4435ee49d958fbc2829777a408ba0f41caf40a\",\"uid\":\"74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19\",\"username\":\"max32\"},\"type\":\"eldest\",\"version\":1},\"ctime\":1431625833,\"expire_in\":10000000,\"prev\":null,\"seq_type\":1,\"seqno\":1,\"tag\":\"signature\"}","kid":"012090cdad7aaba63ea26ddf335a160f4435ee49d958fbc2829777a408ba0f41caf40a","ctime":1431625833},{"seqno":2,"prev":"56c5a4ceec391668ef031ca207601e06708804f0835f9a5e2f964dd7a065042d","sig":"g6Rib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEgkM2tequmPqJt3zNaFg9ENe5J2Vj7woKXd6QIug9ByvQKp3BheWxvYWTFBYF7ImJvZHkiOnsia2V5Ijp7Imhvc3QiOiJrZXliYXNlLmlvIiwia2lkIjoiMDEyMDkwY2RhZDdhYWJhNjNlYTI2ZGRmMzM1YTE2MGY0NDM1ZWU0OWQ5NThmYmMyODI5Nzc3YTQwOGJhMGY0MWNhZjQwYSIsInVpZCI6Ijc0YzM4Y2Y3Y2ViOTQ3ZjU2MzIwNDVkOGNhNWQ0OGQzMDE3ZWFiODU5MGJiOTZlYWQ1OGQzMTdiMGViNzA5ZGYxOSIsInVzZXJuYW1lIjoibWF4MzIifSwic2lia2V5Ijp7ImtpZCI6IjAxMjBmMGEwNjllMDg1MDkwZGFiNGZlNmRmYjg3Njg3N2Q1NGNkNjdjNzc2Y2JjZjAwNDQxZWQ1ODU4Mzk3MjAyNmM3MGEiLCJyZXZlcnNlX3NpZyI6Imc2UmliMlI1aHFoa1pYUmhZMmhsWk1PcGFHRnphRjkwZVhCbENxTnJaWG5FSXdFZzhLQnA0SVVKRGF0UDV0KzRkb2Q5Vk0xbngzYkx6d0JFSHRXRmc1Y2dKc2NLcDNCaGVXeHZZV1RGQWZkN0ltSnZaSGtpT25zaWEyVjVJanA3SW1odmMzUWlPaUpyWlhsaVlYTmxMbWx2SWl3aWEybGtJam9pTURFeU1Ea3dZMlJoWkRkaFlXSmhOak5sWVRJMlpHUm1Nek0xWVRFMk1HWTBORE0xWldVME9XUTVOVGhtWW1NeU9ESTVOemMzWVRRd09HSmhNR1kwTVdOaFpqUXdZU0lzSW5WcFpDSTZJamMwWXpNNFkyWTNZMlZpT1RRM1pqVTJNekl3TkRWa09HTmhOV1EwT0dRek1ERTNaV0ZpT0RVNU1HSmlPVFpsWVdRMU9HUXpNVGRpTUdWaU56QTVaR1l4T1NJc0luVnpaWEp1WVcxbElqb2liV0Y0TXpJaWZTd2ljMmxpYTJWNUlqcDdJbXRwWkNJNklqQXhNakJtTUdFd05qbGxNRGcxTURrd1pHRmlOR1psTm1SbVlqZzNOamczTjJRMU5HTmtOamRqTnpjMlkySmpaakF3TkRReFpXUTFPRFU0TXprM01qQXlObU0zTUdFaUxDSnlaWFpsY25ObFgzTnBaeUk2Ym5Wc2JIMHNJblI1Y0dVaU9pSnphV0pyWlhraUxDSjJaWEp6YVc5dUlqb3hmU3dpWTNScGJXVWlPakUwTXpFMk1qVTVNek1zSW1WNGNHbHlaVjlwYmlJNk1UQXdNREF3TURBc0luQnlaWFlpT2lJMU5tTTFZVFJqWldWak16a3hOalk0WldZd016RmpZVEl3TnpZd01XVXdOamN3T0Rnd05HWXdPRE0xWmpsaE5XVXlaamsyTkdSa04yRXdOalV3TkRKa0lpd2ljMlZ4WDNSNWNHVWlPakVzSW5ObGNXNXZJam95TENKMFlXY2lPaUp6YVdkdVlYUjFjbVVpZmFOemFXZkVRTTNSTDJ0ZXQ2M0d5Z0V4aGRHZlBWOUN6MDRBaTNlM3h0a0hqak1DaWp2N3M5bU1Md1h4MkRCZFU2NlJLUzFLQ3Boa2ZZQWhHam5CbFp4MlF3S2hiQWVvYzJsblgzUjVjR1VnbzNSaFo4MENBcWQyWlhKemFXOXVBUT09In0sInR5cGUiOiJzaWJrZXkiLCJ2ZXJzaW9uIjoxfSwiY3RpbWUiOjE0MzE2MjU5MzMsImV4cGlyZV9pbiI6MTAwMDAwMDAsInByZXYiOiI1NmM1YTRjZWVjMzkxNjY4ZWYwMzFjYTIwNzYwMWUwNjcwODgwNGYwODM1ZjlhNWUyZjk2NGRkN2EwNjUwNDJkIiwic2VxX3R5cGUiOjEsInNlcW5vIjoyLCJ0YWciOiJzaWduYXR1cmUifaNzaWfEQATTiU59oxeoYPKCH4UzQfVLD1jgL1/Ke/79Sc9TXVnqaXgKN8wyj72zG6r1TUJZPMcf/IF5+rm2STO3udlHrgioc2lnX3R5cGUgo3RhZ80CAqd2ZXJzaW9uAQ==","payload_hash":"bf1a827290cb2228a6bdee172c54a0eb8a75aba5d27e7dc6819ffc0975bf7af0","sig_id":"0eff54fc903a3f72fbf65722f3358d61efc0067fe2019f32694156fe16aef2c5","payload_json":"{\"body\":{\"key\":{\"host\":\"keybase.io\",\"kid\":\"012090cdad7aaba63ea26ddf335a160f4435ee49d958fbc2829777a408ba0f41caf40a\",\"uid\":\"74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19\",\"username\":\"max32\"},\"sibkey\":{\"kid\":\"0120f0a069e085090dab4fe6dfb876877d54cd67c776cbcf00441ed58583972026c70a\",\"reverse_sig\":\"g6Rib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEg8KBp4IUJDatP5t+4dod9VM1nx3bLzwBEHtWFg5cgJscKp3BheWxvYWTFAfd7ImJvZHkiOnsia2V5Ijp7Imhvc3QiOiJrZXliYXNlLmlvIiwia2lkIjoiMDEyMDkwY2RhZDdhYWJhNjNlYTI2ZGRmMzM1YTE2MGY0NDM1ZWU0OWQ5NThmYmMyODI5Nzc3YTQwOGJhMGY0MWNhZjQwYSIsInVpZCI6Ijc0YzM4Y2Y3Y2ViOTQ3ZjU2MzIwNDVkOGNhNWQ0OGQzMDE3ZWFiODU5MGJiOTZlYWQ1OGQzMTdiMGViNzA5ZGYxOSIsInVzZXJuYW1lIjoibWF4MzIifSwic2lia2V5Ijp7ImtpZCI6IjAxMjBmMGEwNjllMDg1MDkwZGFiNGZlNmRmYjg3Njg3N2Q1NGNkNjdjNzc2Y2JjZjAwNDQxZWQ1ODU4Mzk3MjAyNmM3MGEiLCJyZXZlcnNlX3NpZyI6bnVsbH0sInR5cGUiOiJzaWJrZXkiLCJ2ZXJzaW9uIjoxfSwiY3RpbWUiOjE0MzE2MjU5MzMsImV4cGlyZV9pbiI6MTAwMDAwMDAsInByZXYiOiI1NmM1YTRjZWVjMzkxNjY4ZWYwMzFjYTIwNzYwMWUwNjcwODgwNGYwODM1ZjlhNWUyZjk2NGRkN2EwNjUwNDJkIiwic2VxX3R5cGUiOjEsInNlcW5vIjoyLCJ0YWciOiJzaWduYXR1cmUifaNzaWfEQM3RL2tet63GygExhdGfPV9Cz04Ai3e3xtkHjjMCijv7s9mMLwXx2DBdU66RKS1KCphkfYAhGjnBlZx2QwKhbAeoc2lnX3R5cGUgo3RhZ80CAqd2ZXJzaW9uAQ==\"},\"type\":\"sibkey\",\"version\":1},\"ctime\":1431625933,\"expire_in\":10000000,\"prev\":\"56c5a4ceec391668ef031ca207601e06708804f0835f9a5e2f964dd7a065042d\",\"seq_type\":1,\"seqno\":2,\"tag\":\"signature\"}","kid":"012090cdad7aaba63ea26ddf335a160f4435ee49d958fbc2829777a408ba0f41caf40a","ctime":1431625933}],"keys":["012090cdad7aaba63ea26ddf335a160f4435ee49d958fbc2829777a408ba0f41caf40a","0120f0a069e085090dab4fe6dfb876877d54cd67c776cbcf00441ed58583972026c70a"],"uid":"74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19","username":"max32"}
+},{}],418:[function(require,module,exports){
 module.exports={
     "0120afac9383132b317336866b4ce48836906cad88de18a92bddf29ffb949db8bc420a": {
         "kid": "0120afac9383132b317336866b4ce48836906cad88de18a92bddf29ffb949db8bc420a",
@@ -71514,7 +71537,7 @@ module.exports={
     }
 }
 
-},{}],418:[function(require,module,exports){
+},{}],419:[function(require,module,exports){
 module.exports=[
     {
         "seqno": 1,
@@ -71728,9 +71751,9 @@ module.exports=[
     }
 ]
 
-},{}],419:[function(require,module,exports){
-module.exports={"chain":[{"seqno":1,"prev":null,"sig":"g6Rib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEgwe8rtTroItrTBUC1SuBrV4SM0RqptHQtSBLfA94h9DYKp3BheWxvYWTFAUx7ImJvZHkiOnsia2V5Ijp7Imhvc3QiOiJrZXliYXNlLmlvIiwia2lkIjoiMDEyMGMxZWYyYmI1M2FlODIyZGFkMzA1NDBiNTRhZTA2YjU3ODQ4Y2QxMWFhOWI0NzQyZDQ4MTJkZjAzZGUyMWY0MzYwYSIsInVpZCI6Ijc0YzM4Y2Y3Y2ViOTQ3ZjU2MzIwNDVkOGNhNWQ0OGQzMDE3ZWFiODU5MGJiOTZlYWQ1OGQzMTdiMGViNzA5ZGYxOSIsInVzZXJuYW1lIjoibWF4MzIifSwidHlwZSI6ImVsZGVzdCIsInZlcnNpb24iOjF9LCJjdGltZSI6MTQzMTYxNTQ2OSwiZXhwaXJlX2luIjoxMDAwMDAwMCwicHJldiI6bnVsbCwic2VxX3R5cGUiOjEsInNlcW5vIjoxLCJ0YWciOiJzaWduYXR1cmUifaNzaWfEQPqzUEJcHR0vMQosiqWlyP3KsZiNA/gLX+zl8d4pobIMbR4o2IIhNtNSiXniEu+qlHmegw4TBvfnLUFcTkXr9gGoc2lnX3R5cGUgo3RhZ80CAqd2ZXJzaW9uAQ==","payload_hash":"cd48a2d5cd292c2f051b1b35c0dd9bf01933f7955e8a1ec5c9073ebe6d1b96cc","sig_id":"e83a58adb7d0530bdc9b814d21ea4adcb2966b84e914374f6beb24b8910268d0","payload_json":"{\"body\":{\"key\":{\"host\":\"keybase.io\",\"kid\":\"0120c1ef2bb53ae822dad30540b54ae06b57848cd11aa9b4742d4812df03de21f4360a\",\"uid\":\"74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19\",\"username\":\"max32\"},\"type\":\"eldest\",\"version\":1},\"ctime\":1431615469,\"expire_in\":10000000,\"prev\":null,\"seq_type\":1,\"seqno\":1,\"tag\":\"signature\"}","kid":"0120c1ef2bb53ae822dad30540b54ae06b57848cd11aa9b4742d4812df03de21f4360a","ctime":1431615469}],"keys":["0120c1ef2bb53ae822dad30540b54ae06b57848cd11aa9b4742d4812df03de21f4360a"],"uid":"74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19","username":"max32"}
 },{}],420:[function(require,module,exports){
+module.exports={"chain":[{"seqno":1,"prev":null,"sig":"g6Rib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEgwe8rtTroItrTBUC1SuBrV4SM0RqptHQtSBLfA94h9DYKp3BheWxvYWTFAUx7ImJvZHkiOnsia2V5Ijp7Imhvc3QiOiJrZXliYXNlLmlvIiwia2lkIjoiMDEyMGMxZWYyYmI1M2FlODIyZGFkMzA1NDBiNTRhZTA2YjU3ODQ4Y2QxMWFhOWI0NzQyZDQ4MTJkZjAzZGUyMWY0MzYwYSIsInVpZCI6Ijc0YzM4Y2Y3Y2ViOTQ3ZjU2MzIwNDVkOGNhNWQ0OGQzMDE3ZWFiODU5MGJiOTZlYWQ1OGQzMTdiMGViNzA5ZGYxOSIsInVzZXJuYW1lIjoibWF4MzIifSwidHlwZSI6ImVsZGVzdCIsInZlcnNpb24iOjF9LCJjdGltZSI6MTQzMTYxNTQ2OSwiZXhwaXJlX2luIjoxMDAwMDAwMCwicHJldiI6bnVsbCwic2VxX3R5cGUiOjEsInNlcW5vIjoxLCJ0YWciOiJzaWduYXR1cmUifaNzaWfEQPqzUEJcHR0vMQosiqWlyP3KsZiNA/gLX+zl8d4pobIMbR4o2IIhNtNSiXniEu+qlHmegw4TBvfnLUFcTkXr9gGoc2lnX3R5cGUgo3RhZ80CAqd2ZXJzaW9uAQ==","payload_hash":"cd48a2d5cd292c2f051b1b35c0dd9bf01933f7955e8a1ec5c9073ebe6d1b96cc","sig_id":"e83a58adb7d0530bdc9b814d21ea4adcb2966b84e914374f6beb24b8910268d0","payload_json":"{\"body\":{\"key\":{\"host\":\"keybase.io\",\"kid\":\"0120c1ef2bb53ae822dad30540b54ae06b57848cd11aa9b4742d4812df03de21f4360a\",\"uid\":\"74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19\",\"username\":\"max32\"},\"type\":\"eldest\",\"version\":1},\"ctime\":1431615469,\"expire_in\":10000000,\"prev\":null,\"seq_type\":1,\"seqno\":1,\"tag\":\"signature\"}","kid":"0120c1ef2bb53ae822dad30540b54ae06b57848cd11aa9b4742d4812df03de21f4360a","ctime":1431615469}],"keys":["0120c1ef2bb53ae822dad30540b54ae06b57848cd11aa9b4742d4812df03de21f4360a"],"uid":"74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19","username":"max32"}
+},{}],421:[function(require,module,exports){
 var C, Leaf, Triple, _ref;
 
 _ref = require('../..').merkle.leaf, Leaf = _ref.Leaf, Triple = _ref.Triple;
@@ -71899,8 +71922,8 @@ exports.test_seqno_assertion = function(T, cb) {
 };
 
 
-},{"../..":6}],421:[function(require,module,exports){
-var C, ParsedKeys, SigChain, bad_ctime_chain, bad_signature_chain, execSync, fs, iced, key_managers_from_all_keys, make_esc, ralph_all_keys, ralph_all_sigs, simple_chain, __iced_k, __iced_k_noop, _ref;
+},{"../..":6}],422:[function(require,module,exports){
+var C, ParsedKeys, SigChain, bad_ctime_chain, bad_signature_chain, do_sigchain_test, execSync, fs, iced, key_managers_from_all_keys, make_esc, missing_kid_chain, ralph_all_keys, ralph_all_sigs, simple_chain, __iced_k, __iced_k_noop, _ref;
 
 iced = require('iced-runtime');
 __iced_k = __iced_k_noop = function() {};
@@ -71922,6 +71945,8 @@ ralph_all_sigs = require('../data/ralph_sig_chain.json');
 ralph_all_keys = require('../data/ralph_all_keys.json');
 
 simple_chain = require('../data/simple_chain.json');
+
+missing_kid_chain = require('../data/missing_kid_chain.json');
 
 bad_ctime_chain = require('../data/bad_ctime_chain.json');
 
@@ -71955,7 +71980,7 @@ exports.test_ralph_sig_chain = function(T, cb) {
             return parsed_keys = arguments[0];
           };
         })(),
-        lineno: 21
+        lineno: 22
       })));
       __iced_deferrals._fulfill();
     });
@@ -71978,7 +72003,7 @@ exports.test_ralph_sig_chain = function(T, cb) {
               return sigchain = arguments[0];
             };
           })(),
-          lineno: 28
+          lineno: 29
         })));
         __iced_deferrals._fulfill();
       })(function() {
@@ -71990,17 +72015,20 @@ exports.test_ralph_sig_chain = function(T, cb) {
   })(this));
 };
 
-exports.test_simple_chain = function(T, cb) {
-  var chain, esc, keys, links, parsed_keys, sigchain, uid, username, ___iced_passed_deferral, __iced_deferrals, __iced_k;
+do_sigchain_test = function(_arg, cb) {
+  var T, chain, eldest_index, err, err_type, esc, input, keys, len, links, parsed_keys, sigchain, uid, username, ___iced_passed_deferral, __iced_deferrals, __iced_k;
   __iced_k = __iced_k_noop;
   ___iced_passed_deferral = iced.findDeferral(arguments);
-  esc = make_esc(cb, "test_simple_chain");
-  chain = simple_chain.chain, keys = simple_chain.keys, username = simple_chain.username, uid = simple_chain.uid;
+  T = _arg.T, input = _arg.input, err_type = _arg.err_type, len = _arg.len, eldest_index = _arg.eldest_index;
+  esc = make_esc(cb, "do_sigchain_test");
+  if (eldest_index == null) {
+    eldest_index = 0;
+  }
+  chain = input.chain, keys = input.keys, username = input.username, uid = input.uid;
   (function(_this) {
     return (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
-        parent: ___iced_passed_deferral,
-        funcname: "test_simple_chain"
+        parent: ___iced_passed_deferral
       });
       ParsedKeys.parse({
         bundles_list: keys
@@ -72010,7 +72038,7 @@ exports.test_simple_chain = function(T, cb) {
             return parsed_keys = arguments[0];
           };
         })(),
-        lineno: 37
+        lineno: 40
       })));
       __iced_deferrals._fulfill();
     });
@@ -72018,70 +72046,14 @@ exports.test_simple_chain = function(T, cb) {
     return function() {
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
-          parent: ___iced_passed_deferral,
-          funcname: "test_simple_chain"
+          parent: ___iced_passed_deferral
         });
         SigChain.replay({
           sig_blobs: chain,
           parsed_keys: parsed_keys,
           uid: uid,
           username: username,
-          eldest_kid: keys[0]
-        }, esc(__iced_deferrals.defer({
-          assign_fn: (function() {
-            return function() {
-              return sigchain = arguments[0];
-            };
-          })(),
-          lineno: 44
-        })));
-        __iced_deferrals._fulfill();
-      })(function() {
-        links = sigchain.get_links();
-        T.assert(links.length === 1, "Expected exactly 1 link, got " + links.length);
-        return cb();
-      });
-    };
-  })(this));
-};
-
-exports.test_error_unknown_keys = function(T, cb) {
-  var chain, err, esc, keys, parsed_keys, sigchain, uid, username, ___iced_passed_deferral, __iced_deferrals, __iced_k;
-  __iced_k = __iced_k_noop;
-  ___iced_passed_deferral = iced.findDeferral(arguments);
-  esc = make_esc(cb, "test_signing_with_unknown_keys");
-  chain = simple_chain.chain, keys = simple_chain.keys, username = simple_chain.username, uid = simple_chain.uid;
-  (function(_this) {
-    return (function(__iced_k) {
-      __iced_deferrals = new iced.Deferrals(__iced_k, {
-        parent: ___iced_passed_deferral,
-        funcname: "test_error_unknown_keys"
-      });
-      ParsedKeys.parse({
-        bundles_list: []
-      }, esc(__iced_deferrals.defer({
-        assign_fn: (function() {
-          return function() {
-            return parsed_keys = arguments[0];
-          };
-        })(),
-        lineno: 56
-      })));
-      __iced_deferrals._fulfill();
-    });
-  })(this)((function(_this) {
-    return function() {
-      (function(__iced_k) {
-        __iced_deferrals = new iced.Deferrals(__iced_k, {
-          parent: ___iced_passed_deferral,
-          funcname: "test_error_unknown_keys"
-        });
-        SigChain.replay({
-          sig_blobs: chain,
-          parsed_keys: parsed_keys,
-          uid: uid,
-          username: username,
-          eldest_kid: keys[0]
+          eldest_kid: keys[eldest_index]
         }, __iced_deferrals.defer({
           assign_fn: (function() {
             return function() {
@@ -72089,15 +72061,43 @@ exports.test_error_unknown_keys = function(T, cb) {
               return sigchain = arguments[1];
             };
           })(),
-          lineno: 63
+          lineno: 47
         }));
         __iced_deferrals._fulfill();
       })(function() {
-        T.assert(typeof err !== "undefined" && err !== null, "expected error");
+        if (typeof err !== "undefined" && err !== null) {
+          if ((err_type == null) || err_type !== err.type) {
+            cb(err);
+            return;
+          } else {
+            cb(null);
+            return;
+          }
+        }
+        links = sigchain.get_links();
+        if (len != null) {
+          T.assert(links.length === len, "Expected exactly " + len + " links, got " + links.length);
+        }
         return cb();
       });
     };
   })(this));
+};
+
+exports.test_simple_chain = function(T, cb) {
+  return do_sigchain_test({
+    T: T,
+    input: simple_chain,
+    len: 1
+  }, cb);
+};
+
+exports.test_error_unknown_keys = function(T, cb) {
+  return do_sigchain_test({
+    T: T,
+    input: missing_kid_chain,
+    err_type: "NONEXISTENT_KID"
+  }, cb);
 };
 
 exports.test_error_bad_signature = function(T, cb) {
@@ -72128,7 +72128,7 @@ exports.test_error_bad_signature = function(T, cb) {
             return parsed_keys = arguments[0];
           };
         })(),
-        lineno: 71
+        lineno: 77
       })));
       __iced_deferrals._fulfill();
     });
@@ -72152,7 +72152,7 @@ exports.test_error_bad_signature = function(T, cb) {
               return sig = arguments[1];
             };
           })(),
-          lineno: 78
+          lineno: 84
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -72191,7 +72191,7 @@ exports.test_error_bad_server_ctime = function(T, cb) {
             return parsed_keys = arguments[0];
           };
         })(),
-        lineno: 90
+        lineno: 96
       })));
       __iced_deferrals._fulfill();
     });
@@ -72215,7 +72215,7 @@ exports.test_error_bad_server_ctime = function(T, cb) {
               return sigchain = arguments[1];
             };
           })(),
-          lineno: 97
+          lineno: 103
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -72227,4 +72227,4 @@ exports.test_error_bad_server_ctime = function(T, cb) {
 };
 
 
-},{"../..":6,"../data/bad_ctime_chain.json":415,"../data/bad_signature_chain.json":416,"../data/ralph_all_keys.json":417,"../data/ralph_sig_chain.json":418,"../data/simple_chain.json":419,"child_process":9,"fs":9,"iced-error":193,"iced-runtime":199}]},{},[414]);
+},{"../..":6,"../data/bad_ctime_chain.json":415,"../data/bad_signature_chain.json":416,"../data/missing_kid_chain.json":417,"../data/ralph_all_keys.json":418,"../data/ralph_sig_chain.json":419,"../data/simple_chain.json":420,"child_process":9,"fs":9,"iced-error":193,"iced-runtime":199}]},{},[414]);

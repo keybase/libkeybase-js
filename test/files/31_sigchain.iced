@@ -8,6 +8,7 @@ fs = require('fs')
 ralph_all_sigs = require '../data/ralph_sig_chain.json'
 ralph_all_keys = require '../data/ralph_all_keys.json'
 simple_chain = require '../data/simple_chain.json'
+missing_kid_chain = require '../data/missing_kid_chain.json'
 bad_ctime_chain = require '../data/bad_ctime_chain.json'
 bad_signature_chain = require '../data/bad_signature_chain.json'
 
@@ -31,39 +32,48 @@ exports.test_ralph_sig_chain = (T,cb) ->
   T.assert links.length == 5, "Expected exactly 5 links, got #{links.length}"
   cb()
 
-exports.test_simple_chain = (T, cb) ->
-  # Test a simple chain, just one link.
-  esc = make_esc cb, "test_simple_chain"
-  {chain, keys, username, uid} = simple_chain
+do_sigchain_test = ({T, input, err_type, len, eldest_index}, cb) ->
+  esc = make_esc cb, "do_sigchain_test"
+  if not eldest_index?
+    # By default, use the first key as the eldest.
+    eldest_index = 0
+  {chain, keys, username, uid} = input
   await ParsedKeys.parse {bundles_list: keys}, esc defer parsed_keys
   await SigChain.replay {
     sig_blobs: chain
     parsed_keys
     uid
     username
-    eldest_kid: keys[0]
-  }, esc defer sigchain
+    eldest_kid: keys[eldest_index]
+  }, defer err, sigchain
+  if err?
+    if not err_type? or err_type != err.type
+      # Not an error we expected.
+      cb err
+      return
+    else
+      # The error we were looking for!
+      cb null
+      return
+  else if err_type?
+    # We expected an error, and didn't get one!
+    cb new Error "Expected error of type #{err_type}"
+    return
+  # No error.
   links = sigchain.get_links()
-  T.assert links.length == 1, "Expected exactly 1 link, got #{links.length}"
+  if len?
+    T.assert links.length == len, "Expected exactly #{len} links, got #{links.length}"
   cb()
+
+exports.test_simple_chain = (T, cb) ->
+  # Test a simple chain, just one link.
+  do_sigchain_test {T, input: simple_chain, len: 1}, cb
 
 exports.test_error_unknown_keys = (T, cb) ->
   # Check the case where a signing kid is simply missing from the list of
   # available keys (as opposed to invalid for some other reason, like having
   # been revoked).
-  esc = make_esc cb, "test_signing_with_unknown_keys"
-  {chain, keys, username, uid} = simple_chain
-  # empty keys here
-  await ParsedKeys.parse {bundles_list: []}, esc defer parsed_keys
-  await SigChain.replay {
-    sig_blobs: chain
-    parsed_keys
-    uid
-    username
-    eldest_kid: keys[0]
-  }, defer err, sigchain
-  T.assert err?, "expected error"
-  cb()
+  do_sigchain_test {T, input: missing_kid_chain, err_type: "NONEXISTENT_KID"}, cb
 
 exports.test_error_bad_signature = (T, cb) ->
   # Change some bytes from the valid signature, and confirm it gets rejected.
