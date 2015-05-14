@@ -48,11 +48,16 @@ class ChainLink
     # during unbox, using the ctime of the chainlink.
     key_manager = parsed_keys.key_managers[kid]
     if not key_manager?
-      await athrow (new Error "link signed by nonexistent kid #{kid}"), esc defer()
+      await athrow error({
+        type: "NONEXISTENT_KID"
+        msg: "link signed by nonexistent kid #{kid}"
+      }), esc defer()
     await key_manager.make_sig_eng().unbox(
       sig_blob.sig,
-      esc(defer payload_buffer),
+      defer(err, payload_buffer),
       {now: ctime_seconds})
+    if err?
+      await athrow error({msg: err.message, type: "VERIFY_FAILED"}), esc defer()
     # Compute the payload_hash ourselves.
     payload_hash = kbpgp.hash.SHA256(payload_buffer).toString("hex")
     # Parse the payload.
@@ -72,11 +77,20 @@ class ChainLink
     payload_ctime = payload.ctime
     err = null
     if payload_kid? and payload_kid isnt signing_kid
-      err = new Error "signing kid (#{signing_kid}) and payload kid (#{payload_kid}) mismatch"
+      err = error({
+        type: "KID_MISMATCH"
+        msg: "signing kid (#{signing_kid}) and payload kid (#{payload_kid}) mismatch"
+      })
     else if payload_fingerprint? and payload_fingerprint isnt parsed_keys.kid_to_pgp[signing_kid]
-      err = new Error "signing kid (#{signing_kid}) and payload fingerprint (#{payload_fingerprint}) mismatch"
+      err = error({
+        type: "FINGERPRINT_MISMATCH"
+        msg: "signing kid (#{signing_kid}) and payload fingerprint (#{payload_fingerprint}) mismatch"
+      })
     else if payload_ctime isnt signing_ctime
-      err = new Error "payload ctime (#{payload_ctime}) doesn't match signing ctime (#{signing_ctime})"
+      err = error({
+        type: "CTIME_MISMATCH"
+        msg: "payload ctime (#{payload_ctime}) doesn't match signing ctime (#{signing_ctime})"
+      })
     cb err
 
   @_check_reverse_signatures : ({payload, parsed_keys}, cb) ->
@@ -120,12 +134,14 @@ class ChainLink
 
 
 exports.SigChain = class SigChain
-  # TODO: Check the merkle tip
   @replay : ({sig_blobs, parsed_keys, uid, username, eldest_kid}, cb) ->
     esc = make_esc cb, "SigChain.replay"
     if not eldest_kid?
       # Forgetting the eldest KID would silently give you an empty sigchain. Prevent this.
-      await athrow (new Error "eldest_kid must not be null"), esc defer()
+      await athrow error({
+        type: "MISSING_ELDEST_KID"
+        msg: "eldest_kid must not be null"
+      }), esc defer()
     sigchain = new SigChain {uid, username, eldest_kid}
     for sig_blob in sig_blobs
       await sigchain._add_new_link {sig_blob, parsed_keys}, esc defer()
@@ -183,31 +199,48 @@ exports.SigChain = class SigChain
   _check_key_is_valid : ({link}, cb) ->
     err = null
     if link.kid not of @_valid_sibkeys
-      err = new Error "not a valid sibkey: #{link.kid} valid sibkeys: #{JSON.stringify(@_valid_sibkeys)}"
+      err = error({
+        type: "INVALID_SUBKEY"
+        msg: "not a valid sibkey: #{link.kid} valid sibkeys: #{JSON.stringify(@_valid_sibkeys)}"
+      })
     else if link.ctime_seconds < @_sibkeys_to_etime_seconds[link.kid]
-      err = new Error "expired sibkey: #{link.kid}"
-    # TODO: Check against key ctime too?
+      err = error({
+        type: "EXPIRED_SIBKEY"
+        msg: "expired sibkey: #{link.kid}"
+      })
     cb err
 
   _check_link_belongs_here : ({link}, cb) ->
     last_link = @_links[@_links.length-1]  # null if this is the first link
     err = null
     if link.uid isnt @_uid
-      err = new Error """link doesn't refer to the right uid
-                         expected: #{link.uid}
-                              got: #{@_uid}"""
+      err = error({
+        type: "WRONG_UID"
+        msg: """link doesn't refer to the right uid
+                expected: #{link.uid}
+                     got: #{@_uid}"""
+      })
     else if link.username isnt @_username
-      err = new Error """link doesn't refer to the right username
-                         expected: #{link.username}
-                              got: #{@_username}"""
+      err = error({
+        type: "WRONG_USERNAME"
+        msg: """link doesn't refer to the right username
+                expected: #{link.username}
+                     got: #{@_username}"""
+      })
     else if last_link? and link.seqno isnt last_link.seqno + 1
-      err = new Error """link sequence number is wrong
-                         expected: #{last_link.seqno + 1}
-                              got: #{link.seqno}"""
+      err = error({
+        type: "WRONG_SEQNO"
+        msg: """link sequence number is wrong
+                expected: #{last_link.seqno + 1}
+                     got: #{link.seqno}"""
+      })
     else if last_link? and link.prev isnt last_link.payload_hash
-      err = new Error """previous payload hash doesn't match,
-                         expected: #{last_link.payload_hash}
-                              got: #{link.prev}"""
+      err = error({
+        type: "WRONG_PREV"
+        msg: """previous payload hash doesn't match,
+                expected: #{last_link.payload_hash}
+                     got: #{link.prev}"""
+      })
     cb err
 
   _delegate_keys : ({link}, cb) ->
@@ -236,3 +269,9 @@ exports.SigChain = class SigChain
         if revoked_kid? and revoked_kid of @_valid_sibkeys
           delete @_valid_sibkeys[revoked_kid]
     cb()
+
+
+error = ({msg, type}) ->
+  err = new Error msg
+  err.type = type
+  return err
