@@ -8,6 +8,7 @@ fs = require('fs')
 ralph_chain = require '../data/ralph_chain.json'
 simple_chain = require '../data/simple_chain.json'
 missing_kid_chain = require '../data/missing_kid_chain.json'
+missing_reverse_kid_chain = require '../data/missing_reverse_kid_chain.json'
 bad_ctime_chain = require '../data/bad_ctime_chain.json'
 bad_signature_chain = require '../data/bad_signature_chain.json'
 
@@ -60,11 +61,15 @@ exports.test_simple_chain = (T, cb) ->
   # Test a simple chain, just one link.
   do_sigchain_test {T, input: simple_chain, len: 1}, cb
 
-exports.test_error_unknown_keys = (T, cb) ->
+exports.test_error_unknown_key = (T, cb) ->
   # Check the case where a signing kid is simply missing from the list of
   # available keys (as opposed to invalid for some other reason, like having
   # been revoked).
   do_sigchain_test {T, input: missing_kid_chain, err_type: "NONEXISTENT_KID"}, cb
+
+exports.test_error_unknown_reverse_sig_key = (T, cb) ->
+  # As above, but for a reverse sig.
+  do_sigchain_test {T, input: missing_reverse_kid_chain, err_type: "NONEXISTENT_KID"}, cb
 
 exports.test_error_bad_signature = (T, cb) ->
   # Change some bytes from the valid signature, and confirm it gets rejected.
