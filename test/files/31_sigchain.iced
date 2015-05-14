@@ -11,6 +11,7 @@ missing_kid_chain = require '../data/missing_kid_chain.json'
 missing_reverse_kid_chain = require '../data/missing_reverse_kid_chain.json'
 bad_ctime_chain = require '../data/bad_ctime_chain.json'
 bad_signature_chain = require '../data/bad_signature_chain.json'
+bad_reverse_signature_chain = require '../data/bad_reverse_signature_chain.json'
 
 #====================================================
 
@@ -55,6 +56,9 @@ exports.test_ralph_sig_chain = (T,cb) ->
 
   # The eldest key for this test is not the first in the list, it's the 2nd
   # (index 1).
+
+
+  ###### HEY LETS USE LABELS INSTEAD OF INDICES
   do_sigchain_test {T, input: ralph_chain, len: 5, eldest_index: 1}, cb
 
 exports.test_simple_chain = (T, cb) ->
@@ -74,6 +78,10 @@ exports.test_error_unknown_reverse_sig_key = (T, cb) ->
 exports.test_error_bad_signature = (T, cb) ->
   # Change some bytes from the valid signature, and confirm it gets rejected.
   do_sigchain_test {T, input: bad_signature_chain, err_type: "VERIFY_FAILED"}, cb
+
+exports.test_error_bad_reverse_signature = (T, cb) ->
+  # Change some bytes from the valid reverse signature, and confirm it gets rejected.
+  do_sigchain_test {T, input: bad_reverse_signature_chain, err_type: "VERIFY_FAILED"}, cb
 
 exports.test_error_bad_server_ctime = (T, cb) ->
   # We need to use the server-provided ctime to unbox a signature (PGP key

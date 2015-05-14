@@ -93,7 +93,9 @@ class ChainLink
     if not key_manager?
       await athrow (new NonexistentKidError "link reverse-signed by nonexistent kid #{kid}"), esc defer()
     sibkey_proof = new proofs.Sibkey {}
-    await sibkey_proof.reverse_sig_check {json: payload, subkm: key_manager}, esc defer()
+    await sibkey_proof.reverse_sig_check {json: payload, subkm: key_manager}, defer err
+    if err?
+      await athrow (new VerifyFailedError err.message), esc defer()
     cb null
 
   constructor : ({@kid, @sig_id, @payload, @payload_hash}) ->
