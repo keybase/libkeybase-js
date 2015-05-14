@@ -48,16 +48,13 @@ class ChainLink
     # during unbox, using the ctime of the chainlink.
     key_manager = parsed_keys.key_managers[kid]
     if not key_manager?
-      await athrow error({
-        type: "NONEXISTENT_KID"
-        msg: "link signed by nonexistent kid #{kid}"
-      }), esc defer()
+      await athrow (new NonexistentKidError "link signed by nonexistent kid #{kid}"), esc defer()
     await key_manager.make_sig_eng().unbox(
       sig_blob.sig,
       defer(err, payload_buffer),
       {now: ctime_seconds})
     if err?
-      await athrow error({msg: err.message, type: "VERIFY_FAILED"}), esc defer()
+      await athrow (new VerifyFailedError err.message), esc defer()
     # Compute the payload_hash ourselves.
     payload_hash = kbpgp.hash.SHA256(payload_buffer).toString("hex")
     # Parse the payload.
@@ -77,20 +74,11 @@ class ChainLink
     payload_ctime = payload.ctime
     err = null
     if payload_kid? and payload_kid isnt signing_kid
-      err = error({
-        type: "KID_MISMATCH"
-        msg: "signing kid (#{signing_kid}) and payload kid (#{payload_kid}) mismatch"
-      })
+      err = new KIDMismatchError "signing kid (#{signing_kid}) and payload kid (#{payload_kid}) mismatch"
     else if payload_fingerprint? and payload_fingerprint isnt parsed_keys.kid_to_pgp[signing_kid]
-      err = error({
-        type: "FINGERPRINT_MISMATCH"
-        msg: "signing kid (#{signing_kid}) and payload fingerprint (#{payload_fingerprint}) mismatch"
-      })
+      err = new FingerprintMismatchError "signing kid (#{signing_kid}) and payload fingerprint (#{payload_fingerprint}) mismatch"
     else if payload_ctime isnt signing_ctime
-      err = error({
-        type: "CTIME_MISMATCH"
-        msg: "payload ctime (#{payload_ctime}) doesn't match signing ctime (#{signing_ctime})"
-      })
+      err = new CtimeMismatchError "payload ctime (#{payload_ctime}) doesn't match signing ctime (#{signing_ctime})"
     cb err
 
   @_check_reverse_signatures : ({payload, parsed_keys}, cb) ->
@@ -101,10 +89,7 @@ class ChainLink
     kid = payload.body.sibkey.kid
     key_manager = parsed_keys.key_managers[kid]
     if not key_manager?
-      await athrow error({
-        type: "NONEXISTENT_KID"
-        msg: "link reverse-signed by nonexistent kid #{kid}"
-      }), esc defer()
+      await athrow (new NonexistentKidError "link reverse-signed by nonexistent kid #{kid}"), esc defer()
     sibkey_proof = new proofs.Sibkey {}
     await sibkey_proof.reverse_sig_check {json: payload, subkm: key_manager}, esc defer()
     cb null
@@ -143,10 +128,7 @@ exports.SigChain = class SigChain
     esc = make_esc cb, "SigChain.replay"
     if not eldest_kid?
       # Forgetting the eldest KID would silently give you an empty sigchain. Prevent this.
-      await athrow error({
-        type: "MISSING_ELDEST_KID"
-        msg: "eldest_kid must not be null"
-      }), esc defer()
+      await athrow (new Error "eldest_kid parameter is required"), esc defer()
     sigchain = new SigChain {uid, username, eldest_kid}
     for sig_blob in sig_blobs
       await sigchain._add_new_link {sig_blob, parsed_keys}, esc defer()
@@ -204,48 +186,30 @@ exports.SigChain = class SigChain
   _check_key_is_valid : ({link}, cb) ->
     err = null
     if link.kid not of @_valid_sibkeys
-      err = error({
-        type: "INVALID_SUBKEY"
-        msg: "not a valid sibkey: #{link.kid} valid sibkeys: #{JSON.stringify(@_valid_sibkeys)}"
-      })
+      err = new InvalidSibkeyError "not a valid sibkey: #{link.kid} valid sibkeys: #{JSON.stringify(@_valid_sibkeys)}"
     else if link.ctime_seconds < @_sibkeys_to_etime_seconds[link.kid]
-      err = error({
-        type: "EXPIRED_SIBKEY"
-        msg: "expired sibkey: #{link.kid}"
-      })
+      err = new ExpiredSibkeyError "expired sibkey: #{link.kid}"
     cb err
 
   _check_link_belongs_here : ({link}, cb) ->
     last_link = @_links[@_links.length-1]  # null if this is the first link
     err = null
     if link.uid isnt @_uid
-      err = error({
-        type: "WRONG_UID"
-        msg: """link doesn't refer to the right uid
-                expected: #{link.uid}
-                     got: #{@_uid}"""
-      })
+      err = new WrongUIDError """link doesn't refer to the right uid
+                                 expected: #{link.uid}
+                                      got: #{@_uid}"""
     else if link.username isnt @_username
-      err = error({
-        type: "WRONG_USERNAME"
-        msg: """link doesn't refer to the right username
-                expected: #{link.username}
-                     got: #{@_username}"""
-      })
+      err = new WrongUsernameError """link doesn't refer to the right username
+                                      expected: #{link.username}
+                                           got: #{@_username}"""
     else if last_link? and link.seqno isnt last_link.seqno + 1
-      err = error({
-        type: "WRONG_SEQNO"
-        msg: """link sequence number is wrong
-                expected: #{last_link.seqno + 1}
-                     got: #{link.seqno}"""
-      })
+      err = new WrongSeqnoError """link sequence number is wrong
+                                   expected: #{last_link.seqno + 1}
+                                        got: #{link.seqno}"""
     else if last_link? and link.prev isnt last_link.payload_hash
-      err = error({
-        type: "WRONG_PREV"
-        msg: """previous payload hash doesn't match,
-                expected: #{last_link.payload_hash}
-                     got: #{link.prev}"""
-      })
+      err = new WrongPrevError """previous payload hash doesn't match,
+                                  expected: #{last_link.payload_hash}
+                                       got: #{link.prev}"""
     cb err
 
   _delegate_keys : ({link}, cb) ->
@@ -275,8 +239,38 @@ exports.SigChain = class SigChain
           delete @_valid_sibkeys[revoked_kid]
     cb()
 
-
-error = ({msg, type}) ->
-  err = new Error msg
-  err.type = type
-  return err
+# NOTE: These classes MUST each have a constructor, or isinstance will not
+# work.
+class NonexistentKidError extends Error
+  constructor : () ->
+    @type = "NONEXISTENT_KID"
+class VerifyFailedError extends Error
+  constructor : () ->
+    @type = "VERIFY_FAILED"
+class KIDMismatchError extends Error
+  constructor : () ->
+    @type = "KID_MISMATCH"
+class FingerprintMismatchError extends Error
+  constructor : () ->
+    @type = "FINGERPRINT_MISMATCH"
+class CtimeMismatchError extends Error
+  constructor : () ->
+    @type = "CTIME_MISMATCH"
+class InvalidSibkeyError extends Error
+  constructor : () ->
+    @type = "INVALID_SIBKEY"
+class ExpiredSibkeyError extends Error
+  constructor : () ->
+    @type = "EXPIRED_SIBKEY"
+class WrongUIDError extends Error
+  constructor : () ->
+    @type = "WRONG_UID"
+class WrongUsernameError extends Error
+  constructor : () ->
+    @type = "WRONG_USERNAME"
+class WrongSeqnoError extends Error
+  constructor : () ->
+    @type = "WRONG_SEQNO"
+class WrongPrevError extends Error
+  constructor : () ->
+    @type = "WRONG_PREV"
