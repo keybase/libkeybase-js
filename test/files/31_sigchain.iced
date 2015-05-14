@@ -9,7 +9,8 @@ ralph_chain = require '../data/ralph_chain.json'
 simple_chain = require '../data/simple_chain.json'
 missing_kid_chain = require '../data/missing_kid_chain.json'
 missing_reverse_kid_chain = require '../data/missing_reverse_kid_chain.json'
-bad_ctime_chain = require '../data/bad_ctime_chain.json'
+mismatched_ctime_chain = require '../data/mismatched_ctime_chain.json'
+mismatched_kid_chain = require '../data/mismatched_kid_chain.json'
 bad_signature_chain = require '../data/bad_signature_chain.json'
 bad_reverse_signature_chain = require '../data/bad_reverse_signature_chain.json'
 
@@ -57,8 +58,7 @@ exports.test_ralph_sig_chain = (T,cb) ->
   # The eldest key for this test is not the first in the list, it's the 2nd
   # (index 1).
 
-
-  ###### HEY LETS USE LABELS INSTEAD OF INDICES
+  # TODO: Use labels instead of indices.
   do_sigchain_test {T, input: ralph_chain, len: 5, eldest_index: 1}, cb
 
 exports.test_simple_chain = (T, cb) ->
@@ -83,10 +83,16 @@ exports.test_error_bad_reverse_signature = (T, cb) ->
   # Change some bytes from the valid reverse signature, and confirm it gets rejected.
   do_sigchain_test {T, input: bad_reverse_signature_chain, err_type: "VERIFY_FAILED"}, cb
 
-exports.test_error_bad_server_ctime = (T, cb) ->
+exports.test_error_mismatched_ctime = (T, cb) ->
   # We need to use the server-provided ctime to unbox a signature (PGP key
   # expiry is checked at the signature level, although NaCl expiry is checked
   # as we replay the chain). We always need to check back after unboxing to
   # make sure the internal ctime matches what the server said. This test
   # exercises that check.
-  do_sigchain_test {T, input: bad_ctime_chain, err_type: "CTIME_MISMATCH"}, cb
+  do_sigchain_test {T, input: mismatched_ctime_chain, err_type: "CTIME_MISMATCH"}, cb
+
+exports.test_error_mismatched_kid = (T, cb) ->
+  # We need to use the server-provided KID to unbox a signature. We always need
+  # to check back after unboxing to make sure the internal KID matches the one
+  # we actually used. This test exercises that check.
+  do_sigchain_test {T, input: mismatched_kid_chain, err_type: "KID_MISMATCH"}, cb
