@@ -77,18 +77,7 @@ exports.test_error_unknown_keys = (T, cb) ->
 
 exports.test_error_bad_signature = (T, cb) ->
   # Change some bytes from the valid signature, and confirm it gets rejected.
-  esc = make_esc cb, "test_error_bad_signature"
-  {chain, keys, username, uid} = bad_signature_chain
-  await ParsedKeys.parse {bundles_list: (bundle for kid, bundle of keys)}, esc defer parsed_keys
-  await SigChain.replay {
-    sig_blobs: chain
-    parsed_keys
-    uid
-    username
-    eldest_kid: keys[0]
-  }, defer err, sig
-  T.assert err?, "expected error"
-  cb()
+  do_sigchain_test {T, input: bad_signature_chain, err_type: "VERIFY_FAILED"}, cb
 
 exports.test_error_bad_server_ctime = (T, cb) ->
   # We need to use the server-provided ctime to unbox a signature (PGP key
@@ -96,15 +85,4 @@ exports.test_error_bad_server_ctime = (T, cb) ->
   # as we replay the chain). We always need to check back after unboxing to
   # make sure the internal ctime matches what the server said. This test
   # exercises that check.
-  esc = make_esc cb, "test_error_bad_server_ctime "
-  {chain, keys, username, uid} = bad_ctime_chain
-  await ParsedKeys.parse {bundles_list: (bundle for kid, bundle of keys)}, esc defer parsed_keys
-  await SigChain.replay {
-    sig_blobs: chain
-    parsed_keys
-    uid
-    username
-    eldest_kid: keys[0]
-  }, defer err, sigchain
-  T.assert err?, "expected error"
-  cb()
+  do_sigchain_test {T, input: bad_ctime_chain, err_type: "CTIME_MISMATCH"}, cb
