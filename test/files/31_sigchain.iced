@@ -18,6 +18,22 @@ example_revokes_chain = require '../data/example_revokes_chain.json'
 
 #====================================================
 
+exports.test_eldest_key_required = (T, cb) ->
+  # Make sure that if we forget to pass eldest key to SigChain.replay, that's
+  # an error. Otherwise we could confisingly empty results.
+  esc = make_esc cb, "test_eldest_key_required"
+  {chain, keys, username, uid} = ralph_chain
+  await node_sigchain.ParsedKeys.parse {bundles_list: keys}, esc defer parsed_keys
+  await node_sigchain.SigChain.replay {
+    sig_blobs: chain
+    parsed_keys
+    uid
+    username
+    # OOPS! Forgot the eldest_kid!
+  }, defer err, sigchain
+  T.assert err, "Forgetting to pass the eldest_kid should fail the replay!"
+  cb()
+
 do_sigchain_test = ({T, input, err_type, len, sibkeys, eldest_index}, cb) ->
   esc = make_esc cb, "do_sigchain_test"
   if not eldest_index?
