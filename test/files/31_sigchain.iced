@@ -86,11 +86,11 @@ exports.test_ralph_sig_chain = (T,cb) ->
   # (index 1).
 
   # TODO: Use labels instead of indices.
-  do_sigchain_test {T, input: ralph_chain, len: 5, eldest_index: 1}, cb
+  do_sigchain_test {T, input: ralph_chain, len: 5, sibkeys: 3, eldest_index: 1}, cb
 
 exports.test_simple_chain = (T, cb) ->
   # Test a simple chain, just one link.
-  do_sigchain_test {T, input: simple_chain, len: 1}, cb
+  do_sigchain_test {T, input: simple_chain, len: 1, sibkeys: 1}, cb
 
 exports.test_error_unknown_key = (T, cb) ->
   # Check the case where a signing kid is simply missing from the list of
