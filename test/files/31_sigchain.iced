@@ -17,6 +17,10 @@ bad_reverse_signature_chain = require '../data/bad_reverse_signature_chain.json'
 example_revokes_chain = require '../data/example_revokes_chain.json'
 signed_with_revoked_key_chain = require '../data/signed_with_revoked_key_chain.json'
 expired_key_chain = require '../data/expired_key_chain.json'
+bad_uid_chain = require '../data/bad_uid_chain.json'
+bad_username_chain = require '../data/bad_username_chain.json'
+bad_prev_chain = require '../data/bad_prev_chain.json'
+bad_seqno_chain = require '../data/bad_seqno_chain.json'
 
 #====================================================
 
@@ -143,3 +147,15 @@ exports.test_error_revoked_key = (T, cb) ->
 exports.test_error_expired_key = (T, cb) ->
   # Try signing a link with a key that has expired.
   do_sigchain_test {T, input: expired_key_chain, err_type: "EXPIRED_SIBKEY" }, cb
+
+exports.test_error_bad_uid = (T, cb) ->
+  do_sigchain_test {T, input: bad_uid_chain, err_type: "WRONG_UID" }, cb
+
+exports.test_error_bad_username = (T, cb) ->
+  do_sigchain_test {T, input: bad_username_chain, err_type: "WRONG_USERNAME" }, cb
+
+exports.test_error_bad_prev = (T, cb) ->
+  do_sigchain_test {T, input: bad_prev_chain, err_type: "WRONG_PREV" }, cb
+
+exports.test_error_bad_seqno = (T, cb) ->
+  do_sigchain_test {T, input: bad_seqno_chain, err_type: "WRONG_SEQNO" }, cb

@@ -204,7 +204,7 @@ exports.SigChain = class SigChain
     last_link = @_links[@_links.length-1]  # null if this is the first link
     err = null
     if link.uid isnt @_uid
-      err = new E.WrongUIDError """link doesn't refer to the right uid
+      err = new E.WrongUidError """link doesn't refer to the right uid
                                  expected: #{link.uid}
                                       got: #{@_uid}"""
     else if link.username isnt @_username

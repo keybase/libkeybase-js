@@ -1,0 +1,19 @@
+{
+    "chain": [
+        {
+            "seqno": 1,
+            "prev": null,
+            "sig": "g6Rib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEgdTZrzzvSt6MJa4ege74VXPva6PnE0CTivsP6ffTntwAKp3BheWxvYWTFARR7ImJvZHkiOnsia2V5Ijp7Imhvc3QiOiJrZXliYXNlLmlvIiwia2lkIjoiMDEyMDc1MzY2YmNmM2JkMmI3YTMwOTZiODdhMDdiYmUxNTVjZmJkYWU4ZjljNGQwMjRlMmJlYzNmYTdkZjRlN2I3MDAwYSIsInVpZCI6ImdhcmJhZ2UxMjMiLCJ1c2VybmFtZSI6Im1heDMyIn0sInR5cGUiOiJlbGRlc3QiLCJ2ZXJzaW9uIjoxfSwiY3RpbWUiOjE0MzE3MTI2NzAsImV4cGlyZV9pbiI6MTAwMDAwMDAsInByZXYiOm51bGwsInNlcV90eXBlIjoxLCJzZXFubyI6MSwidGFnIjoic2lnbmF0dXJlIn2jc2lnxEARvrUBy5nQGAySspZ7G6eV1v2NQfzrxce82Yq2Dbro7nuGQp/O+Nom0B9sVN3K824iNYXTJs8k48kuPbVU9BMLqHNpZ190eXBlIKN0YWfNAgKndmVyc2lvbgE=",
+            "payload_hash": "06d35817f5ebf5f45f6336cee74f3c2346c984cce14e08caa1e3e88a06ce5554",
+            "sig_id": "41357eebc6dc9bf4613d89ad15453ee9e82639336b48e395e10117e8105755fb",
+            "payload_json": "{\"body\":{\"key\":{\"host\":\"keybase.io\",\"kid\":\"012075366bcf3bd2b7a3096b87a07bbe155cfbdae8f9c4d024e2bec3fa7df4e7b7000a\",\"uid\":\"garbage123\",\"username\":\"max32\"},\"type\":\"eldest\",\"version\":1},\"ctime\":1431712670,\"expire_in\":10000000,\"prev\":null,\"seq_type\":1,\"seqno\":1,\"tag\":\"signature\"}",
+            "kid": "012075366bcf3bd2b7a3096b87a07bbe155cfbdae8f9c4d024e2bec3fa7df4e7b7000a",
+            "ctime": 1431712670
+        }
+    ],
+    "keys": [
+        "012075366bcf3bd2b7a3096b87a07bbe155cfbdae8f9c4d024e2bec3fa7df4e7b7000a"
+    ],
+    "uid": "74c38cf7ceb947f5632045d8ca5d48d3017eab8590bb96ead58d317b0eb709df19",
+    "username": "max32"
+}
