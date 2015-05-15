@@ -16,6 +16,7 @@ bad_signature_chain = require '../data/bad_signature_chain.json'
 bad_reverse_signature_chain = require '../data/bad_reverse_signature_chain.json'
 example_revokes_chain = require '../data/example_revokes_chain.json'
 signed_with_revoked_key_chain = require '../data/signed_with_revoked_key_chain.json'
+expired_key_chain = require '../data/expired_key_chain.json'
 
 #====================================================
 
@@ -138,3 +139,7 @@ exports.test_revokes = (T, cb) ->
 exports.test_error_revoked_key = (T, cb) ->
   # Try signing a link with a key that was previously revoked.
   do_sigchain_test {T, input: signed_with_revoked_key_chain, err_type: "INVALID_SIBKEY"}, cb
+
+exports.test_error_expired_key = (T, cb) ->
+  # Try signing a link with a key that has expired.
+  do_sigchain_test {T, input: expired_key_chain, err_type: "EXPIRED_SIBKEY" }, cb

@@ -109,8 +109,8 @@ class ChainLink
     # Not all links have the "eldest_kid" field, but if they don't, then their
     # signing KID is implicitly the eldest.
     @eldest_kid = @payload.body.key.eldest_kid or @kid
-    @ctime_seconds = @payload.body.ctime
-    @etime_seconds = @ctime_seconds + @payload.body.expire_in
+    @ctime_seconds = @payload.ctime
+    @etime_seconds = @ctime_seconds + @payload.expire_in
 
     @sibkey_delegation = @payload.body.sibkey?.kid
     @subkey_delegation = @payload.body.subkey?.kid
@@ -196,7 +196,7 @@ exports.SigChain = class SigChain
     err = null
     if link.kid not of @_valid_sibkeys
       err = new E.InvalidSibkeyError "not a valid sibkey: #{link.kid} valid sibkeys: #{JSON.stringify(@_valid_sibkeys)}"
-    else if link.ctime_seconds < @_sibkeys_to_etime_seconds[link.kid]
+    else if link.ctime_seconds > @_sibkeys_to_etime_seconds[link.kid]
       err = new E.ExpiredSibkeyError "expired sibkey: #{link.kid}"
     cb err
 
@@ -224,11 +224,11 @@ exports.SigChain = class SigChain
   _delegate_keys : ({link}, cb) ->
     if link.sibkey_delegation?
       @_valid_sibkeys[link.sibkey_delegation] = true
-      @_sibkeys_to_etime_seconds[link.sibkey_delegation] = link.etime
+      @_sibkeys_to_etime_seconds[link.sibkey_delegation] = link.etime_seconds
     # The eldest key is valid from the beginning, but it doesn't get an etime
     # until the first link.
     if link.kid is @_eldest_kid and @_eldest_kid not of @_sibkeys_to_etime_seconds
-      @_sibkeys_to_etime_seconds[@_eldest_kid] = link.etime
+      @_sibkeys_to_etime_seconds[@_eldest_kid] = link.etime_seconds
     cb()
 
   _revoke_keys_and_sigs : ({link}, cb) ->
