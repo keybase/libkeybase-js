@@ -149,15 +149,23 @@ exports.SigChain = class SigChain
     @_sibkeys_to_etime_seconds = {}
     @_valid_sibkeys = {}
     @_valid_sibkeys[eldest_kid] = true
+    @_subkeys_to_etime_seconds = {}
+    @_valid_subkeys = {}
 
   # Return the list of links in the current subchain which have not been
   # revoked.
   get_links : () ->
     return (link for link in @_links when link.sig_id of @_unrevoked_links)
 
-  # Return the list of sibkey KIDs which have not been revoked.
-  get_sibkeys : () ->
-    return (kid for kid of @_valid_sibkeys)
+  # Return the list of sibkey KIDs which aren't revoked or expired.
+  get_sibkeys : ({now}) ->
+    now = now or current_time_seconds()
+    return (kid for kid of @_valid_sibkeys when @_sibkeys_to_etime_seconds[kid] > now)
+
+  # Return the list of subkey KIDs which aren't revoked or expired.
+  get_subkeys : ({now}) ->
+    now = now or current_time_seconds()
+    return (kid for kid of @_valid_subkeys when @_subkeys_to_etime_seconds[kid] > now)
 
   _add_new_link : ({sig_blob, parsed_keys}, cb) ->
     esc = make_esc cb, "SigChain._add_new_link"
@@ -222,13 +230,16 @@ exports.SigChain = class SigChain
     cb err
 
   _delegate_keys : ({link}, cb) ->
-    if link.sibkey_delegation?
-      @_valid_sibkeys[link.sibkey_delegation] = true
-      @_sibkeys_to_etime_seconds[link.sibkey_delegation] = link.etime_seconds
     # The eldest key is valid from the beginning, but it doesn't get an etime
     # until the first link.
     if link.kid is @_eldest_kid and @_eldest_kid not of @_sibkeys_to_etime_seconds
       @_sibkeys_to_etime_seconds[@_eldest_kid] = link.etime_seconds
+    if link.sibkey_delegation?
+      @_valid_sibkeys[link.sibkey_delegation] = true
+      @_sibkeys_to_etime_seconds[link.sibkey_delegation] = link.etime_seconds
+    if link.subkey_delegation?
+      @_valid_subkeys[link.subkey_delegation] = true
+      @_subkeys_to_etime_seconds[link.subkey_delegation] = link.etime_seconds
     cb()
 
   _revoke_keys_and_sigs : ({link}, cb) ->
@@ -236,6 +247,8 @@ exports.SigChain = class SigChain
     for kid in link.key_revocations
       if kid of @_valid_sibkeys
         delete @_valid_sibkeys[kid]
+      if kid of @_valid_subkeys
+        delete @_valid_subkeys[kid]
 
     # Handle revocations of an entire link.
     for sig_id in link.sig_revocations
@@ -243,9 +256,12 @@ exports.SigChain = class SigChain
         revoked_link = @_unrevoked_links[sig_id]
         delete @_unrevoked_links[sig_id]
         # Keys delegated by the revoked link are implicitly revoked as well.
-        revoked_kid = revoked_link.sibkey_delegation
-        if revoked_kid? and revoked_kid of @_valid_sibkeys
-          delete @_valid_sibkeys[revoked_kid]
+        revoked_sibkey = revoked_link.sibkey_delegation
+        if revoked_sibkey? and revoked_sibkey of @_valid_sibkeys
+          delete @_valid_sibkeys[revoked_sibkey]
+        revoked_subkey = revoked_link.subkey_delegation
+        if revoked_subkey? and revoked_subkey of @_valid_subkeys
+          delete @_valid_subkeys[revoked_subkey]
     cb()
 
 exports.E = E = ie.make_errors {
@@ -261,3 +277,6 @@ exports.E = E = ie.make_errors {
   "WRONG_SEQNO": ""
   "WRONG_PREV": ""
 }
+
+current_time_seconds = () ->
+  Math.floor(new Date().getTime() / 1000)

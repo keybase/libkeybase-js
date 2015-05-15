@@ -40,7 +40,7 @@ exports.test_eldest_key_required = (T, cb) ->
   T.assert err, "Forgetting to pass the eldest_kid should fail the replay!"
   cb()
 
-do_sigchain_test = ({T, input, err_type, len, sibkeys, eldest_index}, cb) ->
+do_sigchain_test = ({T, input, err_type, len, sibkeys, subkeys, eldest_index}, cb) ->
   esc = make_esc cb, "do_sigchain_test"
   if not eldest_index?
     # By default, use the first key as the eldest.
@@ -68,12 +68,18 @@ do_sigchain_test = ({T, input, err_type, len, sibkeys, eldest_index}, cb) ->
     cb new Error "Expected error of type #{err_type}"
     return
   # No error.
+  # Check the number of unrevoked links.
   links = sigchain.get_links()
   if len?
     T.assert links.length == len, "Expected exactly #{len} links, got #{links.length}"
-  sibkeys_list = sigchain.get_sibkeys()
+  # Check the number of unrevoked/unexpired sibkeys.
+  sibkeys_list = sigchain.get_sibkeys {}
   if sibkeys?
     T.assert sibkeys_list.length == sibkeys, "Expected exactly #{sibkeys} sibkeys, got #{sibkeys_list.length}"
+  # Check the number of unrevoked/unexpired subkeys.
+  subkeys_list = sigchain.get_subkeys {}
+  if subkeys?
+    T.assert subkeys_list.length == subkeys, "Expected exactly #{subkeys} subkeys, got #{subkeys_list.length}"
   cb()
 
 exports.test_ralph_sig_chain = (T,cb) ->
@@ -86,11 +92,11 @@ exports.test_ralph_sig_chain = (T,cb) ->
   # (index 1).
 
   # TODO: Use labels instead of indices.
-  do_sigchain_test {T, input: ralph_chain, len: 5, sibkeys: 3, eldest_index: 1}, cb
+  do_sigchain_test {T, input: ralph_chain, len: 5, sibkeys: 3, subkeys: 2, eldest_index: 1}, cb
 
 exports.test_simple_chain = (T, cb) ->
   # Test a simple chain, just one link.
-  do_sigchain_test {T, input: simple_chain, len: 1, sibkeys: 1}, cb
+  do_sigchain_test {T, input: simple_chain, len: 1, sibkeys: 1, subkeys: 0}, cb
 
 exports.test_error_unknown_key = (T, cb) ->
   # Check the case where a signing kid is simply missing from the list of
@@ -138,7 +144,7 @@ exports.test_revokes = (T, cb) ->
   # The chain is length 10, but after 2 sig revokes it should be length 8.
   # Likewise, 6 keys are delegated, but after 2 sig revokes and 2 key revokes
   # it should be down to 2 keys.
-  do_sigchain_test {T, input: example_revokes_chain, len: 8, sibkeys: 2}, cb
+  do_sigchain_test {T, input: example_revokes_chain, len: 8, sibkeys: 2, subkeys: 0}, cb
 
 exports.test_error_revoked_key = (T, cb) ->
   # Try signing a link with a key that was previously revoked.
