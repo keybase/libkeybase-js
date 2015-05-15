@@ -72,14 +72,24 @@ do_sigchain_test = ({T, input, err_type, len, sibkeys, subkeys, eldest_index}, c
   links = sigchain.get_links()
   if len?
     T.assert links.length == len, "Expected exactly #{len} links, got #{links.length}"
+  # Use the creation time of the last sigchain link to get keys. (We don't want
+  # tests to start breaking in a few years.) But also define a time in the
+  # future that's guaranteed to expire all keys.
+  now = 0  # For empty sigchains now doesn't matter, as long as it's a number.
+  if links.length > 0
+    last_link = links[links.length - 1]
+    now = last_link.ctime_seconds
+  far_future = now + 100 * 365 * 24 * 60 * 60  # 100 years from now
   # Check the number of unrevoked/unexpired sibkeys.
-  sibkeys_list = sigchain.get_sibkeys {}
+  sibkeys_list = sigchain.get_sibkeys {now}
   if sibkeys?
     T.assert sibkeys_list.length == sibkeys, "Expected exactly #{sibkeys} sibkeys, got #{sibkeys_list.length}"
+  T.assert sigchain.get_sibkeys({now: far_future}).length == 0, "Expected no sibkeys in the far future."
   # Check the number of unrevoked/unexpired subkeys.
-  subkeys_list = sigchain.get_subkeys {}
+  subkeys_list = sigchain.get_subkeys {now}
   if subkeys?
     T.assert subkeys_list.length == subkeys, "Expected exactly #{subkeys} subkeys, got #{subkeys_list.length}"
+  T.assert sigchain.get_subkeys({now: far_future}).length == 0, "Expected no subkeys in the far future."
   cb()
 
 exports.test_ralph_sig_chain = (T,cb) ->
