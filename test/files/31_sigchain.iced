@@ -90,6 +90,10 @@ do_sigchain_test = ({T, input, err_type, len, sibkeys, subkeys, eldest_index}, c
   if subkeys?
     T.assert subkeys_list.length == subkeys, "Expected exactly #{subkeys} subkeys, got #{subkeys_list.length}"
   T.assert sigchain.get_subkeys({now: far_future}).length == 0, "Expected no subkeys in the far future."
+  # Get keys with the default time parameter (real now), just to make sure
+  # nothing blows up (and to improve coverage :-D)
+  sigchain.get_sibkeys {}
+  sigchain.get_subkeys {}
   cb()
 
 exports.test_ralph_sig_chain = (T,cb) ->
