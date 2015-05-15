@@ -280,3 +280,6 @@ exports.E = E = ie.make_errors {
 
 current_time_seconds = () ->
   Math.floor(new Date().getTime() / 1000)
+
+# Stupid coverage hack. If this breaks just delete it please, and I'm so sorry.
+__iced_k_noop()

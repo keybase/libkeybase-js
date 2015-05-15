@@ -2744,9 +2744,7 @@ if (typeof module !== 'undefined' && require.main === module) {
     return Math.floor(new Date().getTime() / 1000);
   };
 
-  if (typeof __iced_k_noop === "function") {
-    __iced_k_noop();
-  }
+  __iced_k_noop();
 
 }).call(this);
 
