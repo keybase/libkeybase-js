@@ -15,6 +15,7 @@ mismatched_fingerprint_chain = require '../data/mismatched_fingerprint_chain.jso
 bad_signature_chain = require '../data/bad_signature_chain.json'
 bad_reverse_signature_chain = require '../data/bad_reverse_signature_chain.json'
 example_revokes_chain = require '../data/example_revokes_chain.json'
+signed_with_revoked_key_chain = require '../data/signed_with_revoked_key_chain.json'
 
 #====================================================
 
@@ -133,3 +134,7 @@ exports.test_revokes = (T, cb) ->
   # Likewise, 6 keys are delegated, but after 2 sig revokes and 2 key revokes
   # it should be down to 2 keys.
   do_sigchain_test {T, input: example_revokes_chain, len: 8, sibkeys: 2}, cb
+
+exports.test_error_revoked_key = (T, cb) ->
+  # Try signing a link with a key that was previously revoked.
+  do_sigchain_test {T, input: signed_with_revoked_key_chain, err_type: "INVALID_SIBKEY"}, cb
