@@ -4,25 +4,29 @@ node_sigchain = require('../..')
 C = require('../..').constants
 execSync = require('child_process').execSync
 fs = require('fs')
+path = require('path')
 
-ralph_chain = require '../data/ralph_chain.json'
-simple_chain = require '../data/simple_chain.json'
-missing_kid_chain = require '../data/missing_kid_chain.json'
-missing_reverse_kid_chain = require '../data/missing_reverse_kid_chain.json'
-mismatched_ctime_chain = require '../data/mismatched_ctime_chain.json'
-mismatched_kid_chain = require '../data/mismatched_kid_chain.json'
-mismatched_fingerprint_chain = require '../data/mismatched_fingerprint_chain.json'
-bad_signature_chain = require '../data/bad_signature_chain.json'
-bad_reverse_signature_chain = require '../data/bad_reverse_signature_chain.json'
-example_revokes_chain = require '../data/example_revokes_chain.json'
-signed_with_revoked_key_chain = require '../data/signed_with_revoked_key_chain.json'
-expired_key_chain = require '../data/expired_key_chain.json'
-bad_uid_chain = require '../data/bad_uid_chain.json'
-bad_username_chain = require '../data/bad_username_chain.json'
-bad_prev_chain = require '../data/bad_prev_chain.json'
-bad_seqno_chain = require '../data/bad_seqno_chain.json'
+tests = require '../data/tests.json'
+
+ralph_chain = require '../data/chains/ralph_chain.json'
 
 #====================================================
+
+exports.test_all_sigchain_tests = (T, cb) ->
+  # This runs all the tests described in tests.json, which included many
+  # example chains with both success parameters and expected failures.
+  for test_name, body of tests.tests
+    args = {T}
+    for key, val of body
+      if key == 'input'
+        input_file = path.join('test', 'data', 'chains', val)
+        args.input = JSON.parse(fs.readFileSync(input_file).toString())
+      else
+        args[key] = val
+    T.waypoint test_name
+    await do_sigchain_test args, defer err
+    T.assert not err?, "Error in sigchain test '#{test_name}': #{err}"
+  cb()
 
 exports.test_eldest_key_required = (T, cb) ->
   # Make sure that if we forget to pass eldest key to SigChain.replay, that's
@@ -95,87 +99,3 @@ do_sigchain_test = ({T, input, err_type, len, sibkeys, subkeys, eldest_index}, c
   sigchain.get_sibkeys {}
   sigchain.get_subkeys {}
   cb()
-
-exports.test_ralph_sig_chain = (T,cb) ->
-  # Ralph is a test user I created by hand on my local server. I fetched his
-  # sigs and keys from the API, and then massaged them into our input format.
-  # This test is mainly to make sure that the generated chains we're using in
-  # other tests bear some relationship to reality.  - Jack
-
-  # The eldest key for this test is not the first in the list, it's the 2nd
-  # (index 1).
-
-  # TODO: Use labels instead of indices.
-  do_sigchain_test {T, input: ralph_chain, len: 5, sibkeys: 3, subkeys: 2, eldest_index: 1}, cb
-
-exports.test_simple_chain = (T, cb) ->
-  # Test a simple chain, just one link.
-  do_sigchain_test {T, input: simple_chain, len: 1, sibkeys: 1, subkeys: 0}, cb
-
-exports.test_error_unknown_key = (T, cb) ->
-  # Check the case where a signing kid is simply missing from the list of
-  # available keys (as opposed to invalid for some other reason, like having
-  # been revoked).
-  do_sigchain_test {T, input: missing_kid_chain, err_type: "NONEXISTENT_KID"}, cb
-
-exports.test_error_unknown_reverse_sig_key = (T, cb) ->
-  # As above, but for a reverse sig.
-  do_sigchain_test {T, input: missing_reverse_kid_chain, err_type: "NONEXISTENT_KID"}, cb
-
-exports.test_error_bad_signature = (T, cb) ->
-  # Change some bytes from the valid signature, and confirm it gets rejected.
-  do_sigchain_test {T, input: bad_signature_chain, err_type: "VERIFY_FAILED"}, cb
-
-exports.test_error_bad_reverse_signature = (T, cb) ->
-  # Change some bytes from the valid reverse signature, and confirm it gets rejected.
-  do_sigchain_test {T, input: bad_reverse_signature_chain, err_type: "VERIFY_FAILED"}, cb
-
-exports.test_error_mismatched_ctime = (T, cb) ->
-  # We need to use the server-provided ctime to unbox a signature (PGP key
-  # expiry is checked at the signature level, although NaCl expiry is checked
-  # as we replay the chain). We always need to check back after unboxing to
-  # make sure the internal ctime matches what the server said. This test
-  # exercises that check.
-  do_sigchain_test {T, input: mismatched_ctime_chain, err_type: "CTIME_MISMATCH"}, cb
-
-exports.test_error_mismatched_kid = (T, cb) ->
-  # We need to use the server-provided KID to unbox a signature. We always need
-  # to check back after unboxing to make sure the internal KID matches the one
-  # we actually used. This test exercises that check.
-  # NOTE: I generated this chain by hacking some code into kbpgp to modify the
-  # payload right before it was signed.
-  do_sigchain_test {T, input: mismatched_kid_chain, err_type: "KID_MISMATCH"}, cb
-
-exports.test_error_mismatched_fingerprint = (T, cb) ->
-  # We don't use fingerprints in unboxing, but nonetheless we want to make sure
-  # that if a chain link claims to have been signed by a given fingerprint,
-  # that does in fact correspond to the KID of the PGP key that signed it.
-  # NOTE: I generated this chain by hacking some code into kbpgp to modify the
-  # payload right before it was signed.
-  do_sigchain_test {T, input: mismatched_fingerprint_chain, err_type: "FINGERPRINT_MISMATCH"}, cb
-
-exports.test_revokes = (T, cb) ->
-  # The chain is length 10, but after 2 sig revokes it should be length 8.
-  # Likewise, 6 keys are delegated, but after 2 sig revokes and 2 key revokes
-  # it should be down to 2 keys.
-  do_sigchain_test {T, input: example_revokes_chain, len: 13, sibkeys: 2, subkeys: 1}, cb
-
-exports.test_error_revoked_key = (T, cb) ->
-  # Try signing a link with a key that was previously revoked.
-  do_sigchain_test {T, input: signed_with_revoked_key_chain, err_type: "INVALID_SIBKEY"}, cb
-
-exports.test_error_expired_key = (T, cb) ->
-  # Try signing a link with a key that has expired.
-  do_sigchain_test {T, input: expired_key_chain, err_type: "EXPIRED_SIBKEY" }, cb
-
-exports.test_error_bad_uid = (T, cb) ->
-  do_sigchain_test {T, input: bad_uid_chain, err_type: "WRONG_UID" }, cb
-
-exports.test_error_bad_username = (T, cb) ->
-  do_sigchain_test {T, input: bad_username_chain, err_type: "WRONG_USERNAME" }, cb
-
-exports.test_error_bad_prev = (T, cb) ->
-  do_sigchain_test {T, input: bad_prev_chain, err_type: "WRONG_PREV" }, cb
-
-exports.test_error_bad_seqno = (T, cb) ->
-  do_sigchain_test {T, input: bad_seqno_chain, err_type: "WRONG_SEQNO" }, cb
