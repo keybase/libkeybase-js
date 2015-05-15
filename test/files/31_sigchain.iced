@@ -154,7 +154,7 @@ exports.test_revokes = (T, cb) ->
   # The chain is length 10, but after 2 sig revokes it should be length 8.
   # Likewise, 6 keys are delegated, but after 2 sig revokes and 2 key revokes
   # it should be down to 2 keys.
-  do_sigchain_test {T, input: example_revokes_chain, len: 8, sibkeys: 2, subkeys: 0}, cb
+  do_sigchain_test {T, input: example_revokes_chain, len: 13, sibkeys: 2, subkeys: 1}, cb
 
 exports.test_error_revoked_key = (T, cb) ->
   # Try signing a link with a key that was previously revoked.
