@@ -14,10 +14,11 @@ mismatched_kid_chain = require '../data/mismatched_kid_chain.json'
 mismatched_fingerprint_chain = require '../data/mismatched_fingerprint_chain.json'
 bad_signature_chain = require '../data/bad_signature_chain.json'
 bad_reverse_signature_chain = require '../data/bad_reverse_signature_chain.json'
+example_revokes_chain = require '../data/example_revokes_chain.json'
 
 #====================================================
 
-do_sigchain_test = ({T, input, err_type, len, eldest_index}, cb) ->
+do_sigchain_test = ({T, input, err_type, len, sibkeys, eldest_index}, cb) ->
   esc = make_esc cb, "do_sigchain_test"
   if not eldest_index?
     # By default, use the first key as the eldest.
@@ -48,6 +49,9 @@ do_sigchain_test = ({T, input, err_type, len, eldest_index}, cb) ->
   links = sigchain.get_links()
   if len?
     T.assert links.length == len, "Expected exactly #{len} links, got #{links.length}"
+  sibkeys_list = sigchain.get_sibkeys()
+  if sibkeys?
+    T.assert sibkeys_list.length == sibkeys, "Expected exactly #{sibkeys} sibkeys, got #{sibkeys_list.length}"
   cb()
 
 exports.test_ralph_sig_chain = (T,cb) ->
@@ -96,10 +100,20 @@ exports.test_error_mismatched_kid = (T, cb) ->
   # We need to use the server-provided KID to unbox a signature. We always need
   # to check back after unboxing to make sure the internal KID matches the one
   # we actually used. This test exercises that check.
+  # NOTE: I generated this chain by hacking some code into kbpgp to modify the
+  # payload right before it was signed.
   do_sigchain_test {T, input: mismatched_kid_chain, err_type: "KID_MISMATCH"}, cb
 
 exports.test_error_mismatched_fingerprint = (T, cb) ->
   # We don't use fingerprints in unboxing, but nonetheless we want to make sure
   # that if a chain link claims to have been signed by a given fingerprint,
   # that does in fact correspond to the KID of the PGP key that signed it.
+  # NOTE: I generated this chain by hacking some code into kbpgp to modify the
+  # payload right before it was signed.
   do_sigchain_test {T, input: mismatched_fingerprint_chain, err_type: "FINGERPRINT_MISMATCH"}, cb
+
+exports.test_revokes = (T, cb) ->
+  # The chain is length 10, but after 2 sig revokes it should be length 8.
+  # Likewise, 6 keys are delegated, but after 2 sig revokes and 2 key revokes
+  # it should be down to 2 keys.
+  do_sigchain_test {T, input: example_revokes_chain, len: 8, sibkeys: 2}, cb

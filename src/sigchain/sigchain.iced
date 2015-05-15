@@ -122,10 +122,10 @@ class ChainLink
       @key_revocations.push(@payload.body.revoke.kid)
 
     @sig_revocations = []
-    if @payload.body.revoke?.kids?
-      @sig_revocations = @payload.body.revoke.kids
-    if @payload.body.revoke?.kid?
-      @sig_revocations.push(@payload.body.revoke.kid)
+    if @payload.body.revoke?.sig_ids?
+      @sig_revocations = @payload.body.revoke.sig_ids
+    if @payload.body.revoke?.sig_id?
+      @sig_revocations.push(@payload.body.revoke.sig_id)
 
 
 exports.SigChain = class SigChain
@@ -154,6 +154,10 @@ exports.SigChain = class SigChain
   # revoked.
   get_links : () ->
     return (link for link in @_links when link.sig_id of @_unrevoked_links)
+
+  # Return the list of sibkey KIDs which have not been revoked.
+  get_sibkeys : () ->
+    return (kid for kid of @_valid_sibkeys)
 
   _add_new_link : ({sig_blob, parsed_keys}, cb) ->
     esc = make_esc cb, "SigChain._add_new_link"
