@@ -26,7 +26,7 @@ bad_seqno_chain = require '../data/bad_seqno_chain.json'
 
 exports.test_eldest_key_required = (T, cb) ->
   # Make sure that if we forget to pass eldest key to SigChain.replay, that's
-  # an error. Otherwise we could confisingly empty results.
+  # an error. Otherwise we could get confisingly empty results.
   esc = make_esc cb, "test_eldest_key_required"
   {chain, keys, username, uid} = ralph_chain
   await node_sigchain.ParsedKeys.parse {bundles_list: keys}, esc defer parsed_keys
