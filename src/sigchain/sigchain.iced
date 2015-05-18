@@ -4,6 +4,8 @@ kbpgp = require('kbpgp')
 proofs = require('keybase-proofs')
 ie = require('iced-error')
 
+UID_LEN = 32
+SIG_ID_SUFFIX = "0f"
 
 exports.ParsedKeys = class ParsedKeys
   @parse : ({bundles_list}, cb) ->
@@ -40,7 +42,7 @@ class ChainLink
     esc = make_esc cb, "ChainLink.parse"
     # Compute the sig_id ourselves.
     sig_buffer = new Buffer(sig_blob.sig, "base64")
-    sig_id = kbpgp.hash.SHA256(sig_buffer).toString("hex")
+    sig_id = kbpgp.hash.SHA256(sig_buffer).toString("hex") + SIG_ID_SUFFIX
     # Get the ctime and the KID directly from the server blob. These are the
     # only pieces of data that we don't get from the unboxed sig payload,
     # because we need them to do the uboxing. We check them against what's in
@@ -104,7 +106,7 @@ class ChainLink
   @_check_payload_format : ({payload}, cb) ->
     esc = make_esc cb, "ChainLink._check_payload_format"
     uid = payload.body.key.uid
-    if uid.length != 32
+    if uid.length != UID_LEN
       await athrow (new E.BadLinkFormatError "UID wrong length: #{uid.length}"), esc defer()
     cb()
 
