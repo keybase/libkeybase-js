@@ -65,13 +65,13 @@ class ChainLink
     # Parse the payload.
     payload_json = payload_buffer.toString('utf8')
     await a_json_parse payload_json, esc defer payload
+    # Check internal details of the payload, like uid length.
+    await @_check_payload_format {payload}, esc defer()
     # Make sure the KID and ctime from the blob match the payload, and that any
     # payload PGP fingerprint also matches the KID.
     await @_check_payload_against_blob {signing_kid: kid, signing_ctime: ctime_seconds, payload, parsed_keys}, esc defer()
     # Check any reverse signatures.
     await @_check_reverse_signatures {payload, parsed_keys}, esc defer()
-    # Check any other details of the payload, like uid length.
-    await @_check_payload_format {payload}, esc defer()
     # The constructor takes care of all the payload parsing that isn't failable.
     cb null, new ChainLink {kid, sig_id, payload, payload_hash}
 
