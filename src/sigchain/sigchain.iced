@@ -68,6 +68,8 @@ class ChainLink
     await @_check_payload_against_blob {signing_kid: kid, signing_ctime: ctime_seconds, payload, parsed_keys}, esc defer()
     # Check any reverse signatures.
     await @_check_reverse_signatures {payload, parsed_keys}, esc defer()
+    # Check any other details of the payload, like uid length.
+    await @_check_payload_format {payload}, esc defer()
     # The constructor takes care of all the payload parsing that isn't failable.
     cb null, new ChainLink {kid, sig_id, payload, payload_hash}
 
@@ -98,6 +100,13 @@ class ChainLink
     if err?
       await athrow (new E.VerifyFailedError err.message), esc defer()
     cb null
+
+  @_check_payload_format : ({payload}, cb) ->
+    esc = make_esc cb, "ChainLink._check_payload_format"
+    uid = payload.body.key.uid
+    if uid.length != 32
+      await athrow (new E.BadLinkFormatError "UID wrong length: #{uid.length}"), esc defer()
+    cb()
 
   constructor : ({@kid, @sig_id, @payload, @payload_hash}) ->
     @uid = @payload.body.key.uid
@@ -265,6 +274,7 @@ exports.SigChain = class SigChain
     cb()
 
 exports.E = E = ie.make_errors {
+  "BAD_LINK_FORMAT": ""
   "NONEXISTENT_KID": ""
   "VERIFY_FAILED": ""
   "KID_MISMATCH": ""

@@ -1,5 +1,6 @@
 {
   "error_types": [
+    "BAD_LINK_FORMAT",
     "NONEXISTENT_KID",
     "VERIFY_FAILED",
     "KID_MISMATCH",
