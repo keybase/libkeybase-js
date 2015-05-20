@@ -12,7 +12,7 @@ chain :
       ctime : "+100"
       label : "sib1"
       type : "sibkey"
-      key : gen : "eddsa"
+      key : gen : "pgp_ecc"
       signer : "e"
     },
   ]
