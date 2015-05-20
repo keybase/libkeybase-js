@@ -44,6 +44,23 @@ exports.test_eldest_key_required = (T, cb) ->
   T.assert err, "Forgetting to pass the eldest_kid should fail the replay!"
   cb()
 
+exports.test_chain_link_format = (T, cb) ->
+  # The Go implementation is strict about details like UID length. This
+  # implementation was lenient, so we ended up creating some test cases that
+  # were unusable with Go. After fixing the test cases, we added
+  # check_link_payload_format() to make sure we don't miss this again. This
+  # test just provides coverage for that method. It's not necessarily a failure
+  # that other implementations should reproduce.
+  bad_uid_payload =
+    body:
+      key:
+        uid: "wronglen"
+  await node_sigchain.check_link_payload_format {payload: bad_uid_payload}, defer err
+  T.assert err?, "short uid should fail"
+  if err?
+    T.assert err.code == node_sigchain.E.code.BAD_LINK_FORMAT, "wrong error type"
+  cb()
+
 do_sigchain_test = ({T, input, err_type, len, sibkeys, subkeys, eldest_index}, cb) ->
   esc = make_esc cb, "do_sigchain_test"
   if not eldest_index?

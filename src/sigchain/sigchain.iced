@@ -66,7 +66,7 @@ class ChainLink
     payload_json = payload_buffer.toString('utf8')
     await a_json_parse payload_json, esc defer payload
     # Check internal details of the payload, like uid length.
-    await @_check_payload_format {payload}, esc defer()
+    await check_link_payload_format {payload}, esc defer()
     # Make sure the KID and ctime from the blob match the payload, and that any
     # payload PGP fingerprint also matches the KID.
     await @_check_payload_against_blob {signing_kid: kid, signing_ctime: ctime_seconds, payload, parsed_keys}, esc defer()
@@ -103,13 +103,6 @@ class ChainLink
       await athrow (new E.VerifyFailedError err.message), esc defer()
     cb null
 
-  @_check_payload_format : ({payload}, cb) ->
-    esc = make_esc cb, "ChainLink._check_payload_format"
-    uid = payload.body.key.uid
-    if uid.length != UID_LEN
-      await athrow (new E.BadLinkFormatError "UID wrong length: #{uid.length}"), esc defer()
-    cb()
-
   constructor : ({@kid, @sig_id, @payload, @payload_hash}) ->
     @uid = @payload.body.key.uid
     @username = @payload.body.key.username
@@ -137,6 +130,15 @@ class ChainLink
       @sig_revocations = @payload.body.revoke.sig_ids
     if @payload.body.revoke?.sig_id?
       @sig_revocations.push(@payload.body.revoke.sig_id)
+
+
+# Exported for testing.
+exports.check_link_payload_format = check_link_payload_format = ({payload}, cb) ->
+  esc = make_esc cb, "check_link_payload_format"
+  uid = payload.body.key.uid
+  if uid.length != UID_LEN
+    await athrow (new E.BadLinkFormatError "UID wrong length: #{uid.length}"), esc defer()
+  cb()
 
 
 exports.SigChain = class SigChain
