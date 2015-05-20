@@ -6,7 +6,7 @@ chain :
     {
       type : "eldest"
       label : "e"
-      key : gen : "eddsa"
+      key : gen : "pgp_ecc"
     },
     {
       ctime : "+100"
