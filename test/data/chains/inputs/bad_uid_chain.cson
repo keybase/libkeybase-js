@@ -7,6 +7,6 @@ chain :
       type : "eldest"
       label : "e"
       key : gen : "eddsa"
-      uid : "garbage123"
+      uid : "deadbeef000000000000000000000000"
     },
   ]
