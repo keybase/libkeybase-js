@@ -14,6 +14,7 @@ chain :
       type : "sibkey"
       key : gen : "eddsa"
       signer : "e"
-      prev : "garbage!"  # Previous payload hash mismatch
+      # Previous payload hash mismatch
+      prev : "deadbeef00000000000000000000000000000000000000000000000000000000"
     },
   ]
