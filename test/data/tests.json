@@ -3,6 +3,7 @@
     "BAD_LINK_FORMAT",
     "NONEXISTENT_KID",
     "VERIFY_FAILED",
+    "REVERSE_SIG_VERIFY_FAILED",
     "KID_MISMATCH",
     "FINGERPRINT_MISMATCH",
     "CTIME_MISMATCH",
@@ -54,7 +55,7 @@
     "test_error_bad_reverse_signature": {
       "_comment": "Change some bytes from the valid reverse signature, and confirm it gets rejected.",
       "input": "bad_reverse_signature_chain.json",
-      "err_type": "VERIFY_FAILED"
+      "err_type": "REVERSE_SIG_VERIFY_FAILED"
     },
 
     "test_error_mismatched_ctime": {

@@ -2374,7 +2374,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                     filename: "/home/jacko/libkeybase-js/src/sigchain/sigchain.iced",
                     funcname: "ChainLink._check_reverse_signatures"
                   });
-                  athrow(new E.VerifyFailedError(err.message), esc(__iced_deferrals.defer({
+                  athrow(new E.ReverseSigVerifyFailedError(err.message), esc(__iced_deferrals.defer({
                     lineno: 102
                   })));
                   __iced_deferrals._fulfill();
@@ -2779,6 +2779,7 @@ if (typeof module !== 'undefined' && require.main === module) {
     "BAD_LINK_FORMAT": "",
     "NONEXISTENT_KID": "",
     "VERIFY_FAILED": "",
+    "REVERSE_SIG_VERIFY_FAILED": "",
     "KID_MISMATCH": "",
     "FINGERPRINT_MISMATCH": "",
     "CTIME_MISMATCH": "",
@@ -71751,6 +71752,7 @@ module.exports={
     "BAD_LINK_FORMAT",
     "NONEXISTENT_KID",
     "VERIFY_FAILED",
+    "REVERSE_SIG_VERIFY_FAILED",
     "KID_MISMATCH",
     "FINGERPRINT_MISMATCH",
     "CTIME_MISMATCH",
@@ -71802,7 +71804,7 @@ module.exports={
     "test_error_bad_reverse_signature": {
       "_comment": "Change some bytes from the valid reverse signature, and confirm it gets rejected.",
       "input": "bad_reverse_signature_chain.json",
-      "err_type": "VERIFY_FAILED"
+      "err_type": "REVERSE_SIG_VERIFY_FAILED"
     },
 
     "test_error_mismatched_ctime": {
@@ -72222,7 +72224,11 @@ exports.test_chain_link_format = function(T, cb) {
     });
   })(this)((function(_this) {
     return function() {
-      return T.assert(err.code === "BAD_LINK_FORMAT", "short uid should fail");
+      T.assert(typeof err !== "undefined" && err !== null, "short uid should fail");
+      if (typeof err !== "undefined" && err !== null) {
+        T.assert(err.code === node_sigchain.E.code.BAD_LINK_FORMAT, "wrong error type");
+      }
+      return cb();
     };
   })(this));
 };
@@ -72250,7 +72256,7 @@ do_sigchain_test = function(_arg, cb) {
             return parsed_keys = arguments[0];
           };
         })(),
-        lineno: 66
+        lineno: 69
       })));
       __iced_deferrals._fulfill();
     });
@@ -72273,7 +72279,7 @@ do_sigchain_test = function(_arg, cb) {
               return sigchain = arguments[1];
             };
           })(),
-          lineno: 73
+          lineno: 76
         }));
         __iced_deferrals._fulfill();
       })(function() {

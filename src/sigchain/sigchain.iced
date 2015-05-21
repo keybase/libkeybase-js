@@ -100,7 +100,7 @@ class ChainLink
     sibkey_proof = new proofs.Sibkey {}
     await sibkey_proof.reverse_sig_check {json: payload, subkm: key_manager}, defer err
     if err?
-      await athrow (new E.VerifyFailedError err.message), esc defer()
+      await athrow (new E.ReverseSigVerifyFailedError err.message), esc defer()
     cb null
 
   constructor : ({@kid, @sig_id, @payload, @payload_hash}) ->
@@ -281,6 +281,7 @@ exports.E = E = ie.make_errors {
   "BAD_LINK_FORMAT": ""
   "NONEXISTENT_KID": ""
   "VERIFY_FAILED": ""
+  "REVERSE_SIG_VERIFY_FAILED": ""
   "KID_MISMATCH": ""
   "FINGERPRINT_MISMATCH": ""
   "CTIME_MISMATCH": ""
