@@ -37,12 +37,14 @@
     "test_error_unknown_key": {
       "_comment": "Check the case where a signing kid is simply missing from the list of available keys (as opposed to invalid for some other reason, like having been revoked).",
       "input": "missing_kid_chain.json",
+      "eldest": "e",
       "err_type": "NONEXISTENT_KID"
     },
 
     "test_error_unknown_reverse_sig_key": {
       "_comment": "As above, but for a reverse sig.",
       "input": "missing_reverse_kid_chain.json",
+      "eldest": "e",
       "err_type": "NONEXISTENT_KID"
     },
 
