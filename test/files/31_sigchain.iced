@@ -61,19 +61,21 @@ exports.test_chain_link_format = (T, cb) ->
     T.assert err.code == node_sigchain.E.code.BAD_LINK_FORMAT, "wrong error type"
   cb()
 
-do_sigchain_test = ({T, input, err_type, len, sibkeys, subkeys, eldest_index}, cb) ->
+do_sigchain_test = ({T, input, err_type, len, sibkeys, subkeys, eldest}, cb) ->
   esc = make_esc cb, "do_sigchain_test"
-  if not eldest_index?
-    # By default, use the first key as the eldest.
-    eldest_index = 0
   {chain, keys, username, uid} = input
   await node_sigchain.ParsedKeys.parse {bundles_list: keys}, esc defer parsed_keys
+  if not eldest?
+    # By default, use the first key as the eldest.
+    eldest_kid = parsed_keys.kids_in_order[0]
+  else
+    eldest_kid = input.label_kids[eldest]
   await node_sigchain.SigChain.replay {
     sig_blobs: chain
     parsed_keys
     uid
     username
-    eldest_kid: parsed_keys.kids_in_order[eldest_index]
+    eldest_kid
   }, defer err, sigchain
   if err?
     if not err_type? or err_type != node_sigchain.E.name[err.code]

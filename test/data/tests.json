@@ -23,7 +23,7 @@
       "len": 5,
       "sibkeys": 3,
       "subkeys": 2,
-      "eldest_index": 1
+      "eldest": "second_eldest"
     },
 
     "test_simple_chain": {
