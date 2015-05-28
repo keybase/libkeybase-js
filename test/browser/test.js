@@ -2336,7 +2336,7 @@ if (typeof module !== 'undefined' && require.main === module) {
             __iced_deferrals._fulfill();
           })(function() {
             if (sig_cache != null) {
-              sig_cache.put(sig_id, payload);
+              sig_cache.put(sig_id, payload_buffer);
             }
             return cb(null, payload, sig_id, payload_hash);
           });
@@ -2520,7 +2520,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                 funcname: "SigChain.replay"
               });
               athrow(new Error("eldest_kid parameter is required"), esc(__iced_deferrals.defer({
-                lineno: 165
+                lineno: 184
               })));
               __iced_deferrals._fulfill();
             })(__iced_k);
@@ -2571,7 +2571,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                     parsed_keys: parsed_keys,
                     sig_cache: sig_cache
                   }, esc(__iced_deferrals.defer({
-                    lineno: 168
+                    lineno: 187
                   })));
                   __iced_deferrals._fulfill();
                 })(_next);
@@ -2671,7 +2671,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                 return link = arguments[0];
               };
             })(),
-            lineno: 205
+            lineno: 224
           })));
           __iced_deferrals._fulfill();
         });
@@ -2690,7 +2690,7 @@ if (typeof module !== 'undefined' && require.main === module) {
             _this._check_key_is_valid({
               link: link
             }, esc(__iced_deferrals.defer({
-              lineno: 216
+              lineno: 235
             })));
             __iced_deferrals._fulfill();
           })(function() {
@@ -2703,7 +2703,7 @@ if (typeof module !== 'undefined' && require.main === module) {
               _this._check_link_belongs_here({
                 link: link
               }, esc(__iced_deferrals.defer({
-                lineno: 219
+                lineno: 238
               })));
               __iced_deferrals._fulfill();
             })(function() {
@@ -2718,7 +2718,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                 _this._delegate_keys({
                   link: link
                 }, esc(__iced_deferrals.defer({
-                  lineno: 226
+                  lineno: 245
                 })));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -2731,7 +2731,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                   _this._revoke_keys_and_sigs({
                     link: link
                   }, esc(__iced_deferrals.defer({
-                    lineno: 228
+                    lineno: 247
                   })));
                   __iced_deferrals._fulfill();
                 })(function() {

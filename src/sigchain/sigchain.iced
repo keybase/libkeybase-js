@@ -86,7 +86,7 @@ class ChainLink
     await a_json_parse payload_json, esc defer payload
     # Success!
     if sig_cache?
-      sig_cache.put(sig_id, payload)
+      sig_cache.put(sig_id, payload_buffer)
     cb null, payload, sig_id, payload_hash
 
   @_check_payload_against_blob : ({sig_blob, payload, parsed_keys}, cb) ->
