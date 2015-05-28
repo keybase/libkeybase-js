@@ -28,6 +28,7 @@
     "iced-runtime": "^1.0.1",
     "iced-utils": "^0.1.22",
     "kbpgp": "^2.0.0",
+    "keybase-test-vectors": "^1.0.1",
     "tweetnacl": "^0.12.0"
   },
   "devDependencies": {

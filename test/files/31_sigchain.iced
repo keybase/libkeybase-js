@@ -5,23 +5,16 @@ C = require('../..').constants
 execSync = require('child_process').execSync
 fs = require('fs')
 path = require('path')
-
-tests = require '../data/tests.json'
-
-ralph_chain = require '../data/chains/ralph_chain.json'
+tv = require 'keybase-test-vectors'
 
 #====================================================
 
 exports.test_all_sigchain_tests = (T, cb) ->
   # This runs all the tests described in tests.json, which included many
   # example chains with both success parameters and expected failures.
-  for test_name, body of tests.tests
+  for test_name, body of tv.chain_tests.tests
     args = {T}
     for key, val of body
-      if key == 'input'
-        input_file = path.join('test', 'data', 'chains', val)
-        args.input = JSON.parse(fs.readFileSync(input_file).toString())
-      else
         args[key] = val
     T.waypoint test_name
     await do_sigchain_test args, defer err
@@ -32,7 +25,7 @@ exports.test_eldest_key_required = (T, cb) ->
   # Make sure that if we forget to pass eldest key to SigChain.replay, that's
   # an error. Otherwise we could get confisingly empty results.
   esc = make_esc cb, "test_eldest_key_required"
-  {chain, keys, username, uid} = ralph_chain
+  {chain, keys, username, uid} = tv.chain_test_inputs["ralph_chain.json"]
   await node_sigchain.ParsedKeys.parse {bundles_list: keys}, esc defer parsed_keys
   await node_sigchain.SigChain.replay {
     sig_blobs: chain
@@ -63,13 +56,14 @@ exports.test_chain_link_format = (T, cb) ->
 
 do_sigchain_test = ({T, input, err_type, len, sibkeys, subkeys, eldest}, cb) ->
   esc = make_esc cb, "do_sigchain_test"
-  {chain, keys, username, uid} = input
+  input_blob = tv.chain_test_inputs[input]
+  {chain, keys, username, uid} = input_blob
   await node_sigchain.ParsedKeys.parse {bundles_list: keys}, esc defer parsed_keys
   if not eldest?
     # By default, use the first key as the eldest.
     eldest_kid = parsed_keys.kids_in_order[0]
   else
-    eldest_kid = input.label_kids[eldest]
+    eldest_kid = input_blob.label_kids[eldest]
   await node_sigchain.SigChain.replay {
     sig_blobs: chain
     parsed_keys
