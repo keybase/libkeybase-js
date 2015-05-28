@@ -9,18 +9,6 @@ tv = require 'keybase-test-vectors'
 
 #====================================================
 
-exports.test_all_sigchain_tests = (T, cb) ->
-  # This runs all the tests described in tests.json, which included many
-  # example chains with both success parameters and expected failures.
-  for test_name, body of tv.chain_tests.tests
-    args = {T}
-    for key, val of body
-        args[key] = val
-    T.waypoint test_name
-    await do_sigchain_test args, defer err
-    T.assert not err?, "Error in sigchain test '#{test_name}': #{err}"
-  cb()
-
 exports.test_eldest_key_required = (T, cb) ->
   # Make sure that if we forget to pass eldest key to SigChain.replay, that's
   # an error. Otherwise we could get confisingly empty results.
@@ -52,6 +40,49 @@ exports.test_chain_link_format = (T, cb) ->
   T.assert err?, "short uid should fail"
   if err?
     T.assert err.code == node_sigchain.E.code.BAD_LINK_FORMAT, "wrong error type"
+  cb()
+
+exports.test_sig_cache = (T, cb) ->
+  # We accept a sig_cache parameter to skip verifying signatures that we've
+  # verified before. Exercise that code.
+  esc = make_esc cb, "test_sig_cache"
+  {chain, keys, username, uid, label_kids} = tv.chain_test_inputs["ralph_chain.json"]
+
+  # Create a fake sig_cache and populate it with the last sig in ralph's chain.
+  # (The first sig is not in ralph's most recent subchain.)
+  store = {}
+  sig_cache =
+    get: (sig_id) ->
+      return store[sig_id]
+    put: (sig_id, payload) ->
+      store[sig_id] = payload
+      return
+  last_sig_id = chain[chain.length-1].sig_id
+  last_payload = new Buffer chain[chain.length-1].payload_json, "utf8"
+  sig_cache.put last_sig_id, last_payload
+
+  # Replay the sigchain and make sure everything works.
+  await node_sigchain.ParsedKeys.parse {bundles_list: keys}, esc defer parsed_keys
+  await node_sigchain.SigChain.replay {
+    sig_blobs: chain
+    parsed_keys
+    sig_cache
+    uid
+    username
+    eldest_kid: label_kids.second_eldest
+  }, esc defer sigchain
+  cb()
+
+exports.test_all_sigchain_tests = (T, cb) ->
+  # This runs all the tests described in tests.json, which included many
+  # example chains with both success parameters and expected failures.
+  for test_name, body of tv.chain_tests.tests
+    args = {T}
+    for key, val of body
+        args[key] = val
+    T.waypoint test_name
+    await do_sigchain_test args, defer err
+    T.assert not err?, "Error in sigchain test '#{test_name}': #{err}"
   cb()
 
 do_sigchain_test = ({T, input, err_type, len, sibkeys, subkeys, eldest}, cb) ->

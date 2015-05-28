@@ -38,44 +38,61 @@ exports.ParsedKeys = class ParsedKeys
 
 
 class ChainLink
-  @parse : ({sig_blob, parsed_keys}, cb) ->
+  @parse : ({sig_blob, parsed_keys, sig_cache}, cb) ->
     esc = make_esc cb, "ChainLink.parse"
-    # Compute the sig_id ourselves.
-    sig_buffer = new Buffer(sig_blob.sig, "base64")
-    sig_id = kbpgp.hash.SHA256(sig_buffer).toString("hex") + SIG_ID_SUFFIX
-    # Get the ctime and the KID directly from the server blob. These are the
-    # only pieces of data that we don't get from the unboxed sig payload,
-    # because we need them to do the uboxing. We check them against what's in
-    # the box immediately after, and freak out of there's a difference.
-    kid = sig_blob.kid
-    ctime_seconds = sig_blob.ctime
     # Unbox the signed payload. PGP key expiration is checked automatically
     # during unbox, using the ctime of the chainlink.
-    key_manager = parsed_keys.key_managers[kid]
-    if not key_manager?
-      await athrow (new E.NonexistentKidError "link signed by nonexistent kid #{kid}"), esc defer()
-    await key_manager.make_sig_eng().unbox(
-      sig_blob.sig,
-      defer(err, payload_buffer),
-      {now: ctime_seconds})
-    if err?
-      await athrow (new E.VerifyFailedError err.message), esc defer()
-    # Compute the payload_hash ourselves.
-    payload_hash = kbpgp.hash.SHA256(payload_buffer).toString("hex")
-    # Parse the payload.
-    payload_json = payload_buffer.toString('utf8')
-    await a_json_parse payload_json, esc defer payload
+    await @_unbox_payload {sig_blob, parsed_keys, sig_cache}, esc defer payload, sig_id, payload_hash
     # Check internal details of the payload, like uid length.
     await check_link_payload_format {payload}, esc defer()
     # Make sure the KID and ctime from the blob match the payload, and that any
     # payload PGP fingerprint also matches the KID.
-    await @_check_payload_against_blob {signing_kid: kid, signing_ctime: ctime_seconds, payload, parsed_keys}, esc defer()
+    await @_check_payload_against_blob {sig_blob, payload, parsed_keys}, esc defer()
     # Check any reverse signatures.
     await @_check_reverse_signatures {payload, parsed_keys}, esc defer()
     # The constructor takes care of all the payload parsing that isn't failable.
-    cb null, new ChainLink {kid, sig_id, payload, payload_hash}
+    cb null, new ChainLink {kid: sig_blob.kid, sig_id, payload, payload_hash}
 
-  @_check_payload_against_blob : ({signing_kid, signing_ctime, payload, parsed_keys}, cb) ->
+  @_unbox_payload : ({sig_blob, parsed_keys, sig_cache}, cb) ->
+    esc = make_esc cb, "ChainLink._unbox_payload"
+    # Compute the sig_id. We return this, but we also use it to check whether
+    # this sig is in the sig_cache, meaning it's already been verified.
+    sig_buffer = new Buffer(sig_blob.sig, "base64")
+    sig_id = kbpgp.hash.SHA256(sig_buffer).toString("hex") + SIG_ID_SUFFIX
+    # Check whether the sig is cached. If so, get the payload from cache.
+    if sig_cache?
+      payload_buffer = sig_cache.get(sig_id)
+    # If we didn't get the payload from cache, unbox it for real.
+    if not payload_buffer?
+      # Get the ctime and the KID directly from the server blob. These are the
+      # only pieces of data that we don't get from the unboxed sig payload,
+      # because we need them to do the uboxing. We check them against what's in
+      # the box later, and freak out of there's a difference.
+      kid = sig_blob.kid
+      ctime_seconds = sig_blob.ctime
+      key_manager = parsed_keys.key_managers[kid]
+      if not key_manager?
+        await athrow (new E.NonexistentKidError "link signed by nonexistent kid #{kid}"), esc defer()
+      await key_manager.make_sig_eng().unbox(
+        sig_blob.sig,
+        defer(err, payload_buffer),
+        {now: ctime_seconds})
+      if err?
+        await athrow (new E.VerifyFailedError err.message), esc defer()
+    # Compute the payload_hash.
+    payload_hash = kbpgp.hash.SHA256(payload_buffer).toString("hex")
+    # Parse the payload.
+    payload_json = payload_buffer.toString('utf8')
+    await a_json_parse payload_json, esc defer payload
+    # Success!
+    if sig_cache?
+      sig_cache.put(sig_id, payload)
+    cb null, payload, sig_id, payload_hash
+
+  @_check_payload_against_blob : ({sig_blob, payload, parsed_keys}, cb) ->
+    # Here's where we check the data we relied on in @_unbox_payload().
+    signing_kid = sig_blob.kid
+    signing_ctime = sig_blob.ctime
     payload_kid = payload.body.key.kid
     payload_fingerprint = payload.body.key.fingerprint
     payload_ctime = payload.ctime
@@ -142,14 +159,33 @@ exports.check_link_payload_format = check_link_payload_format = ({payload}, cb) 
 
 
 exports.SigChain = class SigChain
-  @replay : ({sig_blobs, parsed_keys, uid, username, eldest_kid}, cb) ->
+
+  # The replay() method is the main interface for all callers. It checks all of
+  # the user's signatures and returns a SigChain object representing their
+  # current state.
+  #
+  # @param {[string]} sig_blobs The parsed JSON signatures list returned from
+  #     the server's sig/get.json endpoint.
+  # @param {ParsedKeys} parsed_keys The collection of the user's keys. This is
+  #     usually obtained from the all_bundles list given by user/lookup.json,
+  #     given to ParsedKeys.parse().
+  # @param {object} sig_cache An object with two methods: get(sig_id) and
+  #     put(sig_id, Buffer), which caches the payloads of previously verified
+  #     signatures. This parameter can be nil, in which case all signatures
+  #     will be checked.
+  # @param {string} uid Used only to check that the sigchain belongs to the
+  #     right user.
+  # @param {string} username As with uid, used for confirming ownership.
+  # @param {string} eldest_kid The full (i.e. with-prefix) KID of the user's
+  #     current eldest key. This is used to determine the latest subchain.
+  @replay : ({sig_blobs, parsed_keys, sig_cache, uid, username, eldest_kid}, cb) ->
     esc = make_esc cb, "SigChain.replay"
     if not eldest_kid?
       # Forgetting the eldest KID would silently give you an empty sigchain. Prevent this.
       await athrow (new Error "eldest_kid parameter is required"), esc defer()
     sigchain = new SigChain {uid, username, eldest_kid}
     for sig_blob in sig_blobs
-      await sigchain._add_new_link {sig_blob, parsed_keys}, esc defer()
+      await sigchain._add_new_link {sig_blob, parsed_keys, sig_cache}, esc defer()
     cb null, sigchain
 
   # NOTE: Don't call the constructor directly. Use SigChain.replay().
@@ -180,13 +216,13 @@ exports.SigChain = class SigChain
     now = now or current_time_seconds()
     return (kid for kid of @_valid_subkeys when @_subkeys_to_etime_seconds[kid] > now)
 
-  _add_new_link : ({sig_blob, parsed_keys}, cb) ->
+  _add_new_link : ({sig_blob, parsed_keys, sig_cache}, cb) ->
     esc = make_esc cb, "SigChain._add_new_link"
 
     # This constructor checks that the link is internally consistent: its
     # signature is valid and belongs to the key it claims, and the same for any
     # reverse sigs.
-    await ChainLink.parse {sig_blob, parsed_keys}, esc defer link
+    await ChainLink.parse {sig_blob, parsed_keys, sig_cache}, esc defer link
 
     # Filter on eldest KID. We do this using verified ChainLink data, because
     # otherwise the server could lie about what a link's eldest_kid was,
