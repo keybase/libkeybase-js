@@ -5,6 +5,9 @@ C = require '../constants'
 merkle = require 'merkle-tree'
 {a_json_parse} = require('iced-utils').util
 
+sha256 = (s) -> (new hash.SHA256).bufhash(new Buffer s, 'utf8').toString('hex')
+sha512 = (s) -> (new hash.SHA512).bufhash(new Buffer s, 'utf8').toString('hex')
+
 #===========================================================
 
 #
@@ -49,20 +52,22 @@ class PathChecker
 
   #-----------
 
-  _extract_nodes : (list) ->
+  _extract_nodes : ({list}, cb) ->
+    esc = make_esc cb, "PathChecker::_extract_nodes"
     ret = {}
     for {node} in list
-      ret[node.hash] = JSON.parse node.val
-    return ret
+      await a_json_parse node.val, esc defer val
+      ret[node.hash] = val
+    cb null, ret
 
   #-----------
 
   _verify_username_legacy : ({uid, username}, cb) ->
     esc = make_esc cb, "PathChecker::_verify_username_legacy"
     root = @_signed_payload.body.legacy_uid_root
-    nodes = @_extract_nodes @server_reply.uid_proof_path
+    await @_extract_nodes {list : @server_reply.uid_proof_path}, esc defer nodes
     tree = new LegacyUidNameTree { root, nodes }
-    await tree.find {key : username}, esc defer leaf
+    await tree.find {key : sha256(username) }, esc defer leaf
     err = if (leaf is uid) then null 
     else new Error "UID mismatch #{leaf} != #{uid} in tree for #{username}"
     cb err
@@ -70,11 +75,12 @@ class PathChecker
   #-----------
 
   _verify_path : ({uid}, cb) ->
+    esc = make_esc cb, "PathChecker::_verify_path"
     root = @_signed_payload.body.root
-    nodes = @_extract_nodes @server_reply.path
+    await @_extract_nodes { list : @server_reply.path}, esc defer nodes
     tree = new MainTree { root, nodes }
-    await tree.find {key : uid}, defer err, leaf
-    cb err, leaf
+    await tree.find {key : uid}, esc defer leaf
+    cb null, leaf
 
   #-----------
 
@@ -88,7 +94,7 @@ class PathChecker
       uid2 = h[0...15].toString('hex') + '19'
       if uid isnt uid2  
         err = new Error "bad UID: #{uid} != #{uid2} for username #{username}"
-    cb err
+    cb err, uid, username
 
 #===========================================================
 
@@ -97,30 +103,26 @@ class BaseTree extends merkle.Base
   constructor : ({@root, @nodes}) ->
     super {}
 
-  cb_unimplemented : (cb) ->
-    cb new Error "not a storage engine"
-
-  store_node : (args, cb) -> @cb_unimplemented cb
-  store_root : (args, cb) -> @cb_unimplemented cb
-
   lookup_root : (cb) ->
     cb null, @root
 
   lookup_node : ({key}, cb) ->
     ret = @nodes[key]
-    err = if ret? then null else new Error "key '#{key}' not found"
+    err = if ret? then null else new Error "key not found: '#{key}'"
     cb err, ret
 
 #===========================================================
 
 class LegacyUidNameTree extends BaseTree
 
-  hash_fn : (s) -> (new hash.SHA256).bufhash(new Buffer s, 'utf8').toString('hex')
+  hash_fn : (s) -> sha256 s
 
 #===========================================================
 
 class MainTree extends BaseTree
 
-  hash_fn : (s) -> (new hash.SHA512).bufhash(new Buffer s, 'utf8').toString('hex')
+  hash_fn : (s) -> sha512 s
 
 #===========================================================
+
+__iced_k_noop()

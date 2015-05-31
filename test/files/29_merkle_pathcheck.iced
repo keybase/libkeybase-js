@@ -5,9 +5,16 @@
 
 #=========================================================
 
+km = null
+exports.init = (T,cb) -> 
+  await KeyManager.import_from_armored_pgp {armored : key }, defer err, tmp
+  km = tmp unless err?
+  cb err
+
+#=========================================================
+
 exports.check_bre = (T,cb) ->
   esc = make_esc cb
-  await KeyManager.import_from_armored_pgp {armored : key }, esc defer km
   await pathcheck { server_reply : path_bre, km }, defer err, resp
   T.no_error err
   cb()
@@ -16,9 +23,41 @@ exports.check_bre = (T,cb) ->
 
 exports.check_max = (T,cb) ->
   esc = make_esc cb
-  await KeyManager.import_from_armored_pgp {armored : key }, esc defer km
   await pathcheck { server_reply : path_max, km }, defer err, resp
   T.no_error err
+  cb()
+
+#=========================================================
+
+exports.check_max_bad_uid = (T,cb) ->
+  esc = make_esc cb
+  bad = JSON.parse JSON.stringify path_max
+  bad.username = "glaforge"
+  await pathcheck { server_reply : bad, km }, defer err, resp
+  T.assert err?, "bad UID came back"
+  T.assert err.toString().indexOf("UID mismatch") >= 0, "UID mismatch error"
+  cb()
+
+#=========================================================
+
+exports.check_bre_bad_uid = (T,cb) ->
+  esc = make_esc cb
+  bad = JSON.parse JSON.stringify path_bre
+  bad.username = "bre2"
+  await pathcheck { server_reply : bad, km }, defer err, resp
+  T.assert err?, "bad UID came back"
+  T.assert err.toString().indexOf("bad UID:") >= 0, "bad UID: error"
+  cb()
+
+#=========================================================
+
+exports.check_bre_bad_path = (T,cb) ->
+  esc = make_esc cb
+  bad = JSON.parse JSON.stringify path_bre
+  bad.path = []
+  await pathcheck { server_reply : bad, km }, defer err, resp
+  T.assert err?, "bad path"
+  T.assert err.toString().indexOf("key not found:") >= 0, "key not found: error"
   cb()
 
 #=========================================================
@@ -85,8 +124,6 @@ path_max = {
       }
    ]
 }
-
-
 
 path_bre = {
    "csrf_token" : "lgHZIDVhNmRhMTk3YjNjNGUzYzViOTU0NmU2NzNmYTBiMTA4zlVqdqXOAAFRgMDEIGuWx5m38tjzJfeZvJvji6vUY2ALSEwXSlTINvd7CHsf",
