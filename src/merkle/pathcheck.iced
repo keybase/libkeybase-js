@@ -2,6 +2,7 @@
 C = require '../constants'
 {make_esc} = require 'iced-error'
 {hash} = require 'triplesec'
+merkle = require 'merkle-tree'
 
 #===========================================================
 
@@ -16,7 +17,7 @@ C = require '../constants'
 # @param km {KeyManager} a keyManager to verify the reply with
 # @param cb {Callback<err,{Leaf,Uid,Username}>} Reply with the Leaf, uid, 
 #   and username verified by the merkle path
-export.pathcheck = ({server_reply, km}, cb) ->
+exports.pathcheck = ({server_reply, km}, cb) ->
   pc = new PathChecker { server_reply, km }
   await pc.run defer err, res
   cb err, res
@@ -32,20 +33,45 @@ class PathChecker
   run : (cb) ->
     esc = make_esc cb, "PathChecker::run"
     await @_verify_sig esc defer()
-    await @_verify_username esc defer()
-    await @_verify_path esc defer()
-    cb null, {@leaf, @uid, @username}
+    await @_verify_username esc defer uid, username
+    await @_verify_path {uid}, esc defer leaf
+    cb null, {leaf, uid, username}
 
   #-----------
 
   _verify_sig : (cb) -> 
     sigeng = km.make_sig_eng()
-    await sigeng.unbox @server_reply.root.sig, defer err, @signed_payload
+    await sigeng.unbox @server_reply.root.sig, defer err, @_signed_payload
     cb err
 
   #-----------
 
-  _verify_username_legacy : ({uid}, cb) ->
+  _extract_nodes : (list) ->
+    ret = {}
+    for node in list
+      ret[node.hash] = node.val
+    return ret
+
+  #-----------
+
+  _verify_path : ({uid}, cb) ->
+    esc = make_esc cb, "PathChecker::_verify_username_legacy"
+    root = @_signed_payload.body.root
+    nodes = @_extract_nodes @_signed_payload.path
+    tree = new LegacyUidNameTree { root, nodes }
+    await tree.find {key : username}, esc defer leaf
+    err = if (leaf is uid) then null 
+    else new Error "UID mismatch #{leaf} != #{uid} in tree for #{username}"
+    cb err
+
+  #-----------
+
+  _verify_username_legacy : ({uid, username}, cb) ->
+    root = @_signed_payload.body.legacy_uid_root
+    nodes = @_extract_nodes @_signed_payload.uid_proof_path
+    tree = new MainTree { root, nodes }
+    await tree.find {key : uid}, esc defer leaf
+    cb err, leaf
 
   #-----------
 
@@ -53,15 +79,44 @@ class PathChecker
     {uid,username} = @server_reply
     err = null
     if uid[-2...] is '00'
-      await @_verify_username_legacy {uid}, defer err
+      await @_verify_username_legacy {username,uid}, defer err
     else
       h = (new hash.SHA256).bufhash (new Buffer username, "utf8")
       uid2 = h[0...15].toString('hex') + '19'
       if uid isnt uid2  
         err = new Error "bad UID: #{uid} != #{uid2} for username #{username}"
-      else
-        [@uid, @username] = [ uid, username ]
     cb err
 
 #===========================================================
+
+class BaseTree extends merkle.Base
+
+  constructor : ({@root, @nodes}) ->
+
+  cb_unimplemented : (cb) ->
+    cb new Error "not a storage engine"
+
+  store_node : (args, cb) -> @cb_unimplemented cb
+  store_root : (args, cb) -> @cb_unimplemented cb
+
+  lookup_root : (cb) ->
+    cb null, @root
+
+  lookup_node : ({key}, cb) ->
+    ret = @nodes[key]
+    err = if ret? then null else new Error "key '#{key}' not found"
+    cb err, ret
+
+#===========================================================
+
+class LegacyUidNameTree extends BaseTree
+
+  hash_fn : (s) -> (new hash.SHA256).bufhash(new Buffer s, 'utf8').toString('hex')
+
+#===========================================================
+
+class MainTree extends BaseTree
+
+  hash_fn : (s) -> (new hash.SHA512).bufhash(new Buffer s, 'utf8').toString('hex')
+
 #===========================================================

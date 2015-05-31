@@ -26,6 +26,7 @@ $(BUILD_STAMP): \
 	lib/kvstore.js \
 	lib/main.js \
 	lib/merkle/leaf.js \
+	lib/merkle/pathcheck.js \
 	lib/sigchain/sigchain.js
 	date > $@
 
