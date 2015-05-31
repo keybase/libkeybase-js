@@ -1,6 +1,7 @@
 
 exports.merkle = 
   leaf : require('./merkle/leaf')
+  pathcheck : require('./merkle/pathcheck')
 
 # Export all of these modules as namespace extensions
 exports[k] = v for k,v of {

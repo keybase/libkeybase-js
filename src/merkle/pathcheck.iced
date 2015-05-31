@@ -3,6 +3,7 @@ C = require '../constants'
 {make_esc} = require 'iced-error'
 {hash} = require 'triplesec'
 merkle = require 'merkle-tree'
+{a_json_parse} = require('iced-utils').util
 
 #===========================================================
 
@@ -17,7 +18,7 @@ merkle = require 'merkle-tree'
 # @param km {KeyManager} a keyManager to verify the reply with
 # @param cb {Callback<err,{Leaf,Uid,Username}>} Reply with the Leaf, uid, 
 #   and username verified by the merkle path
-exports.pathcheck = ({server_reply, km}, cb) ->
+module.exports = pathcheck = ({server_reply, km}, cb) ->
   pc = new PathChecker { server_reply, km }
   await pc.run defer err, res
   cb err, res
@@ -40,24 +41,26 @@ class PathChecker
   #-----------
 
   _verify_sig : (cb) -> 
-    sigeng = km.make_sig_eng()
-    await sigeng.unbox @server_reply.root.sig, defer err, @_signed_payload
-    cb err
+    esc = make_esc cb, "_verify_sig"
+    sigeng = @km.make_sig_eng()
+    await sigeng.unbox @server_reply.root.sig, esc defer raw
+    await a_json_parse raw.toString('utf8'), esc defer @_signed_payload
+    cb null
 
   #-----------
 
   _extract_nodes : (list) ->
     ret = {}
-    for node in list
-      ret[node.hash] = node.val
+    for {node} in list
+      ret[node.hash] = JSON.parse node.val
     return ret
 
   #-----------
 
-  _verify_path : ({uid}, cb) ->
+  _verify_username_legacy : ({uid, username}, cb) ->
     esc = make_esc cb, "PathChecker::_verify_username_legacy"
-    root = @_signed_payload.body.root
-    nodes = @_extract_nodes @_signed_payload.path
+    root = @_signed_payload.body.legacy_uid_root
+    nodes = @_extract_nodes @server_reply.uid_proof_path
     tree = new LegacyUidNameTree { root, nodes }
     await tree.find {key : username}, esc defer leaf
     err = if (leaf is uid) then null 
@@ -66,11 +69,11 @@ class PathChecker
 
   #-----------
 
-  _verify_username_legacy : ({uid, username}, cb) ->
-    root = @_signed_payload.body.legacy_uid_root
-    nodes = @_extract_nodes @_signed_payload.uid_proof_path
+  _verify_path : ({uid}, cb) ->
+    root = @_signed_payload.body.root
+    nodes = @_extract_nodes @server_reply.path
     tree = new MainTree { root, nodes }
-    await tree.find {key : uid}, esc defer leaf
+    await tree.find {key : uid}, defer err, leaf
     cb err, leaf
 
   #-----------
@@ -92,6 +95,7 @@ class PathChecker
 class BaseTree extends merkle.Base
 
   constructor : ({@root, @nodes}) ->
+    super {}
 
   cb_unimplemented : (cb) ->
     cb new Error "not a storage engine"
