@@ -12,14 +12,14 @@ sha512 = (s) -> (new hash.SHA512).bufhash(new Buffer s, 'utf8').toString('hex')
 
 #
 # pathcheck
-# 
+#
 # Given a reply from the server, and a keymanager that can verify the
 # reply, check the signature, check the path from the root the leaf,
 # check the username, and then callback.
 #
 # @param server_reply {Object} the JSON object the server sent back
 # @param km {KeyManager} a keyManager to verify the reply with
-# @param cb {Callback<err,{Leaf,Uid,Username}>} Reply with the Leaf, uid, 
+# @param cb {Callback<err,{Leaf,Uid,Username}>} Reply with the Leaf, uid,
 #   and username verified by the merkle path
 module.exports = pathcheck = ({server_reply, km}, cb) ->
   pc = new PathChecker { server_reply, km }
@@ -43,12 +43,17 @@ class PathChecker
 
   #-----------
 
-  _verify_sig : (cb) -> 
+  _verify_sig : (cb) ->
     esc = make_esc cb, "_verify_sig"
-    sigeng = @km.make_sig_eng()
-    await sigeng.unbox @server_reply.root.sig, esc defer raw
-    await a_json_parse raw.toString('utf8'), esc defer @_signed_payload
-    cb null
+    kid = @km.get_ekid().toString('hex')
+    err = null
+    unless (sig = @server_reply.root.sigs[kid]?.sig)?
+      err = new Error "No signature found for kid: #{kid}"
+    else
+      sigeng = @km.make_sig_eng()
+      await sigeng.unbox sig, esc defer raw
+      await a_json_parse raw.toString('utf8'), esc defer @_signed_payload
+    cb err
 
   #-----------
 
@@ -68,7 +73,7 @@ class PathChecker
     await @_extract_nodes {list : @server_reply.uid_proof_path}, esc defer nodes
     tree = new LegacyUidNameTree { root, nodes }
     await tree.find {key : sha256(username) }, esc defer leaf
-    err = if (leaf is uid) then null 
+    err = if (leaf is uid) then null
     else new Error "UID mismatch #{leaf} != #{uid} in tree for #{username}"
     cb err
 
@@ -92,7 +97,7 @@ class PathChecker
     else
       h = (new hash.SHA256).bufhash (new Buffer username, "utf8")
       uid2 = h[0...15].toString('hex') + '19'
-      if uid isnt uid2  
+      if uid isnt uid2
         err = new Error "bad UID: #{uid} != #{uid2} for username #{username}"
     cb err, uid, username
 

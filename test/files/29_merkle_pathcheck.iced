@@ -6,7 +6,7 @@
 #=========================================================
 
 km = null
-exports.init = (T,cb) -> 
+exports.init = (T,cb) ->
   await KeyManager.import_from_armored_pgp {armored : key }, defer err, tmp
   km = tmp unless err?
   cb err
@@ -36,6 +36,20 @@ exports.check_max_bad_uid = (T,cb) ->
   await pathcheck { server_reply : bad, km }, defer err, resp
   T.assert err?, "bad UID came back"
   T.assert err.toString().indexOf("UID mismatch") >= 0, "UID mismatch error"
+  cb()
+
+#=========================================================
+
+exports.check_max_no_sig_for_kid = (T,cb) ->
+  esc = make_esc cb
+  bad = JSON.parse JSON.stringify path_max
+  good_kid = "010159baae6c7d43c66adf8fb7bb2b8b4cbe408c062cfc369e693ccb18f85631dbcd0a"
+  bad_kid = "010159baae6c7d43c66adf8fb7bb2b8b4cbe408c062cfc369e693ccb18f85631dbce0a"
+  bad.root.sigs[bad_kid] = bad.root.sigs[good_kid]
+  delete bad.root.sigs[good_kid]
+  await pathcheck { server_reply : bad, km }, defer err, resp
+  T.assert err?, "sig not found came back"
+  T.assert err.toString().indexOf("No signature found for kid: 010") >= 0, "right error message"
   cb()
 
 #=========================================================
@@ -98,11 +112,15 @@ path_max = {
       "txid" : "ab5fd1e63b3557a91a7d735e6de53415",
       "seqno" : 232661,
       "hash" : "27db90e0b5bd2e66496ecb295c1b5786029c50ba676b5821ddd1d206ecb1f0b09cef3c839e3c7c20f38a47885d0e3c4ec52f72f738b8d7b69d34e69c02078ad4",
-      "sig" : "-----BEGIN PGP MESSAGE-----\nVersion: GnuPG v2\n\nkA0DAAIB9DgDo0namdUBy+liAFVqdNB7ImJvZHkiOnsia2V5Ijp7ImZpbmdlcnBy\naW50IjoiMDNlMTQ2Y2RhZjgxMzY2ODBhZDU2NjkxMmEzMjM0MGNlYzhjOTQ5MiIs\nImtleV9pZCI6IjJBMzIzNDBDRUM4Qzk0OTIifSwibGVnYWN5X3VpZF9yb290Ijoi\nZDM0NTAyODhkMjMzZmU5MTI1ZDBiNmY4MTk2ZGJjOTM0NDdiY2EyNjMwMzAwODk4\nNzgxYTYzN2E0NDc1MjAzMiIsInByZXYiOiJkZmNkMjFlN2Y5YjIwYzQ5OGM4Njlh\nYzIwYjdiZDkzZmZkMzllMDEzZWI1YzM0NzBjMGY2OThmYmYyNDcxZGQzZTJlMzhm\nNzBjNTliYzY0YzQ4OTJlMzdmNmU5MTkxOTE3MWVjMTlhOTgzNTA5YTcxOWFjOTFk\nMzUzM2Y2MzQzZCIsInJvb3QiOiIyN2RiOTBlMGI1YmQyZTY2NDk2ZWNiMjk1YzFi\nNTc4NjAyOWM1MGJhNjc2YjU4MjFkZGQxZDIwNmVjYjFmMGIwOWNlZjNjODM5ZTNj\nN2MyMGYzOGE0Nzg4NWQwZTNjNGVjNTJmNzJmNzM4YjhkN2I2OWQzNGU2OWMwMjA3\nOGFkNCIsInNlcW5vIjoyMzI2NjEsInR4aWQiOiJhYjVmZDFlNjNiMzU1N2E5MWE3\nZFU3MzVlNmRlNTM0MTUiLCJ0eXBlIjoibWVya2xlX3Jvb3QiLCJ2ZXJzaW9uIjox\nfSwiY3RpbWUiOjE0MzMwNDAwNzksInRhZyI6InNpZ25hdHVyZSJ9iQIcBAABAgAG\nBQJVanTQAAoJEPQ4A6NJ2pnVK90P/1LNwvGaiA52cjhfRiLjJ770LHjP+htMham2\ndAIwuOwYvcnw/hUNup5tDD2LwkmR+uXOwZf/o0hCkjtiDNaLaz6sIslP4XvRZXmf\nlhvRV2+vrncIDn3yQf5pD506eil66UOMjAIe9d/cOcIFfJvz5DUYsiD9Wrdyae/8\nFGrHo5FU7a9uf5Yk7NklTMJfNpqZ7k0L8g4TgrLQKA8259QHE6m2YklDTzwAlRY2\nkvrdkw2TWfJYspdmlDIe0xxmZ4DNKdKi5Lgt+A0PojTZ6vtjslB5QAR1Uz8oU2a+\ngQ6PnIq5XprDypmqrst3FFPimvxHdtrc/wQ/UZ0zhi1/uaYq3VaL8PWIPbc3xZXI\nlzD9eoyxr+hMPSLk2PGYUHbJD6kNWrgh1xq4LH3HUbjdNK1I8GVz1GuE7jhA1qXP\na6oIaYGpVs1x2MLOj9eY9JeunvtQMpkJ/X5JgFpR7fyCn6rS7O9tWjIg8xzPDgAL\n1rL2xaqddCC+4Cpegy0gmdpQYi1vNfERgi962lnFj3+sU2tMN1OcfTdqomlxIhD7\nFpQJSPbc0WCfTfZiesqKHtVWjYreRAJ45Zv+xRRoM6bqrOxu6izbwrQoQoOuV7iT\nlK9RITs8ml8BHJuvN8sE3Td2wHokJzr4qpDpfqTf5Kan88z+A6CmjfR4RdjEqpo1\nwfl0O7CY\n=VHC0\n-----END PGP MESSAGE-----\n",
+      "sigs" : {
+        "010159baae6c7d43c66adf8fb7bb2b8b4cbe408c062cfc369e693ccb18f85631dbcd0a" : {
+          "sig" : "-----BEGIN PGP MESSAGE-----\nVersion: GnuPG v2\n\nkA0DAAIB9DgDo0namdUBy+liAFVqdNB7ImJvZHkiOnsia2V5Ijp7ImZpbmdlcnBy\naW50IjoiMDNlMTQ2Y2RhZjgxMzY2ODBhZDU2NjkxMmEzMjM0MGNlYzhjOTQ5MiIs\nImtleV9pZCI6IjJBMzIzNDBDRUM4Qzk0OTIifSwibGVnYWN5X3VpZF9yb290Ijoi\nZDM0NTAyODhkMjMzZmU5MTI1ZDBiNmY4MTk2ZGJjOTM0NDdiY2EyNjMwMzAwODk4\nNzgxYTYzN2E0NDc1MjAzMiIsInByZXYiOiJkZmNkMjFlN2Y5YjIwYzQ5OGM4Njlh\nYzIwYjdiZDkzZmZkMzllMDEzZWI1YzM0NzBjMGY2OThmYmYyNDcxZGQzZTJlMzhm\nNzBjNTliYzY0YzQ4OTJlMzdmNmU5MTkxOTE3MWVjMTlhOTgzNTA5YTcxOWFjOTFk\nMzUzM2Y2MzQzZCIsInJvb3QiOiIyN2RiOTBlMGI1YmQyZTY2NDk2ZWNiMjk1YzFi\nNTc4NjAyOWM1MGJhNjc2YjU4MjFkZGQxZDIwNmVjYjFmMGIwOWNlZjNjODM5ZTNj\nN2MyMGYzOGE0Nzg4NWQwZTNjNGVjNTJmNzJmNzM4YjhkN2I2OWQzNGU2OWMwMjA3\nOGFkNCIsInNlcW5vIjoyMzI2NjEsInR4aWQiOiJhYjVmZDFlNjNiMzU1N2E5MWE3\nZFU3MzVlNmRlNTM0MTUiLCJ0eXBlIjoibWVya2xlX3Jvb3QiLCJ2ZXJzaW9uIjox\nfSwiY3RpbWUiOjE0MzMwNDAwNzksInRhZyI6InNpZ25hdHVyZSJ9iQIcBAABAgAG\nBQJVanTQAAoJEPQ4A6NJ2pnVK90P/1LNwvGaiA52cjhfRiLjJ770LHjP+htMham2\ndAIwuOwYvcnw/hUNup5tDD2LwkmR+uXOwZf/o0hCkjtiDNaLaz6sIslP4XvRZXmf\nlhvRV2+vrncIDn3yQf5pD506eil66UOMjAIe9d/cOcIFfJvz5DUYsiD9Wrdyae/8\nFGrHo5FU7a9uf5Yk7NklTMJfNpqZ7k0L8g4TgrLQKA8259QHE6m2YklDTzwAlRY2\nkvrdkw2TWfJYspdmlDIe0xxmZ4DNKdKi5Lgt+A0PojTZ6vtjslB5QAR1Uz8oU2a+\ngQ6PnIq5XprDypmqrst3FFPimvxHdtrc/wQ/UZ0zhi1/uaYq3VaL8PWIPbc3xZXI\nlzD9eoyxr+hMPSLk2PGYUHbJD6kNWrgh1xq4LH3HUbjdNK1I8GVz1GuE7jhA1qXP\na6oIaYGpVs1x2MLOj9eY9JeunvtQMpkJ/X5JgFpR7fyCn6rS7O9tWjIg8xzPDgAL\n1rL2xaqddCC+4Cpegy0gmdpQYi1vNfERgi962lnFj3+sU2tMN1OcfTdqomlxIhD7\nFpQJSPbc0WCfTfZiesqKHtVWjYreRAJ45Zv+xRRoM6bqrOxu6izbwrQoQoOuV7iT\nlK9RITs8ml8BHJuvN8sE3Td2wHokJzr4qpDpfqTf5Kan88z+A6CmjfR4RdjEqpo1\nwfl0O7CY\n=VHC0\n-----END PGP MESSAGE-----\n",
+          "fingerprint" : "03E146CDAF8136680AD566912A32340CEC8C9492"
+        }
+      },
       "ctime" : 1433040079,
       "payload_json" : "{\"body\":{\"key\":{\"fingerprint\":\"03e146cdaf8136680ad566912a32340cec8c9492\",\"key_id\":\"2A32340CEC8C9492\"},\"legacy_uid_root\":\"d3450288d233fe9125d0b6f8196dbc93447bca2630300898781a637a44752032\",\"prev\":\"dfcd21e7f9b20c498c869ac20b7bd93ffd39e013eb5c3470c0f698fbf2471dd3e2e38f70c59bc64c4892e37f6e91919171ec19a983509a719ac91d3533f6343d\",\"root\":\"27db90e0b5bd2e66496ecb295c1b5786029c50ba676b5821ddd1d206ecb1f0b09cef3c839e3c7c20f38a47885d0e3c4ec52f72f738b8d7b69d34e69c02078ad4\",\"seqno\":232661,\"txid\":\"ab5fd1e63b3557a91a7d735e6de53415\",\"type\":\"merkle_root\",\"version\":1},\"ctime\":1433040079,\"tag\":\"signature\"}"
    },
-   "key_fingerprint" : "03E146CDAF8136680AD566912A32340CEC8C9492",
    "path" : [
       {
          "node" : {
@@ -129,7 +147,12 @@ path_bre = {
    "csrf_token" : "lgHZIDVhNmRhMTk3YjNjNGUzYzViOTU0NmU2NzNmYTBiMTA4zlVqdqXOAAFRgMDEIGuWx5m38tjzJfeZvJvji6vUY2ALSEwXSlTINvd7CHsf",
    "root" : {
       "ctime" : 1433040079,
-      "sig" : "-----BEGIN PGP MESSAGE-----\nVersion: GnuPG v2\n\nkA0DAAIB9DgDo0namdUBy+liAFVqdNB7ImJvZHkiOnsia2V5Ijp7ImZpbmdlcnBy\naW50IjoiMDNlMTQ2Y2RhZjgxMzY2ODBhZDU2NjkxMmEzMjM0MGNlYzhjOTQ5MiIs\nImtleV9pZCI6IjJBMzIzNDBDRUM4Qzk0OTIifSwibGVnYWN5X3VpZF9yb290Ijoi\nZDM0NTAyODhkMjMzZmU5MTI1ZDBiNmY4MTk2ZGJjOTM0NDdiY2EyNjMwMzAwODk4\nNzgxYTYzN2E0NDc1MjAzMiIsInByZXYiOiJkZmNkMjFlN2Y5YjIwYzQ5OGM4Njlh\nYzIwYjdiZDkzZmZkMzllMDEzZWI1YzM0NzBjMGY2OThmYmYyNDcxZGQzZTJlMzhm\nNzBjNTliYzY0YzQ4OTJlMzdmNmU5MTkxOTE3MWVjMTlhOTgzNTA5YTcxOWFjOTFk\nMzUzM2Y2MzQzZCIsInJvb3QiOiIyN2RiOTBlMGI1YmQyZTY2NDk2ZWNiMjk1YzFi\nNTc4NjAyOWM1MGJhNjc2YjU4MjFkZGQxZDIwNmVjYjFmMGIwOWNlZjNjODM5ZTNj\nN2MyMGYzOGE0Nzg4NWQwZTNjNGVjNTJmNzJmNzM4YjhkN2I2OWQzNGU2OWMwMjA3\nOGFkNCIsInNlcW5vIjoyMzI2NjEsInR4aWQiOiJhYjVmZDFlNjNiMzU1N2E5MWE3\nZFU3MzVlNmRlNTM0MTUiLCJ0eXBlIjoibWVya2xlX3Jvb3QiLCJ2ZXJzaW9uIjox\nfSwiY3RpbWUiOjE0MzMwNDAwNzksInRhZyI6InNpZ25hdHVyZSJ9iQIcBAABAgAG\nBQJVanTQAAoJEPQ4A6NJ2pnVK90P/1LNwvGaiA52cjhfRiLjJ770LHjP+htMham2\ndAIwuOwYvcnw/hUNup5tDD2LwkmR+uXOwZf/o0hCkjtiDNaLaz6sIslP4XvRZXmf\nlhvRV2+vrncIDn3yQf5pD506eil66UOMjAIe9d/cOcIFfJvz5DUYsiD9Wrdyae/8\nFGrHo5FU7a9uf5Yk7NklTMJfNpqZ7k0L8g4TgrLQKA8259QHE6m2YklDTzwAlRY2\nkvrdkw2TWfJYspdmlDIe0xxmZ4DNKdKi5Lgt+A0PojTZ6vtjslB5QAR1Uz8oU2a+\ngQ6PnIq5XprDypmqrst3FFPimvxHdtrc/wQ/UZ0zhi1/uaYq3VaL8PWIPbc3xZXI\nlzD9eoyxr+hMPSLk2PGYUHbJD6kNWrgh1xq4LH3HUbjdNK1I8GVz1GuE7jhA1qXP\na6oIaYGpVs1x2MLOj9eY9JeunvtQMpkJ/X5JgFpR7fyCn6rS7O9tWjIg8xzPDgAL\n1rL2xaqddCC+4Cpegy0gmdpQYi1vNfERgi962lnFj3+sU2tMN1OcfTdqomlxIhD7\nFpQJSPbc0WCfTfZiesqKHtVWjYreRAJ45Zv+xRRoM6bqrOxu6izbwrQoQoOuV7iT\nlK9RITs8ml8BHJuvN8sE3Td2wHokJzr4qpDpfqTf5Kan88z+A6CmjfR4RdjEqpo1\nwfl0O7CY\n=VHC0\n-----END PGP MESSAGE-----\n",
+      "sigs" : {
+        "010159baae6c7d43c66adf8fb7bb2b8b4cbe408c062cfc369e693ccb18f85631dbcd0a" : {
+          "sig" : "-----BEGIN PGP MESSAGE-----\nVersion: GnuPG v2\n\nkA0DAAIB9DgDo0namdUBy+liAFVqdNB7ImJvZHkiOnsia2V5Ijp7ImZpbmdlcnBy\naW50IjoiMDNlMTQ2Y2RhZjgxMzY2ODBhZDU2NjkxMmEzMjM0MGNlYzhjOTQ5MiIs\nImtleV9pZCI6IjJBMzIzNDBDRUM4Qzk0OTIifSwibGVnYWN5X3VpZF9yb290Ijoi\nZDM0NTAyODhkMjMzZmU5MTI1ZDBiNmY4MTk2ZGJjOTM0NDdiY2EyNjMwMzAwODk4\nNzgxYTYzN2E0NDc1MjAzMiIsInByZXYiOiJkZmNkMjFlN2Y5YjIwYzQ5OGM4Njlh\nYzIwYjdiZDkzZmZkMzllMDEzZWI1YzM0NzBjMGY2OThmYmYyNDcxZGQzZTJlMzhm\nNzBjNTliYzY0YzQ4OTJlMzdmNmU5MTkxOTE3MWVjMTlhOTgzNTA5YTcxOWFjOTFk\nMzUzM2Y2MzQzZCIsInJvb3QiOiIyN2RiOTBlMGI1YmQyZTY2NDk2ZWNiMjk1YzFi\nNTc4NjAyOWM1MGJhNjc2YjU4MjFkZGQxZDIwNmVjYjFmMGIwOWNlZjNjODM5ZTNj\nN2MyMGYzOGE0Nzg4NWQwZTNjNGVjNTJmNzJmNzM4YjhkN2I2OWQzNGU2OWMwMjA3\nOGFkNCIsInNlcW5vIjoyMzI2NjEsInR4aWQiOiJhYjVmZDFlNjNiMzU1N2E5MWE3\nZFU3MzVlNmRlNTM0MTUiLCJ0eXBlIjoibWVya2xlX3Jvb3QiLCJ2ZXJzaW9uIjox\nfSwiY3RpbWUiOjE0MzMwNDAwNzksInRhZyI6InNpZ25hdHVyZSJ9iQIcBAABAgAG\nBQJVanTQAAoJEPQ4A6NJ2pnVK90P/1LNwvGaiA52cjhfRiLjJ770LHjP+htMham2\ndAIwuOwYvcnw/hUNup5tDD2LwkmR+uXOwZf/o0hCkjtiDNaLaz6sIslP4XvRZXmf\nlhvRV2+vrncIDn3yQf5pD506eil66UOMjAIe9d/cOcIFfJvz5DUYsiD9Wrdyae/8\nFGrHo5FU7a9uf5Yk7NklTMJfNpqZ7k0L8g4TgrLQKA8259QHE6m2YklDTzwAlRY2\nkvrdkw2TWfJYspdmlDIe0xxmZ4DNKdKi5Lgt+A0PojTZ6vtjslB5QAR1Uz8oU2a+\ngQ6PnIq5XprDypmqrst3FFPimvxHdtrc/wQ/UZ0zhi1/uaYq3VaL8PWIPbc3xZXI\nlzD9eoyxr+hMPSLk2PGYUHbJD6kNWrgh1xq4LH3HUbjdNK1I8GVz1GuE7jhA1qXP\na6oIaYGpVs1x2MLOj9eY9JeunvtQMpkJ/X5JgFpR7fyCn6rS7O9tWjIg8xzPDgAL\n1rL2xaqddCC+4Cpegy0gmdpQYi1vNfERgi962lnFj3+sU2tMN1OcfTdqomlxIhD7\nFpQJSPbc0WCfTfZiesqKHtVWjYreRAJ45Zv+xRRoM6bqrOxu6izbwrQoQoOuV7iT\nlK9RITs8ml8BHJuvN8sE3Td2wHokJzr4qpDpfqTf5Kan88z+A6CmjfR4RdjEqpo1\nwfl0O7CY\n=VHC0\n-----END PGP MESSAGE-----\n",
+          "fingerprint" : "03E146CDAF8136680AD566912A32340CEC8C9492"
+        }
+      }
       "txid" : "ab5fd1e63b3557a91a7d735e6de53415",
       "seqno" : 232661,
       "payload_json" : "{\"body\":{\"key\":{\"fingerprint\":\"03e146cdaf8136680ad566912a32340cec8c9492\",\"key_id\":\"2A32340CEC8C9492\"},\"legacy_uid_root\":\"d3450288d233fe9125d0b6f8196dbc93447bca2630300898781a637a44752032\",\"prev\":\"dfcd21e7f9b20c498c869ac20b7bd93ffd39e013eb5c3470c0f698fbf2471dd3e2e38f70c59bc64c4892e37f6e91919171ec19a983509a719ac91d3533f6343d\",\"root\":\"27db90e0b5bd2e66496ecb295c1b5786029c50ba676b5821ddd1d206ecb1f0b09cef3c839e3c7c20f38a47885d0e3c4ec52f72f738b8d7b69d34e69c02078ad4\",\"seqno\":232661,\"txid\":\"ab5fd1e63b3557a91a7d735e6de53415\",\"type\":\"merkle_root\",\"version\":1},\"ctime\":1433040079,\"tag\":\"signature\"}",
