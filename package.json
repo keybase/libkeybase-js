@@ -31,8 +31,7 @@
     "keybase-proofs": "^2.0.23",
     "keybase-test-vectors": "^1.0.1",
     "merkle-tree": "0.0.14",
-    "triplesec": "^3.0.19",
-    "tweetnacl": "^0.12.0"
+    "triplesec": "^3.0.19"
   },
   "devDependencies": {
     "browserify": "^5.10.1",
