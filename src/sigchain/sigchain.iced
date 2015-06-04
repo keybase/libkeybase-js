@@ -55,24 +55,26 @@ class ChainLink
 
   @_unbox_payload : ({sig_blob, parsed_keys, sig_cache}, cb) ->
     esc = make_esc cb, "ChainLink._unbox_payload"
+    # Get the ctime and the KID directly from the server blob. These are the
+    # only pieces of data that we don't get from the unboxed sig payload,
+    # because we need them to do the uboxing. We check them against what's in
+    # the box later, and freak out of there's a difference.
+    kid = sig_blob.kid
+    ctime_seconds = sig_blob.ctime
+    # Get the key_manager and sig_eng we need from the ParsedKeys object.
+    key_manager = parsed_keys.key_managers[kid]
+    if not key_manager?
+      await athrow (new E.NonexistentKidError "link signed by nonexistent kid #{kid}"), esc defer()
+    sig_eng = key_manager.make_sig_eng()
     # Compute the sig_id. We return this, but we also use it to check whether
     # this sig is in the sig_cache, meaning it's already been verified.
-    sig_buffer = new Buffer(sig_blob.sig, "base64")
-    sig_id = kbpgp.hash.SHA256(sig_buffer).toString("hex") + SIG_ID_SUFFIX
+    await sig_eng.get_body {armored: sig_blob.sig}, esc defer sig_body
+    sig_id = kbpgp.hash.SHA256(sig_body).toString("hex") + SIG_ID_SUFFIX
     # Check whether the sig is cached. If so, get the payload from cache.
     if sig_cache?
       payload_buffer = sig_cache.get(sig_id)
     # If we didn't get the payload from cache, unbox it for real.
     if not payload_buffer?
-      # Get the ctime and the KID directly from the server blob. These are the
-      # only pieces of data that we don't get from the unboxed sig payload,
-      # because we need them to do the uboxing. We check them against what's in
-      # the box later, and freak out of there's a difference.
-      kid = sig_blob.kid
-      ctime_seconds = sig_blob.ctime
-      key_manager = parsed_keys.key_managers[kid]
-      if not key_manager?
-        await athrow (new E.NonexistentKidError "link signed by nonexistent kid #{kid}"), esc defer()
       await key_manager.make_sig_eng().unbox(
         sig_blob.sig,
         defer(err, payload_buffer),
