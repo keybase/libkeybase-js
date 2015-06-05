@@ -5,7 +5,7 @@ proofs = require('keybase-proofs')
 ie = require('iced-error')
 
 UID_LEN = 32
-SIG_ID_SUFFIX = "0f"
+exports.SIG_ID_SUFFIX = SIG_ID_SUFFIX = "0f"
 
 exports.ParsedKeys = class ParsedKeys
   @parse : ({bundles_list}, cb) ->

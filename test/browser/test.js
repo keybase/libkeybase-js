@@ -2530,7 +2530,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 
   UID_LEN = 32;
 
-  SIG_ID_SUFFIX = "0f";
+  exports.SIG_ID_SUFFIX = SIG_ID_SUFFIX = "0f";
 
   exports.ParsedKeys = ParsedKeys = (function() {
     ParsedKeys.parse = function(_arg, cb) {
