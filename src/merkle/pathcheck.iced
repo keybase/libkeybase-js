@@ -4,6 +4,7 @@ C = require '../constants'
 {hash} = require 'triplesec'
 merkle = require 'merkle-tree'
 {a_json_parse} = require('iced-utils').util
+{Leaf} = require './leaf'
 
 sha256 = (s) -> (new hash.SHA256).bufhash(new Buffer s, 'utf8').toString('hex')
 sha512 = (s) -> (new hash.SHA512).bufhash(new Buffer s, 'utf8').toString('hex')
@@ -84,8 +85,13 @@ class PathChecker
     root = @_signed_payload.body.root
     await @_extract_nodes { list : @server_reply.path}, esc defer nodes
     tree = new MainTree { root, nodes }
-    await tree.find {key : uid}, esc defer leaf
-    cb null, leaf
+    await tree.find {key : uid}, esc defer leaf_raw
+    # The leaf might be missing entirely, for empty users.
+    if leaf_raw?
+      [err, leaf] = Leaf.parse leaf_raw
+    else
+      [err, leaf] = [null, null]
+    cb err, leaf
 
   #-----------
 
