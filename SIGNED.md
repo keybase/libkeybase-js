@@ -3,13 +3,13 @@
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2
 
-iQEcBAABCAAGBQJVcd1KAAoJEHGHa2itSC0yH7oH/0l0+yEujp58Vso0iOam8MXi
-UqSr4pSJpdYTpS+yOFr/ZhzDCKBkhDV2IKAcVwYkmddH1uhze+P0eAKTG4QZKAeW
-lhbF3zS7R77bHci6urNWwKXTP1XFp6R8N9GCtkxOLLcjmQEaSBWr/kf2P/ub51Cq
-Iv3ajm7eUa1mEMWEp7I9F85IOXYlvyK62BmDJMN9IEkMQAii5m//cY6O11OhwoVl
-++G5bu4n3HY28RuQymj4W135Y62ESGU97JRLDMhvl4aVFxWftcTb6VegEMipYj4I
-cHa22G42TGFieM+kDE1bUlEFNruQJrUJvyiXB1mG21Vr1glo4c36tD003WtZOto=
-=0fkX
+iQEcBAABCAAGBQJVeJQrAAoJEHGHa2itSC0yPOgIAKUeZotbBbdW1f9sE4Cok1jj
+67xXiD8reQLwzirRePzzX+Xbbq4rC6xqZG/1Y8t13OSIoOYr7q16gZNwPsMOCSqr
+QYRSQf4xKhDUKjoYbDZeRxGxDZcHMzncSkZtJASm30+TLbqvyetoWMJggFieeBzE
+clddIQK6XYNAeJEDK64jfM1ogEYjwgBAT59is5s9dHFOOcwvQgjLPSn18MRMXtUo
+8BiD5cvLQUTI4cU9jrebOKL01XFoCAntSz6OkyQdIMudnSr+PyaSHyg2eB7AmzXK
+kadx/46oC4Rb2CaMhacjPVXH74U83V2q/YSNQedtSiW9tzH/bLbtelrFr6rSWC0=
+=TyNI
 -----END PGP SIGNATURE-----
 
 ```
@@ -45,12 +45,12 @@ size     exec  file                            contents
 625                main.js                     c046e0c31a2b087f1dc56a373b46f16691ce3065d4cd0c9ca0fa5c62bfb233c0
                    merkle/                                                                                     
 5430                 leaf.js                   6d6a21ccf133b97e4ce60324be92378ebb0e065a24cf8282484cdf837d364ac3
-15896                pathcheck.js              1fcba6ac68654c60a385dc3244c95f9aecb0a25509a5ec08c0773637f1320161
+16234                pathcheck.js              692cbdaadf98d5137b06a770abb9ffe926860ab11182f08cc3a151a86b2c50ca
                    sigchain/                                                                                   
 32101                sigchain.js               3f68d8993eb0a36a93eecef08a5cf7cdcb20cd26eea02ea30a29b7f27eb30c9a
                  notes/                                                                                        
 2129               tweetnacl.md                099fac68f7caebd05b6060781e7fcfb32726309bb4bd67aa35b10134a280e049
-1107             package.json                  63a32755f969b4823126e1d8e2f0bf7ae3cd52752b62fdbb093ad02bb0046373
+1107             package.json                  64f8b81a2513a667e08a1d4ce3282e56e3385ea0fd3dc0b1401994017f8c7383
                  src/                                                                                          
 4407               assertion.iced              fac9d95f8915318ec94dcd9f57f0f6a1b65b210429e6a5f6ac2ad8d33b97cd10
 634                assertion_parser.jison      65624a141081113074e6c778af7df8fad6769d3c5b2fb96e8edcd31444f8706f
@@ -60,16 +60,16 @@ size     exec  file                            contents
 466                main.iced                   0d36dd68f0281e58d0269395bcd9b2ef4d6d2ffbd69307e292b5aa14e646b4df
                    merkle/                                                                                     
 3371                 leaf.iced                 e083507d9f223bd667c4a1068465461edb1fc35657c59835c230b79172694fc4
-3917                 pathcheck.iced            de79d9637f47520a67d6a64215aca5630f4f7ad6b0999f7f8212457b7cdad0d8
+4104                 pathcheck.iced            d56c4797650cc72592dcc644678b88480753ea51bce91f6c966c9b1716d8fb34
                    sigchain/                                                                                   
 14628                sigchain.iced             c477a84039acc4292960d72a434b35fcb75632eeeaf5245a26850998dbbdca50
                  test/                                                                                         
                    browser/                                                                                    
 287                  index.html                e31387cfd94034901e89af59f0ad29a3e2f494eb7269f1806e757be21b3cf33e
 258                  main.iced                 a37b688cc46a4cfe2eee5892f556d4a4a96b2fcbe59e8e50e935bbc57262f16b
-2507041              test.js                   5595e8608f19b94222e19946f8bc0748bf346b8adf992ca5ed5d6d69ed6b4d13
+2507390              test.js                   20189ab94794b9a1e6585eff92293b27faa32c339584a5416d86a26c681f8a30
                    files/                                                                                      
-180426               29_merkle_pathcheck.iced  18b2fa7d1e86750490ef460303a52719229bb81a49a5e982c5733cb1635413f0
+180883               29_merkle_pathcheck.iced  971975a5ba316af0ce2150be8170762699f323753ce3040a8e3f9a12f07656f1
 4706                 30_merkle_leaf.iced       2ed24fd02ac4d9c39149d974d774760448db6f4a600fd9adbb3b1b35e0d0000c
 5591                 31_sigchain.iced          7a74d34f286135804f8f5e8d7a4129e68e56a17c7f550a0d681b763b5e305b46
 5624                 32_kvstore.iced           90bacb5973649246d91f959d64c6cb6a7d52e1a2784ccd4363997f2ef5ef17a2
