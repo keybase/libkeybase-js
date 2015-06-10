@@ -76,6 +76,19 @@ exports.check_bre_bad_path = (T,cb) ->
 
 #=========================================================
 
+exports.check_max_nonexistent_uid = (T,cb) ->
+  esc = make_esc cb
+  max = JSON.parse JSON.stringify path_max
+  # username specifically chosen to make the hash start with "db"
+  max.username = "someone_590910"
+  max.uid = "dbb163c107f3ae7100135833dc26ce19"
+  await pathcheck { server_reply : max, km }, defer err, resp
+  T.no_error err
+  T.assert (resp.leaf == null), "leaf should be null"
+  cb()
+
+#=========================================================
+
 path_max = {
    "status" : {
       "code" : 0,

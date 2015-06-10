@@ -2402,8 +2402,12 @@ if (typeof module !== 'undefined' && require.main === module) {
             })));
             __iced_deferrals._fulfill();
           })(function() {
-            var _ref;
-            _ref = Leaf.parse(leaf_raw), err = _ref[0], leaf = _ref[1];
+            var _ref, _ref1;
+            if (typeof leaf_raw !== "undefined" && leaf_raw !== null) {
+              _ref = Leaf.parse(leaf_raw), err = _ref[0], leaf = _ref[1];
+            } else {
+              _ref1 = [null, null], err = _ref1[0], leaf = _ref1[1];
+            }
             return cb(err, leaf);
           });
         };
@@ -2434,7 +2438,7 @@ if (typeof module !== 'undefined' && require.main === module) {
                     return err = arguments[0];
                   };
                 })(),
-                lineno: 97
+                lineno: 101
               }));
               __iced_deferrals._fulfill();
             })(__iced_k);
