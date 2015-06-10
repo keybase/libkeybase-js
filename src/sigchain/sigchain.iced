@@ -188,6 +188,7 @@ exports.SigChain = class SigChain
     sigchain = new SigChain {uid, username, eldest_kid}
     for sig_blob in sig_blobs
       await sigchain._add_new_link {sig_blob, parsed_keys, sig_cache}, esc defer()
+    await sigchain._enforce_eldest_key_ownership {}, esc defer()
     cb null, sigchain
 
   # NOTE: Don't call the constructor directly. Use SigChain.replay().
@@ -202,6 +203,7 @@ exports.SigChain = class SigChain
     @_valid_sibkeys[eldest_kid] = true
     @_subkeys_to_etime_seconds = {}
     @_valid_subkeys = {}
+    @_eldest_key_verified = false
 
   # Return the list of links in the current subchain which have not been
   # revoked.
@@ -244,6 +246,8 @@ exports.SigChain = class SigChain
     # relevant metadata.
     @_links.push(link)
     @_unrevoked_links[link.sig_id] = link
+    if link.kid == @_eldest_kid
+      @_eldest_key_verified = true
 
     await @_delegate_keys {link}, esc defer()
 
@@ -314,6 +318,20 @@ exports.SigChain = class SigChain
         if revoked_subkey? and revoked_subkey of @_valid_subkeys
           delete @_valid_subkeys[revoked_subkey]
     cb()
+
+  _enforce_eldest_key_ownership : ({}, cb) ->
+    # It's important that users actually *prove* they own their eldest key,
+    # rather than just claiming someone else's key as their own. The server
+    # normally enforces this, and here we check the server's work. Proof can
+    # happen in one of two ways: either the eldest key signs a link in the
+    # sigchain (thereby referencing the username in the signature payload), or
+    # the eldest key is a PGP key that self-signs its own identity.
+    if @_eldest_key_verified
+      # There was at least one chain link signed by the eldest key.
+      cb null
+      return
+    # No chain link signed by the eldest key. Check PGP self sig.
+
 
 exports.E = E = ie.make_errors {
   "BAD_LINK_FORMAT": ""
