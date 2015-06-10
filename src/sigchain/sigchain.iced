@@ -188,6 +188,7 @@ exports.SigChain = class SigChain
     sigchain = new SigChain {uid, username, eldest_kid}
     for sig_blob in sig_blobs
       await sigchain._add_new_link {sig_blob, parsed_keys, sig_cache}, esc defer()
+    await sigchain._enforce_eldest_key_ownership {parsed_keys}, esc defer()
     cb null, sigchain
 
   # NOTE: Don't call the constructor directly. Use SigChain.replay().
@@ -202,6 +203,7 @@ exports.SigChain = class SigChain
     @_valid_sibkeys[eldest_kid] = true
     @_subkeys_to_etime_seconds = {}
     @_valid_subkeys = {}
+    @_eldest_key_verified = false
 
   # Return the list of links in the current subchain which have not been
   # revoked.
@@ -210,6 +212,11 @@ exports.SigChain = class SigChain
 
   # Return the list of sibkey KIDs which aren't revoked or expired.
   get_sibkeys : ({now}) ->
+    if @_links.length == 0
+      # If there are no links at all, just return the eldest KID. See also
+      # @_enforce_eldest_key_ownership().
+      # TODO: Should we respect PGP key expiration times in this case?
+      return [@_eldest_key]
     now = now or current_time_seconds()
     return (kid for kid of @_valid_sibkeys when @_sibkeys_to_etime_seconds[kid] > now)
 
@@ -244,6 +251,8 @@ exports.SigChain = class SigChain
     # relevant metadata.
     @_links.push(link)
     @_unrevoked_links[link.sig_id] = link
+    if link.kid == @_eldest_kid
+      @_eldest_key_verified = true
 
     await @_delegate_keys {link}, esc defer()
 
@@ -315,16 +324,47 @@ exports.SigChain = class SigChain
           delete @_valid_subkeys[revoked_subkey]
     cb()
 
+  _enforce_eldest_key_ownership : ({parsed_keys}, cb) ->
+    # It's important that users actually *prove* they own their eldest key,
+    # rather than just claiming someone else's key as their own. The server
+    # normally enforces this, and here we check the server's work. Proof can
+    # happen in one of two ways: either the eldest key signs a link in the
+    # sigchain (thereby referencing the username in the signature payload), or
+    # the eldest key is a PGP key that self-signs its own identity.
+    esc = make_esc cb, "SigChain._enforce_eldest_key_ownership"
+    if @_eldest_key_verified
+      # There was at least one chain link signed by the eldest key.
+      cb null
+      return
+    # No chain link signed by the eldest key. Check PGP self sig.
+    eldest_km = parsed_keys.key_managers[@_eldest_kid]
+    if not eldest_km?
+      # Server-reported eldest key is simply missing.
+      await athrow (new E.NonexistentKidError "no key for eldest kid #{@_eldest_kid}"), esc defer()
+    if not eldest_km.userids?
+      # Server-reported key doesn't self-sign any identities (probably because
+      # it's a NaCl key and not a PGP key).
+      await athrow (new E.KeyOwnershipError "key #{@_eldest_kid} is not self-signing"), esc defer()
+    expected_email = @_username + "@keybase.io"
+    for identity in eldest_km.userids
+      if identity.get_email() == expected_email
+        # Found a matching identity. This key is good.
+        cb null
+        return
+    # No matching identity found.
+    await athrow (new E.KeyOwnershipError "key #{@_eldest_kid} is not owned by #{expected_email}"), esc defer()
+
 exports.E = E = ie.make_errors {
   "BAD_LINK_FORMAT": ""
-  "NONEXISTENT_KID": ""
-  "VERIFY_FAILED": ""
-  "REVERSE_SIG_VERIFY_FAILED": ""
-  "KID_MISMATCH": ""
-  "FINGERPRINT_MISMATCH": ""
   "CTIME_MISMATCH": ""
-  "INVALID_SIBKEY": ""
   "EXPIRED_SIBKEY": ""
+  "FINGERPRINT_MISMATCH": ""
+  "INVALID_SIBKEY": ""
+  "KEY_OWNERSHIP": ""
+  "KID_MISMATCH": ""
+  "NONEXISTENT_KID": ""
+  "REVERSE_SIG_VERIFY_FAILED": ""
+  "VERIFY_FAILED": ""
   "WRONG_UID": ""
   "WRONG_USERNAME": ""
   "WRONG_SEQNO": ""

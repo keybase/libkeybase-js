@@ -132,7 +132,9 @@ do_sigchain_test = ({T, input, err_type, len, sibkeys, subkeys, eldest}, cb) ->
   sibkeys_list = sigchain.get_sibkeys {now}
   if sibkeys?
     T.assert sibkeys_list.length == sibkeys, "Expected exactly #{sibkeys} sibkeys, got #{sibkeys_list.length}"
-  T.assert sigchain.get_sibkeys({now: far_future}).length == 0, "Expected no sibkeys in the far future."
+  if links.length > 0
+    # The eldest key does not expire if there are no links at all.
+    T.assert sigchain.get_sibkeys({now: far_future}).length == 0, "Expected no sibkeys in the far future."
   # Check the number of unrevoked/unexpired subkeys.
   subkeys_list = sigchain.get_subkeys {now}
   if subkeys?
