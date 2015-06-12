@@ -185,25 +185,30 @@ exports.SigChain = class SigChain
     if not eldest_kid?
       # Forgetting the eldest KID would silently give you an empty sigchain. Prevent this.
       await athrow (new Error "eldest_kid parameter is required"), esc defer()
-    sigchain = new SigChain {uid, username, eldest_kid}
+    sigchain = new SigChain {uid, username, eldest_kid, parsed_keys}
     for sig_blob in sig_blobs
       await sigchain._add_new_link {sig_blob, parsed_keys, sig_cache}, esc defer()
     await sigchain._enforce_eldest_key_ownership {parsed_keys}, esc defer()
     cb null, sigchain
 
   # NOTE: Don't call the constructor directly. Use SigChain.replay().
-  constructor : ({uid, username, eldest_kid}) ->
+  constructor : ({uid, username, eldest_kid, parsed_keys}) ->
     @_uid = uid
     @_username = username
     @_eldest_kid = eldest_kid
     @_links = []
     @_unrevoked_links = {}
-    @_sibkeys_to_etime_seconds = {}
     @_valid_sibkeys = {}
+    # Eldest key starts out valid, but will be checked later for ownership.
     @_valid_sibkeys[eldest_kid] = true
-    @_subkeys_to_etime_seconds = {}
     @_valid_subkeys = {}
     @_eldest_key_verified = false
+    @_kid_to_etime_seconds = {}
+    # Get all the PGP key etimes, which could be sooner than link etimes.
+    for kid, km of parsed_keys.key_manager
+      if km.primary?.lifespan?
+        etime_seconds = km.primary.lifespan.generated + km.primary.lifespan.expire_in
+        @_kid_to_etime_seconds[kid] = etime_seconds
 
   # Return the list of links in the current subchain which have not been
   # revoked.
@@ -218,12 +223,12 @@ exports.SigChain = class SigChain
       # TODO: Should we respect PGP key expiration times in this case?
       return [@_eldest_key]
     now = now or current_time_seconds()
-    return (kid for kid of @_valid_sibkeys when @_sibkeys_to_etime_seconds[kid] > now)
+    return (kid for kid of @_valid_sibkeys when @_kid_to_etime_seconds[kid] > now)
 
   # Return the list of subkey KIDs which aren't revoked or expired.
   get_subkeys : ({now}) ->
     now = now or current_time_seconds()
-    return (kid for kid of @_valid_subkeys when @_subkeys_to_etime_seconds[kid] > now)
+    return (kid for kid of @_valid_subkeys when @_kid_to_etime_seconds[kid] > now)
 
   _add_new_link : ({sig_blob, parsed_keys, sig_cache}, cb) ->
     esc = make_esc cb, "SigChain._add_new_link"
@@ -264,7 +269,7 @@ exports.SigChain = class SigChain
     err = null
     if link.kid not of @_valid_sibkeys
       err = new E.InvalidSibkeyError "not a valid sibkey: #{link.kid} valid sibkeys: #{JSON.stringify(@_valid_sibkeys)}"
-    else if link.ctime_seconds > @_sibkeys_to_etime_seconds[link.kid]
+    else if link.ctime_seconds > @_kid_to_etime_seconds[link.kid]
       err = new E.ExpiredSibkeyError "expired sibkey: #{link.kid}"
     cb err
 
@@ -292,14 +297,14 @@ exports.SigChain = class SigChain
   _delegate_keys : ({link}, cb) ->
     # The eldest key is valid from the beginning, but it doesn't get an etime
     # until the first link.
-    if link.kid is @_eldest_kid and @_eldest_kid not of @_sibkeys_to_etime_seconds
-      @_sibkeys_to_etime_seconds[@_eldest_kid] = link.etime_seconds
+    if link.kid is @_eldest_kid and @_eldest_kid not of @_kid_to_etime_seconds
+      @_kid_to_etime_seconds[@_eldest_kid] = link.etime_seconds
     if link.sibkey_delegation?
       @_valid_sibkeys[link.sibkey_delegation] = true
-      @_sibkeys_to_etime_seconds[link.sibkey_delegation] = link.etime_seconds
+      @_kid_to_etime_seconds[link.sibkey_delegation] = link.etime_seconds
     if link.subkey_delegation?
       @_valid_subkeys[link.subkey_delegation] = true
-      @_subkeys_to_etime_seconds[link.subkey_delegation] = link.etime_seconds
+      @_kid_to_etime_seconds[link.subkey_delegation] = link.etime_seconds
     cb()
 
   _revoke_keys_and_sigs : ({link}, cb) ->
