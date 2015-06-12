@@ -120,21 +120,15 @@ do_sigchain_test = ({T, input, err_type, len, sibkeys, subkeys, eldest}, cb) ->
   links = sigchain.get_links()
   if len?
     T.assert links.length == len, "Expected exactly #{len} links, got #{links.length}"
-  # Use the creation time of the last sigchain link to get keys. (We don't want
-  # tests to start breaking in a few years.) But also define a time in the
-  # future that's guaranteed to expire all keys.
-  now = 0  # For empty sigchains now doesn't matter, as long as it's a number.
-  if links.length > 0
-    last_link = links[links.length - 1]
-    now = last_link.ctime_seconds
+  # Don't use the current time for tests, because eventually that will cause
+  # keys to expire and tests to break.
+  now = get_current_time_for_test { links, parsed_keys }
   far_future = now + 100 * 365 * 24 * 60 * 60  # 100 years from now
   # Check the number of unrevoked/unexpired sibkeys.
   sibkeys_list = sigchain.get_sibkeys {now}
   if sibkeys?
     T.assert sibkeys_list.length == sibkeys, "Expected exactly #{sibkeys} sibkeys, got #{sibkeys_list.length}"
-  if links.length > 0
-    # The eldest key does not expire if there are no links at all.
-    T.assert sigchain.get_sibkeys({now: far_future}).length == 0, "Expected no sibkeys in the far future."
+  T.assert sigchain.get_sibkeys({now: far_future}).length == 0, "Expected no sibkeys in the far future."
   # Check the number of unrevoked/unexpired subkeys.
   subkeys_list = sigchain.get_subkeys {now}
   if subkeys?
@@ -145,3 +139,13 @@ do_sigchain_test = ({T, input, err_type, len, sibkeys, subkeys, eldest}, cb) ->
   sigchain.get_sibkeys {}
   sigchain.get_subkeys {}
   cb()
+
+get_current_time_for_test = ({links, parsed_keys}) ->
+  # Pick a time that's later than the ctime of all links and PGP keys.
+  t_seconds = 0
+  for link in links
+    t_seconds = Math.max(t_seconds, link.ctime_seconds)
+  for kid, km of parsed_keys.key_managers
+    if km.primary?.lifespan?.generated?
+      t_seconds = Math.max(t_seconds, km.primary.lifespan.generated)
+  return t_seconds
