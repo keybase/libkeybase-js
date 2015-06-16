@@ -52,14 +52,14 @@ exports.test_sig_cache = (T, cb) ->
   # (The first sig is not in ralph's most recent subchain.)
   store = {}
   sig_cache =
-    get: (sig_id) ->
-      return store[sig_id]
-    put: (sig_id, payload) ->
-      store[sig_id] = payload
-      return
+    get: ({sig_id}, cb) ->
+      cb null, store[sig_id]
+    put: ({sig_id, payload_buffer}, cb) ->
+      store[sig_id] = payload_buffer
+      cb null
   last_sig_id = chain[chain.length-1].sig_id
   last_payload = new Buffer chain[chain.length-1].payload_json, "utf8"
-  sig_cache.put last_sig_id, last_payload
+  await sig_cache.put {sig_id: last_sig_id, payload_buffer: last_payload}, esc defer()
 
   # Replay the sigchain and make sure everything works.
   await node_sigchain.ParsedKeys.parse {bundles_list: keys}, esc defer parsed_keys
