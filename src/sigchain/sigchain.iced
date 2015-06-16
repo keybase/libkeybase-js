@@ -201,6 +201,8 @@ exports.SigChain = class SigChain
     @_username = username
     @_eldest_kid = eldest_kid
     @_links = []
+    @_next_seqno = 1
+    @_next_payload_hash = null
     @_unrevoked_links = {}
     @_valid_sibkeys = {}
     # Eldest key starts out valid, but will be checked later for ownership.
@@ -238,25 +240,30 @@ exports.SigChain = class SigChain
     # reverse sigs.
     await ChainLink.parse {sig_blob, parsed_keys, sig_cache}, esc defer link
 
-    # Users can "reset" their eldest key, for example if they lose all their
-    # devices. This invalidates old links, but those links are kept in the
-    # chain for consistency. We have to skip ahead to the part of the chain
-    # belonging to the current eldest key.
-    # TODO: Make sure we actually check seqnos and prev pointers on skipped
-    # links.
-    if link.eldest_kid isnt @_eldest_kid
-      # This link was signed by a previous generation of keys. Skip.
-      cb()
-      return
-
-    # Next we need to check that the signing key is in the family.
-    await @_check_key_is_valid {link}, esc defer()
-
-    # Finally, check that the link belongs at this point in the chain.
+    # Make sure the link belongs in this chain (right username and uid) and at
+    # this particular point in the chain (right seqno and prev hash).
     await @_check_link_belongs_here {link}, esc defer()
 
-    # At this point, we've confirmed the link is valid. Update all the relevant
-    # metadata.
+    # Now check if this link's eldest key is the one we're looking for. If not,
+    # this link belongs to a different subchain.
+    if link.eldest_kid isnt @_eldest_kid
+      if @_links.length == 0
+        # This link is in an old subchain. Skip to the next link.
+        cb null
+        return
+      else
+        # There's another subchain AFTER the one we're looking for. This should
+        # never happen -- until we build some sort of history-inspecting
+        # feature in the future.
+        cb new E.NotLatestSubchainError("Found a later subchain with eldest kid #{link.eldest_kid}")
+        return
+
+    # Finally, make sure that the key that signed this link was actually valid
+    # at the time the link was signed.
+    await @_check_key_is_valid {link}, esc defer()
+
+    # This link is valid and part of the current subchain. Update all the
+    # relevant metadata.
     @_links.push(link)
     @_unrevoked_links[link.sig_id] = link
     if link.kid == @_eldest_kid
@@ -266,38 +273,40 @@ exports.SigChain = class SigChain
 
     cb null
 
+  _check_link_belongs_here : ({link}, cb) ->
+    err = null
+    if link.uid isnt @_uid
+      err = new E.WrongUidError(
+        "Link doesn't refer to the right uid,
+        expected: #{link.uid} got: #{@_uid}")
+    else if link.username isnt @_username
+      err = new E.WrongUsernameError(
+        "Link doesn't refer to the right username,
+        expected: #{link.username} got: #{@_username}")
+    else if link.seqno isnt @_next_seqno
+      err = new E.WrongSeqnoError(
+        "Link sequence number is wrong, expected:
+        #{@_next_seqno} got: #{link.seqno}")
+    else if @_next_payload_hash? and link.prev isnt @_next_payload_hash
+      err = new E.WrongPrevError(
+        "Previous payload hash doesn't match,
+        expected: #{@_next_payload_hash} got: #{link.prev}")
+    @_next_seqno++
+    @_next_payload_hash = link.payload_hash
+    cb err
+
   _check_key_is_valid : ({link}, cb) ->
     err = null
     if link.kid not of @_valid_sibkeys
-      err = new E.InvalidSibkeyError "not a valid sibkey: #{link.kid} valid sibkeys: #{JSON.stringify(@_valid_sibkeys)}"
+      err = new E.InvalidSibkeyError("not a valid sibkey: #{link.kid}, valid sibkeys:
+                                      #{JSON.stringify(kid for kid of @_valid_sibkeys)}")
     else if link.ctime_seconds > @_kid_to_etime_seconds[link.kid]
       err = new E.ExpiredSibkeyError "expired sibkey: #{link.kid}"
     cb err
 
-  _check_link_belongs_here : ({link}, cb) ->
-    last_link = @_links[@_links.length-1]  # null if this is the first link
-    err = null
-    if link.uid isnt @_uid
-      err = new E.WrongUidError """link doesn't refer to the right uid
-                                 expected: #{link.uid}
-                                      got: #{@_uid}"""
-    else if link.username isnt @_username
-      err = new E.WrongUsernameError """link doesn't refer to the right username
-                                      expected: #{link.username}
-                                           got: #{@_username}"""
-    else if last_link? and link.seqno isnt last_link.seqno + 1
-      err = new E.WrongSeqnoError """link sequence number is wrong
-                                   expected: #{last_link.seqno + 1}
-                                        got: #{link.seqno}"""
-    else if last_link? and link.prev isnt last_link.payload_hash
-      err = new E.WrongPrevError """previous payload hash doesn't match,
-                                  expected: #{last_link.payload_hash}
-                                       got: #{link.prev}"""
-    cb err
-
   _delegate_keys : ({link}, cb) ->
-    # The eldest key is valid from the beginning, but it doesn't get an etime
-    # until the first link.
+    # The eldest key is valid from the beginning, but it might not get an etime
+    # until the first link (unless it has an internal PGP etime).
     if link.kid is @_eldest_kid and not @_eldest_key_delegated
       @_update_kid_etime { kid: @_eldest_kid, etime_seconds: link.etime_seconds }
       @_eldest_key_delegated = true
@@ -370,22 +379,29 @@ exports.SigChain = class SigChain
     # No matching identity found.
     await athrow (new E.KeyOwnershipError "key #{@_eldest_kid} is not owned by #{expected_email}"), esc defer()
 
-exports.E = E = ie.make_errors {
-  "BAD_LINK_FORMAT": ""
-  "CTIME_MISMATCH": ""
-  "EXPIRED_SIBKEY": ""
-  "FINGERPRINT_MISMATCH": ""
-  "INVALID_SIBKEY": ""
-  "KEY_OWNERSHIP": ""
-  "KID_MISMATCH": ""
-  "NONEXISTENT_KID": ""
-  "REVERSE_SIG_VERIFY_FAILED": ""
-  "VERIFY_FAILED": ""
-  "WRONG_UID": ""
-  "WRONG_USERNAME": ""
-  "WRONG_SEQNO": ""
-  "WRONG_PREV": ""
-}
+error_names = [
+  "BAD_LINK_FORMAT"
+  "CTIME_MISMATCH"
+  "EXPIRED_SIBKEY"
+  "FINGERPRINT_MISMATCH"
+  "INVALID_SIBKEY"
+  "KEY_OWNERSHIP"
+  "KID_MISMATCH"
+  "NONEXISTENT_KID"
+  "NOT_LATEST_SUBCHAIN"
+  "REVERSE_SIG_VERIFY_FAILED"
+  "VERIFY_FAILED"
+  "WRONG_UID"
+  "WRONG_USERNAME"
+  "WRONG_SEQNO"
+  "WRONG_PREV"
+]
+
+# make_errors() needs its input to be a map
+errors_map = {}
+for name in error_names
+  errors_map[name] = ""
+exports.E = E = ie.make_errors errors_map
 
 current_time_seconds = () ->
   Math.floor(new Date().getTime() / 1000)
