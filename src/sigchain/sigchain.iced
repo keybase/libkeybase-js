@@ -182,12 +182,16 @@ exports.SigChain = class SigChain
   #     current eldest key. This is used to determine the latest subchain.
   @replay : ({sig_blobs, parsed_keys, sig_cache, uid, username, eldest_kid}, cb) ->
     esc = make_esc cb, "SigChain.replay"
+    # Forgetting the eldest KID would silently give you an empty sigchain. Prevent this.
     if not eldest_kid?
-      # Forgetting the eldest KID would silently give you an empty sigchain. Prevent this.
       await athrow (new Error "eldest_kid parameter is required"), esc defer()
+    # Initialize the SigChain.
     sigchain = new SigChain {uid, username, eldest_kid, parsed_keys}
+    # Build the chain link by link, checking consistency all the way through.
     for sig_blob in sig_blobs
       await sigchain._add_new_link {sig_blob, parsed_keys, sig_cache}, esc defer()
+    # After the chain is finished, make sure we've proven ownership of the
+    # eldest key in some way.
     await sigchain._enforce_eldest_key_ownership {parsed_keys}, esc defer()
     cb null, sigchain
 
@@ -234,29 +238,30 @@ exports.SigChain = class SigChain
     # reverse sigs.
     await ChainLink.parse {sig_blob, parsed_keys, sig_cache}, esc defer link
 
-    # Filter on eldest KID. We do this using verified ChainLink data, because
-    # otherwise the server could lie about what a link's eldest_kid was,
-    # tricking us into discarding good links from the front of the chain.
+    # Users can "reset" their eldest key, for example if they lose all their
+    # devices. This invalidates old links, but those links are kept in the
+    # chain for consistency. We have to skip ahead to the part of the chain
+    # belonging to the current eldest key.
+    # TODO: Make sure we actually check seqnos and prev pointers on skipped
+    # links.
     if link.eldest_kid isnt @_eldest_kid
+      # This link was signed by a previous generation of keys. Skip.
       cb()
       return
 
-    # Next we need to check that the signing key is in the family, unless this
-    # is the very first link (in which case the key family is empty).
+    # Next we need to check that the signing key is in the family.
     await @_check_key_is_valid {link}, esc defer()
 
     # Finally, check that the link belongs at this point in the chain.
     await @_check_link_belongs_here {link}, esc defer()
 
-    # At this point, we've confirmed the link belongs here. Update all the
-    # relevant metadata.
+    # At this point, we've confirmed the link is valid. Update all the relevant
+    # metadata.
     @_links.push(link)
     @_unrevoked_links[link.sig_id] = link
     if link.kid == @_eldest_kid
       @_eldest_key_verified = true
-
     await @_delegate_keys {link}, esc defer()
-
     await @_revoke_keys_and_sigs {link}, esc defer()
 
     cb null
