@@ -71,7 +71,7 @@ class ChainLink
     sig_id = kbpgp.hash.SHA256(sig_body).toString("hex") + SIG_ID_SUFFIX
     # Check whether the sig is cached. If so, get the payload from cache.
     if sig_cache?
-      payload_buffer = sig_cache.get(sig_id)
+      await sig_cache.get {sig_id}, esc defer payload_buffer
     # If we didn't get the payload from cache, unbox it for real.
     if not payload_buffer?
       await key_manager.make_sig_eng().unbox(
@@ -87,7 +87,7 @@ class ChainLink
     await a_json_parse payload_json, esc defer payload
     # Success!
     if sig_cache?
-      sig_cache.put(sig_id, payload_buffer)
+      await sig_cache.put {sig_id, payload_buffer}, esc defer()
     cb null, payload, sig_id, payload_hash
 
   @_check_payload_against_blob : ({sig_blob, payload, parsed_keys}, cb) ->
@@ -170,10 +170,10 @@ exports.SigChain = class SigChain
   # @param {ParsedKeys} parsed_keys The collection of the user's keys. This is
   #     usually obtained from the all_bundles list given by user/lookup.json,
   #     given to ParsedKeys.parse().
-  # @param {object} sig_cache An object with two methods: get(sig_id) and
-  #     put(sig_id, Buffer), which caches the payloads of previously verified
-  #     signatures. This parameter can be nil, in which case all signatures
-  #     will be checked.
+  # @param {object} sig_cache An object with two methods: get({sig_id}, cb) and
+  #     put({sig_id, payload_buffer}, cb), which caches the payloads of
+  #     previously verified signatures. This parameter can be null, in which
+  #     case all signatures will be checked.
   # @param {string} uid Used only to check that the sigchain belongs to the
   #     right user.
   # @param {string} username As with uid, used for confirming ownership.
