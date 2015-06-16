@@ -3,13 +3,13 @@
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2
 
-iQEcBAABCAAGBQJVfyGAAAoJEHGHa2itSC0yaeMH/3UhVEtmAb8bFGOybEX+aotN
-3gBYLYE/BlocwVGjbrEfA1xbFj35ggcqIDrr+SmSJuD1Q5cZ5Rxh9ZpxSEkPQqO1
-qQTxaEHV4OXebq0bpFFNlhyrvlQVAnC6pVtK4P8xSP08vMeSNbhk7vwilO5/Brx+
-J8OOphMTDfHieCPwmYGpTzl5q5Ig/s6HI8kIVcwKqiY9dEh42bMv9RT6PTGcis8d
-5NpcUSLkRiOXp9qRwdICU3BYygOat9XIcu4RGaSvs5kzlKJj2p/rSMjgYwy5whcn
-UWSQ5m0sw/Bb8JxOA1SPa/QHPqY4XUX6DuQoqMyM/WriscUYoFfpSRS8/eLEm3Q=
-=Hfco
+iQEcBAABCAAGBQJVgEBIAAoJEHGHa2itSC0y/SYIALeWjn8sBQqVhMuRZdy6vV1W
+vBUmhSCQg3LS4NjOv+oaZQ9Gz5HHDq5Tdyj00mZ+rDozC1FLvgMuULdRtuLROATj
+qWyhhXnHfz3wJTZkEgStzAjfRoC6PiGdVWG51EdwUl/KcdBEM99vbAVsbzIgJDkq
+AF1Z+U0WHQjQIdXgyU9lMrdISig/47z5QxyUVFSm9NWIvvtxyiWnH0t/1Pa2Tpkc
+rQ2qIL4V7bSeNJv9w63etTfTQAdTBn7OSr9aUC1GwTuq4OtnGj86PUgXydEYN4z0
+jnpXQtXO8jfjyXX0gVE4p0nkHwxaedN+KbwO41KYMn1KDa21CuQP9Hgpe/f9O2I=
+=oVyE
 -----END PGP SIGNATURE-----
 
 ```
@@ -47,10 +47,10 @@ size    exec  file                            contents
 5430                leaf.js                   6d6a21ccf133b97e4ce60324be92378ebb0e065a24cf8282484cdf837d364ac3
 16234               pathcheck.js              692cbdaadf98d5137b06a770abb9ffe926860ab11182f08cc3a151a86b2c50ca
                   sigchain/                                                                                   
-36840               sigchain.js               a172db631db5a8eca73f99fd4998ec547eae4beaf88b7e7f620d12bc9db753ef
+38763               sigchain.js               2e5b65cc6b6db7ec65ec0da131d34aec337ad2d884bb413411fe984845735840
                 notes/                                                                                        
 2129              tweetnacl.md                099fac68f7caebd05b6060781e7fcfb32726309bb4bd67aa35b10134a280e049
-1107            package.json                  4c849c9a8644e9a8a2f01e987074bf67d8914dbe3fbdb62935298151f76b5dc6
+1107            package.json                  d52298c32db2a36b393dee91c1823f5c0483e26e476c1bbe37c6ece1a1a14d30
                 src/                                                                                          
 4407              assertion.iced              fac9d95f8915318ec94dcd9f57f0f6a1b65b210429e6a5f6ac2ad8d33b97cd10
 634               assertion_parser.jison      65624a141081113074e6c778af7df8fad6769d3c5b2fb96e8edcd31444f8706f
@@ -62,7 +62,7 @@ size    exec  file                            contents
 3371                leaf.iced                 e083507d9f223bd667c4a1068465461edb1fc35657c59835c230b79172694fc4
 4104                pathcheck.iced            d56c4797650cc72592dcc644678b88480753ea51bce91f6c966c9b1716d8fb34
                   sigchain/                                                                                   
-17243               sigchain.iced             f027a42d05500fb0f2c78dc4f85011c913db00f1683edcfecff0316e1e37bffe
+17337               sigchain.iced             d8399a0e8105b72a20beff57bc7a56e18ec810fbcfb99d3d4c3f1a32724e19d6
                 test/                                                                                         
                   browser/                                                                                    
 287                 index.html                e31387cfd94034901e89af59f0ad29a3e2f494eb7269f1806e757be21b3cf33e
@@ -70,7 +70,7 @@ size    exec  file                            contents
                   files/                                                                                      
 180883              29_merkle_pathcheck.iced  971975a5ba316af0ce2150be8170762699f323753ce3040a8e3f9a12f07656f1
 4706                30_merkle_leaf.iced       2ed24fd02ac4d9c39149d974d774760448db6f4a600fd9adbb3b1b35e0d0000c
-5773                31_sigchain.iced          71792aca6e7df8bdad0df381d19df7ddc6f7a5d46dcac9dffa8933d0ee64e16f
+5847                31_sigchain.iced          50c6e665a384f24bfa127b01a37776297084b93d29e5fa538676c7d8779c78e5
 5624                32_kvstore.iced           90bacb5973649246d91f959d64c6cb6a7d52e1a2784ccd4363997f2ef5ef17a2
 2704                33_assertion.iced         73f0b3beef768b9d003d7273f8917a2ada71b8d13b46cdf87d1eaa11c73340e2
 52                run.iced                    8e58458d6f5d0973dbb15d096e5366492add708f3123812b8e65d49a685de71c
