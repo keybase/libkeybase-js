@@ -14,7 +14,7 @@ exports.test_eldest_key_required = (T, cb) ->
   # an error. Otherwise we could get confisingly empty results.
   esc = make_esc cb, "test_eldest_key_required"
   {chain, keys, username, uid} = tv.chain_test_inputs["ralph_chain.json"]
-  await node_sigchain.ParsedKeys.parse {bundles_list: keys}, esc defer parsed_keys
+  await node_sigchain.ParsedKeys.parse {key_bundles: keys}, esc defer parsed_keys
   await node_sigchain.SigChain.replay {
     sig_blobs: chain
     parsed_keys
@@ -62,7 +62,7 @@ exports.test_sig_cache = (T, cb) ->
   await sig_cache.put {sig_id: last_sig_id, payload_buffer: last_payload}, esc defer()
 
   # Replay the sigchain and make sure everything works.
-  await node_sigchain.ParsedKeys.parse {bundles_list: keys}, esc defer parsed_keys
+  await node_sigchain.ParsedKeys.parse {key_bundles: keys}, esc defer parsed_keys
   await node_sigchain.SigChain.replay {
     sig_blobs: chain
     parsed_keys
@@ -89,10 +89,10 @@ do_sigchain_test = ({T, input, err_type, len, sibkeys, subkeys, eldest}, cb) ->
   esc = make_esc cb, "do_sigchain_test"
   input_blob = tv.chain_test_inputs[input]
   {chain, keys, username, uid} = input_blob
-  await node_sigchain.ParsedKeys.parse {bundles_list: keys}, esc defer parsed_keys
+  await node_sigchain.ParsedKeys.parse {key_bundles: keys}, esc defer parsed_keys, default_eldest
   if not eldest?
     # By default, use the first key as the eldest.
-    eldest_kid = parsed_keys.kids_in_order[0]
+    eldest_kid = default_eldest
   else
     eldest_kid = input_blob.label_kids[eldest]
   await node_sigchain.SigChain.replay {
@@ -120,10 +120,10 @@ do_sigchain_test = ({T, input, err_type, len, sibkeys, subkeys, eldest}, cb) ->
   links = sigchain.get_links()
   if len?
     T.assert links.length == len, "Expected exactly #{len} links, got #{links.length}"
-  check_sibkey_and_subkey_count {T, sigchain, parsed_keys, eldest_kid}
+  check_sibkey_and_subkey_count {T, sigchain, parsed_keys, eldest_kid, sibkeys, subkeys}
   cb()
 
-check_sibkey_and_subkey_count = ({T, sigchain, parsed_keys, eldest_kid}) ->
+check_sibkey_and_subkey_count = ({T, sigchain, parsed_keys, eldest_kid, sibkeys, subkeys}) ->
   # Don't use the current time for tests, because eventually that will cause
   # keys to expire and tests to break.
   now = get_current_time_for_test { sigchain, parsed_keys }
