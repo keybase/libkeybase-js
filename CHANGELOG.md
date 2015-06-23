@@ -1,3 +1,11 @@
+## 1.1.7 (2015-06-23)
+
+Oops, I forgot to update the CHANGELOG for a while there.
+
+Features:
+  - A full sigchain implementation.
+  - A shared test suite in keybase-test-vectors.
+
 ## 1.0.2 (2015-04-21)
 
 Features:
