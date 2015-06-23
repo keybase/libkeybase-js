@@ -120,30 +120,38 @@ do_sigchain_test = ({T, input, err_type, len, sibkeys, subkeys, eldest}, cb) ->
   links = sigchain.get_links()
   if len?
     T.assert links.length == len, "Expected exactly #{len} links, got #{links.length}"
+  check_sibkey_and_subkey_count {T, sigchain, parsed_keys, eldest_kid}
+  cb()
+
+check_sibkey_and_subkey_count = ({T, sigchain, parsed_keys, eldest_kid}) ->
   # Don't use the current time for tests, because eventually that will cause
   # keys to expire and tests to break.
-  now = get_current_time_for_test { links, parsed_keys }
+  now = get_current_time_for_test { sigchain, parsed_keys }
   far_future = now + 100 * 365 * 24 * 60 * 60  # 100 years from now
+
   # Check the number of unrevoked/unexpired sibkeys.
   sibkeys_list = sigchain.get_sibkeys {now}
   if sibkeys?
     T.assert sibkeys_list.length == sibkeys, "Expected exactly #{sibkeys} sibkeys, got #{sibkeys_list.length}"
-  T.assert sigchain.get_sibkeys({now: far_future}).length == 0, "Expected no sibkeys in the far future."
+  if sigchain.get_links().length > 0
+    # The eldest key might not expire if there are no links. Just skip this part of the test.
+    T.assert sigchain.get_sibkeys({now: far_future}).length == 0, "Expected no sibkeys in the far future."
+
   # Check the number of unrevoked/unexpired subkeys.
   subkeys_list = sigchain.get_subkeys {now}
   if subkeys?
     T.assert subkeys_list.length == subkeys, "Expected exactly #{subkeys} subkeys, got #{subkeys_list.length}"
   T.assert sigchain.get_subkeys({now: far_future}).length == 0, "Expected no subkeys in the far future."
+
   # Get keys with the default time parameter (real now), just to make sure
   # nothing blows up (and to improve coverage :-D)
   sigchain.get_sibkeys {}
   sigchain.get_subkeys {}
-  cb()
 
-get_current_time_for_test = ({links, parsed_keys}) ->
+get_current_time_for_test = ({sigchain, parsed_keys}) ->
   # Pick a time that's later than the ctime of all links and PGP keys.
   t_seconds = 0
-  for link in links
+  for link in sigchain.get_links()
     t_seconds = Math.max(t_seconds, link.ctime_seconds)
   for kid, km of parsed_keys.key_managers
     if km.primary?.lifespan?.generated?

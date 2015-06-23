@@ -213,7 +213,7 @@ exports.SigChain = class SigChain
     @_kid_to_etime_seconds = {}
     # Get all the PGP key etimes, which could be sooner than link etimes.
     for kid, km of parsed_keys.key_managers
-      if km.primary?.lifespan?
+      if km.get_type() == 'pgp' and km.primary.lifespan.expire_in?
         etime_seconds = km.primary.lifespan.generated + km.primary.lifespan.expire_in
         @_update_kid_etime {kid, etime_seconds}
 
@@ -225,12 +225,22 @@ exports.SigChain = class SigChain
   # Return the list of sibkey KIDs which aren't revoked or expired.
   get_sibkeys : ({now}) ->
     now = now or current_time_seconds()
-    return (kid for kid of @_valid_sibkeys when @_kid_to_etime_seconds[kid] > now)
+    ret = []
+    for kid of @_valid_sibkeys
+      etime = @_kid_to_etime_seconds[kid]
+      if not etime? or now < etime
+        ret.push(kid)
+    ret
 
   # Return the list of subkey KIDs which aren't revoked or expired.
   get_subkeys : ({now}) ->
     now = now or current_time_seconds()
-    return (kid for kid of @_valid_subkeys when @_kid_to_etime_seconds[kid] > now)
+    ret = []
+    for kid of @_valid_subkeys
+      etime = @_kid_to_etime_seconds[kid]
+      if not etime? or now < etime
+        ret.push(kid)
+    ret
 
   _add_new_link : ({sig_blob, parsed_keys, sig_cache}, cb) ->
     esc = make_esc cb, "SigChain._add_new_link"
