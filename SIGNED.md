@@ -3,13 +3,13 @@
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2
 
-iQEcBAABAgAGBQJVibpdAAoJEHGHa2itSC0yfngH/iD02qstTngFw+4Nw2JPPvQ4
-DkulFRuPCRSd/FaL1k1t2qh+LeigcW8Cx383f/djzxlZRH5DfQ4BDF1VnDzsNP4S
-wiFPSbDHDzJmje6y9u8aNYhlZJZZfXaG1JchGdXMnxLRzD3LZq+vGOrrCPB9xL9u
-KVrOlOrttGh/rb8qbAuOdlIXqaUp2RCuzaNslAr5/O1wNTk4la7fWVJqXdCaacNR
-U92WKggVzK/AvG2IL79g7g97jqP1ycKjK7P5uGRu71KY3LzsFzjqWiO9DmS7hx6b
-BlYwij0RW/Z+diIdv/SYl70UaJj1icP1q0AfmPLI58bElDP7kscimscY+R7EX8A=
-=boDl
+iQEcBAABAgAGBQJVisWQAAoJEHGHa2itSC0yvE4H/1V+7/3GdnyTXJUJR0R5YcCf
+nCsgL0wRF428ogKZ28VmBI0b2aaZdxbSZVpdbKVNM6YxIJnnXg/FGzAya4VVZXJt
+WZ+arQzTFUTidX+74TWnHNXc2QZcfKynfjHJCyHSOv3KQAPk5SxPvCfU5z+Lrc/m
+5XdTCNwhx1Ad/w3/A4KExiRNdbT/K8VAkMTwgeEGWULOr/4+iGunjyHCEi9m7Zbv
+bqwzEUHGrd6rQ07nDPrbxwn5DcCQtEMM2DT2Y0mfPtkmwXqPzbw294hd9U2y042q
+A/L7pZuQqREdk73YxGnxZwsAXRZ+D3viJRDz3hBBmeBiEI1uJfnJooAhNkf8Dt0=
+=ahjT
 -----END PGP SIGNATURE-----
 
 ```
@@ -24,7 +24,7 @@ BlYwij0RW/Z+diIdv/SYl70UaJj1icP1q0AfmPLI58bElDP7kscimscY+R7EX8A=
 size    exec  file                            contents                                                        
               ./                                                                                              
 67              .gitignore                    5e89d4014d03a0f7f21f1429ab57b662f835214ac9bc4512285fed2982011191
-864             CHANGELOG.md                  d405e567fad504e98ffc3c7f8d2bf612a81b1f149b5e81e2996f5369508a64ba
+962             CHANGELOG.md                  d9b719078aa92b5559e718c6466fe5f8ae23a9c8bf0353906b2adc32813fe95f
 1484            LICENSE                       20a8a5de57bfaf6870517c52265d4469770a23cbc1af85eb9973ce639b0abff2
 1353            Makefile                      d7f684e836240e402e48f131cf4a8fe5efb722156cb8587f5e25288cfb812f2d
 109             README.md                     f2dd5d8192cff83f9c44a3e56779977bfe82725df259970a5c2d5396e6f87e13
@@ -47,10 +47,10 @@ size    exec  file                            contents
 5430                leaf.js                   6d6a21ccf133b97e4ce60324be92378ebb0e065a24cf8282484cdf837d364ac3
 16234               pathcheck.js              692cbdaadf98d5137b06a770abb9ffe926860ab11182f08cc3a151a86b2c50ca
                   sigchain/                                                                                   
-39247               sigchain.js               c8b905451a03e5337d3d8d981e1fe8b467f56fd348bad04b2512cc888895a98d
+41397               sigchain.js               e0c9e7df6350ae3cab180ed662135ec65bb096679b44e2bbfddc71ddbe399f26
                 notes/                                                                                        
 2129              tweetnacl.md                099fac68f7caebd05b6060781e7fcfb32726309bb4bd67aa35b10134a280e049
-1107            package.json                  7671dc3eb7e01a6e6c8c81c5aa835c7dffeda68044a3711964469a5cfffb1338
+1107            package.json                  f218b6604b98422413bc813e4b103d7946759b64c528cda4d8d6c53cc890c099
                 src/                                                                                          
 4407              assertion.iced              fac9d95f8915318ec94dcd9f57f0f6a1b65b210429e6a5f6ac2ad8d33b97cd10
 634               assertion_parser.jison      65624a141081113074e6c778af7df8fad6769d3c5b2fb96e8edcd31444f8706f
@@ -62,7 +62,7 @@ size    exec  file                            contents
 3371                leaf.iced                 e083507d9f223bd667c4a1068465461edb1fc35657c59835c230b79172694fc4
 4104                pathcheck.iced            d56c4797650cc72592dcc644678b88480753ea51bce91f6c966c9b1716d8fb34
                   sigchain/                                                                                   
-18054               sigchain.iced             daaa84e143b1b0f2bc4937d13c53ada3c15dc4e26d14671e9aac0dd016f06a03
+19277               sigchain.iced             63b938f14ddd06a1123f045a51a3f4842303903654b95b9f4c7e5f29fee402cf
                 test/                                                                                         
                   browser/                                                                                    
 287                 index.html                e31387cfd94034901e89af59f0ad29a3e2f494eb7269f1806e757be21b3cf33e
@@ -70,7 +70,7 @@ size    exec  file                            contents
                   files/                                                                                      
 180883              29_merkle_pathcheck.iced  971975a5ba316af0ce2150be8170762699f323753ce3040a8e3f9a12f07656f1
 4706                30_merkle_leaf.iced       2ed24fd02ac4d9c39149d974d774760448db6f4a600fd9adbb3b1b35e0d0000c
-6152                31_sigchain.iced          75d0924de654c0f98af88328998fc415cc1fb6f0be1b8cbf6b64831608705d42
+6187                31_sigchain.iced          49519c8aeaca4e513acb338996d59208e3148b7868b0a9b0fe2e87a8f7b25feb
 5624                32_kvstore.iced           90bacb5973649246d91f959d64c6cb6a7d52e1a2784ccd4363997f2ef5ef17a2
 2704                33_assertion.iced         73f0b3beef768b9d003d7273f8917a2ada71b8d13b46cdf87d1eaa11c73340e2
 52                run.iced                    8e58458d6f5d0973dbb15d096e5366492add708f3123812b8e65d49a685de71c
