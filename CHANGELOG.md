@@ -1,3 +1,8 @@
+## 1.2.0 (2015-06-23)
+
+Features:
+  - Change the sigchain interface to make mistakes less likely.
+
 ## 1.1.7 (2015-06-23)
 
 Oops, I forgot to update the CHANGELOG for a while there.
