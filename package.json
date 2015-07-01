@@ -27,7 +27,7 @@
     "iced-logger": "0.0.5",
     "iced-runtime": "^1.0.1",
     "iced-utils": "^0.1.22",
-    "kbpgp": "^2.0.0",
+    "kbpgp": ">=2.0.21",
     "keybase-proofs": "^2.0.23",
     "keybase-test-vectors": "^1.0.1",
     "merkle-tree": "0.0.14",
