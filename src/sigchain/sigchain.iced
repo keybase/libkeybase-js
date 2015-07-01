@@ -62,14 +62,12 @@ class ChainLink
     if not key_manager?
       await athrow (new E.NonexistentKidError "link signed by nonexistent kid #{kid}"), esc defer()
     sig_eng = key_manager.make_sig_eng()
-    # Compute the sig_id. We return this, but we also use it to check whether
-    # this sig is in the sig_cache, meaning it's already been verified.
-    await sig_eng.get_body {armored: sig_blob.sig}, esc defer sig_body
-    sig_id = kbpgp.hash.SHA256(sig_body).toString("hex") + SIG_ID_SUFFIX
     # We need the signing ctime to verify the signature, and that's actually in
     # the signed payload. So we fully parse the payload *before* verifying, and
     # do the actual (maybe cached) verification at the end.
-    await sig_eng.get_unverified_payload_from_raw_sig_body {body: sig_body}, esc defer unverified_buffer
+    await sig_eng.get_body_and_unverified_payload(
+      {armored: sig_blob.sig}, esc defer sig_body, unverified_buffer)
+    sig_id = kbpgp.hash.SHA256(sig_body).toString("hex") + SIG_ID_SUFFIX
     payload_hash = kbpgp.hash.SHA256(unverified_buffer).toString("hex")
     payload_json = unverified_buffer.toString('utf8')
     await a_json_parse payload_json, esc defer payload
