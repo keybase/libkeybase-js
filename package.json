@@ -29,7 +29,6 @@
     "iced-utils": "^0.1.22",
     "kbpgp": ">=2.0.22",
     "keybase-proofs": "^2.0.23",
-    "keybase-test-vectors": "^1.0.1",
     "merkle-tree": "0.0.14",
     "triplesec": "^3.0.19"
   },
@@ -40,6 +39,7 @@
     "iced-test": "0.0.17",
     "icsify": "^0.6.0",
     "istanbul": "^0.3.2",
-    "jison": "^0.4.15"
+    "jison": "^0.4.15",
+    "keybase-test-vectors": "1.0.6"
   }
 }
