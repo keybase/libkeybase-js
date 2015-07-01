@@ -3,13 +3,13 @@
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2
 
-iQEcBAABAgAGBQJVlEfjAAoJEHGHa2itSC0yhLEH/1HNs5e/w1tHXmfDZg4Zx0te
-ZUBnWXpQPK+uW9Wjauf+2VLGlrKTzMlIMaaRE5z8AGJ6+VdSDxR/DkIj/4gib+30
-wXSEpmDOxoBhifF9LAuBlK6mG0GQHD75MytwKoRJg5uJFVEsZL1XPXq0m60TJfRs
-5fIxQkvLVoLhKv2QE/Z3lJKz1xwjybKYljoH7OlQ4bOGeNqYXu30EWVR/tnOCZg5
-VUJdFpbjtZnen6nn+W4NomdEdq7/GwaQjkqzX6D9vn694VFiMNRvJ7HHn8pgOMc2
-FFl684eJ+SHtCSZXToX/GmbOc0Csw+cnQWkAV0FE0WpWu9PeQQf9Uqmi0xbN4o8=
-=GNBL
+iQEcBAABAgAGBQJVlE4aAAoJEHGHa2itSC0ylFQH/1ee5iKT2zDleEar6YhhJcr5
+aThn3+h4GyXBSlhWzU/0ZCBVyIhG2ciHIxUJahJ2ZdDn735yQclbnx+xoOmJ9mGG
+JLOnuqNX3edAcZv1523iRL4F71829tcb9elVF4/H31OwPgJHDOj3x5wPYBWZT0Q2
+CiyFN3Oz6Gk0dcp0GFGXBGdW2JHLHHKOumDoFFm1+tcu14YprGdw2oVqBO9dAqW1
+1ljA7bnjtj+kzWt7Nhz7jNqYvVclEvTcM2LsMaf7EuAyx3/WgPYmXNPDJC90h5rb
+lmGjJ1ITM0DDjluG4Moo+eTb9nTsKWwHiITed6lIWnSbr11VquKia9m4PH/hZmo=
+=iUFi
 -----END PGP SIGNATURE-----
 
 ```
@@ -47,10 +47,10 @@ size    exec  file                            contents
 5430                leaf.js                   6d6a21ccf133b97e4ce60324be92378ebb0e065a24cf8282484cdf837d364ac3
 16234               pathcheck.js              692cbdaadf98d5137b06a770abb9ffe926860ab11182f08cc3a151a86b2c50ca
                   sigchain/                                                                                   
-43301               sigchain.js               7f5a4f9208d0142011d4de9f01749682b9a90c085b7610d30afbb352ca734361
+42371               sigchain.js               ec5825740f776a682e0bbbe5d9558d34da686ff8e14d5893d6ca4e6f4fb96630
                 notes/                                                                                        
 2129              tweetnacl.md                099fac68f7caebd05b6060781e7fcfb32726309bb4bd67aa35b10134a280e049
-1109            package.json                  bc2332340e7fabdfd47d3be7dc30931f8070e1a84b66d793aa6c1b6b044fada9
+1109            package.json                  71f4a0436f5b60254e3894952d0b2351acce22658084562f0125774ed0228011
                 src/                                                                                          
 4407              assertion.iced              fac9d95f8915318ec94dcd9f57f0f6a1b65b210429e6a5f6ac2ad8d33b97cd10
 634               assertion_parser.jison      65624a141081113074e6c778af7df8fad6769d3c5b2fb96e8edcd31444f8706f
@@ -62,7 +62,7 @@ size    exec  file                            contents
 3371                leaf.iced                 e083507d9f223bd667c4a1068465461edb1fc35657c59835c230b79172694fc4
 4104                pathcheck.iced            d56c4797650cc72592dcc644678b88480753ea51bce91f6c966c9b1716d8fb34
                   sigchain/                                                                                   
-19918               sigchain.iced             96393bf235a94fbbbef88e027985474d89cab1bed5cc84c1e65e30445f70331b
+19713               sigchain.iced             212e91431503d4cf82e4978eba968b1716e85295261640b5c02638d2e56df26a
                 test/                                                                                         
                   browser/                                                                                    
 287                 index.html                e31387cfd94034901e89af59f0ad29a3e2f494eb7269f1806e757be21b3cf33e
