@@ -1,3 +1,8 @@
+## 1.2.5 (2015-07-02)
+
+Features:
+  - Add a debug counter to track the number of unboxes we do.
+
 ## 1.2.4 (2015-07-01)
 
 Bugfixes:
