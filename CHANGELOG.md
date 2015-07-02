@@ -4,6 +4,16 @@ Bugfixes:
   - Don't use Buffer.equals(), since it doesn't work on Node < 0.12.0;
     Use the paranoid bufeq_secure anyways.
 
+## 1.2.3 (2015-07-01)
+
+Bugfixes:
+  - Make keybase-test-vectors a dev dependency only.
+
+## 1.2.2 (2015-07-01)
+
+Features:
+  - New version of kbpgp.
+
 ## 1.2.1 (2015-07-01)
 
 Bugfixes:
