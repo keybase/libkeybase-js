@@ -1,3 +1,9 @@
+## 1.2.7 (2015-07-03)
+
+Bugfixes:
+  - Allow key time_travel, so that we can check prior states in which
+    subkeys might still have been valid (though now they're expired).
+
 ## 1.2.6 (2015-07-02)
 
 Bugfixes:

@@ -22,7 +22,7 @@ exports.ParsedKeys = ParsedKeys = class ParsedKeys
     kids_to_key_managers = {}
     default_eldest_kid_for_testing = null
     for bundle in key_bundles
-      await kbpgp.ukm.import_armored_public {armored: bundle}, esc defer key_manager
+      await kbpgp.ukm.import_armored_public {armored: bundle, time_travel : true}, esc defer key_manager
       kid = key_manager.get_ekid()
       kid_str = kid.toString "hex"
       kids_to_key_managers[kid_str] = key_manager
