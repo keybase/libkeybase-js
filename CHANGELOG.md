@@ -1,3 +1,8 @@
+## 1.2.8 (2015-07-03)
+
+Bugfix:
+  - Fix to the proceeding, in which opts weren't properly passed.
+
 ## 1.2.7 (2015-07-03)
 
 Bugfixes:
