@@ -103,7 +103,6 @@ class PathChecker
       await @_verify_username_legacy {username,uid}, defer err
 
     else
-
       err = @_verify_username_hash { uid, username, lc : false }
       if err? and username_cased? and
           (username_cased isnt username) and 
@@ -120,7 +119,7 @@ class PathChecker
     if (uid isnt uid2)
       err = new Error "bad UID: #{uid} != #{uid2} for username #{username}"
     return err
-    
+
 #===========================================================
 
 class BaseTree extends merkle.Base
