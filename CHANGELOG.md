@@ -1,3 +1,8 @@
+## 1.2.11 (2015-07-06)
+
+Bugfix:
+  - Move to kbpgp v2.0.27 w/ subkey merging to handle zaher's sigchain
+  
 ## 1.2.10 (2015-07-05)
 
 Bugfix:
