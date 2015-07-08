@@ -26,7 +26,7 @@ exports.ParsedKeys = ParsedKeys = class ParsedKeys
       await kbpgp.ukm.import_armored_public {armored: bundle, opts}, esc defer key_manager
       kid = key_manager.get_ekid()
       kid_str = kid.toString "hex"
-      
+
       if (existing = kids_to_key_managers[kid_str])?
         existing.merge_subkeys key_manager
       else
