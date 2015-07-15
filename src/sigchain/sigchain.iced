@@ -28,6 +28,11 @@ exports.ParsedKeys = ParsedKeys = class ParsedKeys
       kid_str = kid.toString "hex"
 
       if (existing = kids_to_key_managers[kid_str])?
+        # We may get multiple versions of a PGP key with the same
+        # KID/fingerprint. They could have different subkeys, and it could be
+        # an old subkey that was used to sign an old link. To handle these
+        # cases, we merge all versions of a PGP key together into a single key
+        # manager. (One of the many tricky corner cases with PGP :p)
         existing.merge_subkeys key_manager
       else
         kids_to_key_managers[kid_str] = key_manager
