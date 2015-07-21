@@ -1,3 +1,8 @@
+## 1.2.13 (2015-07-21)
+
+Features:
+  - Add logging to sigchain replays.
+
 ## 1.2.12 (2015-07-06)
 
 Bugfix:
