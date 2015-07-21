@@ -219,7 +219,7 @@ exports.SigChain = class SigChain
   #     error). May be null.
   @replay : ({sig_blobs, parsed_keys, sig_cache, uid, username, eldest_kid, log}, cb) ->
     log = log or (() ->)
-    log "libkeybase: >>> replay(username: #{username}, uid: #{uid}, eldest: #{eldest_kid})"
+    log "+ libkeybase: replay(username: #{username}, uid: #{uid}, eldest: #{eldest_kid})"
     esc = make_esc cb, "SigChain.replay"
     # Forgetting the eldest KID would silently give you an empty sigchain. Prevent this.
     if not eldest_kid?
@@ -228,12 +228,12 @@ exports.SigChain = class SigChain
     sigchain = new SigChain {uid, username, eldest_kid, parsed_keys}
     # Build the chain link by link, checking consistency all the way through.
     for sig_blob in sig_blobs
-      log "libkeybase: === replaying signature #{sig_blob.seqno}: #{sig_blob.sig_id}"
+      log "| libkeybase: replaying signature #{sig_blob.seqno}: #{sig_blob.sig_id}"
       await sigchain._add_new_link {sig_blob, sig_cache, log}, esc defer()
     # After the chain is finished, make sure we've proven ownership of the
     # eldest key in some way.
     await sigchain._enforce_eldest_key_ownership {}, esc defer()
-    log "libkeybase: >>> replay finished"
+    log "- libkeybase: replay finished"
     cb null, sigchain
 
   # NOTE: Don't call the constructor directly. Use SigChain.replay().
@@ -291,7 +291,7 @@ exports.SigChain = class SigChain
     # signature is valid and belongs to the key it claims, and the same for any
     # reverse sigs.
     await ChainLink.parse {sig_blob, parsed_keys: @_parsed_keys, sig_cache}, esc defer link
-    log "libkeybase: chain link parsed, type '#{link.payload.body.type}'"
+    log "| libkeybase: chain link parsed, type '#{link.payload.body.type}'"
 
     # Make sure the link belongs in this chain (right username and uid) and at
     # this particular point in the chain (right seqno and prev hash).
@@ -302,7 +302,7 @@ exports.SigChain = class SigChain
     if link.eldest_kid isnt @_eldest_kid
       if @_links.length == 0
         # This link is in an old subchain. Skip to the next link.
-        log "libkeybase: link not in the current subchain -- skipping ahead"
+        log "| libkeybase: link not in the current subchain -- skipping ahead"
         cb null
         return
       else
@@ -315,7 +315,7 @@ exports.SigChain = class SigChain
     # Finally, make sure that the key that signed this link was actually valid
     # at the time the link was signed.
     await @_check_key_is_valid {link}, esc defer()
-    log "libkeybase: signing key is valid (#{link.kid})"
+    log "| libkeybase: signing key is valid (#{link.kid})"
 
     # This link is valid and part of the current subchain. Update all the
     # relevant metadata.
@@ -370,7 +370,7 @@ exports.SigChain = class SigChain
       @_sibkey_order.push(link.sibkey_delegation)
       @_update_kid_etime { kid: link.sibkey_delegation, etime_seconds: link.etime_seconds }
       @_update_kid_pgp_etime { kid: link.sibkey_delegation }
-      log "libkeybase: delegating sibkey #{link.sibkey_delegation}"
+      log "| libkeybase: delegating sibkey #{link.sibkey_delegation}"
     if link.subkey_delegation?
       @_valid_subkeys[link.subkey_delegation] = true
       @_subkey_order.push(link.subkey_delegation)
@@ -400,7 +400,7 @@ exports.SigChain = class SigChain
     # Handle direct sibkey revocations.
     for kid in link.key_revocations
       if kid of @_valid_sibkeys
-        log "libkeybase: revoking sibkey #{kid}"
+        log "| libkeybase: revoking sibkey #{kid}"
         delete @_valid_sibkeys[kid]
       if kid of @_valid_subkeys
         delete @_valid_subkeys[kid]
@@ -413,7 +413,7 @@ exports.SigChain = class SigChain
         # Keys delegated by the revoked link are implicitly revoked as well.
         revoked_sibkey = revoked_link.sibkey_delegation
         if revoked_sibkey? and revoked_sibkey of @_valid_sibkeys
-          log "libkeybase: revoking sibkey #{revoked_sibkey} from sig #{sig_id}"
+          log "| libkeybase: revoking sibkey #{revoked_sibkey} from sig #{sig_id}"
           delete @_valid_sibkeys[revoked_sibkey]
         revoked_subkey = revoked_link.subkey_delegation
         if revoked_subkey? and revoked_subkey of @_valid_subkeys
