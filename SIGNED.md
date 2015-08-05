@@ -1,15 +1,15 @@
-##### Signed by https://keybase.io/oconnor663
+##### Signed by https://keybase.io/max
 ```
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
+Comment: GPGTools - https://gpgtools.org
 
-iQEcBAABCAAGBQJVua+BAAoJEHGHa2itSC0y2WoH/jutqiPS0TQOwGV5C+A1HjXb
-04mfJOVrl89eBYSmU8AV+JYaYmm/A40paB58yaNHt0oxgp4ZNuTiowMuybYei0KA
-w2LioA+pWpuew1pFqKkXLBY/lKaIKIFkeplCOi1z7w+Ygy1N2jxCCvd4cMUR2qLC
-kYRDBNuxx7wZuNLxMN4iQJOLqEx0WJBE9RdRHj5154wneCpS4DULIfMICbO7onzv
-O26bK72XcZqExsjXBKyJCSgmelac/mzMOId9pGaV36ufa81ZpAmcwglit6s/hGk5
-245/niq2akeKj4Xpx4fk8oizpQE7Up9n3gGIDdN4NXM5lXmxhhKXU9QFYZdk5SY=
-=8DuT
+iQEcBAABCgAGBQJVwi90AAoJEJgKPw0B/gTfaqUH/A7NCPt07qdNpehbXkdjoT7A
+lcbjdbU24+bJN4P6WZ4EGUQhm/usOyvP+UoYLWxIbtSpnAzO4rGgTaM2+BJ3Hkei
+zABm8gwB/UTCRXWptMFIJmfJyADOtcGQMM3VBIWzALBNY930Z89CGaPy+2Q/QDjq
+U0Ac23DBTLEC/WpoCuyoB0uIDuYj4XZG2lhA+bPm7uyke7RCKTi0AdaTpR+ZskdL
+Dk+nF4H2ohWqmzdaBOdl8cdeDKznNgbNqq2xyF6oj1d5CkAz71zQiDAvJ7MCYMuE
+Otibyo5xAyNr7FrZoKOd41I4MovovM3YVm8KYxhqOgfDNbW83xE5gOwpKEMNxTI=
+=eEvm
 -----END PGP SIGNATURE-----
 
 ```
@@ -24,7 +24,7 @@ O26bK72XcZqExsjXBKyJCSgmelac/mzMOId9pGaV36ufa81ZpAmcwglit6s/hGk5
 size    exec  file                            contents                                                        
               ./                                                                                              
 67              .gitignore                    5e89d4014d03a0f7f21f1429ab57b662f835214ac9bc4512285fed2982011191
-2530            CHANGELOG.md                  b600b1a7bd3bdd8b8fd6dce8a0c00d1a2e5e90bc17657c9116af13036c032f66
+2604            CHANGELOG.md                  f8f312f34727aaea27597104033ec9be48f40a0a2335fbf446b54e2930636371
 1484            LICENSE                       20a8a5de57bfaf6870517c52265d4469770a23cbc1af85eb9973ce639b0abff2
 1353            Makefile                      d7f684e836240e402e48f131cf4a8fe5efb722156cb8587f5e25288cfb812f2d
 109             README.md                     f2dd5d8192cff83f9c44a3e56779977bfe82725df259970a5c2d5396e6f87e13
@@ -44,13 +44,13 @@ size    exec  file                            contents
 22073             kvstore.js                  40d061e72d572746b5d557d28e16ed43a4cd23da459e004382e2d15dab855702
 625               main.js                     c046e0c31a2b087f1dc56a373b46f16691ce3065d4cd0c9ca0fa5c62bfb233c0
                   merkle/                                                                                     
-5430                leaf.js                   6d6a21ccf133b97e4ce60324be92378ebb0e065a24cf8282484cdf837d364ac3
+6356                leaf.js                   b22f0873a9f0e9adb00be96549f25a637af02dff88b34e8392d9d46f4835c0c3
 16991               pathcheck.js              781c7078bfa40c5196036c8a886e7ff217f6bb7111ff2c30df61e2184400af2b
                   sigchain/                                                                                   
 43782               sigchain.js               620ee84c99c96945e1288d24fecf2d9550e958cad8a2c1ef21ff52233443a03a
                 notes/                                                                                        
 2129              tweetnacl.md                099fac68f7caebd05b6060781e7fcfb32726309bb4bd67aa35b10134a280e049
-1109            package.json                  41cbc25b92adb27e9e44135b6a6b8dd04692c90e03c719ce6f13ec81a5289e0c
+1109            package.json                  5e7be42b9dae0e7d91e01c4092ca8e292806a6e94bac02809ea53b214a6c85a9
                 src/                                                                                          
 4407              assertion.iced              fac9d95f8915318ec94dcd9f57f0f6a1b65b210429e6a5f6ac2ad8d33b97cd10
 634               assertion_parser.jison      65624a141081113074e6c778af7df8fad6769d3c5b2fb96e8edcd31444f8706f
@@ -59,7 +59,7 @@ size    exec  file                            contents
 6948              kvstore.iced                53ebce5a6b584fc9977c6502554a0df97463a94416de4eacbb572fafe83f052d
 466               main.iced                   0d36dd68f0281e58d0269395bcd9b2ef4d6d2ffbd69307e292b5aa14e646b4df
                   merkle/                                                                                     
-3371                leaf.iced                 e083507d9f223bd667c4a1068465461edb1fc35657c59835c230b79172694fc4
+3857                leaf.iced                 5de4556aff8642d7bdfc39cb0edff1acbeb693ce040faa272fb4cf8fe3b6092d
 4470                pathcheck.iced            23650aa2a4db7497e55b23c3f0ff0cdefeb60ff8f0363a6f4a1348405e9f5cc8
                   sigchain/                                                                                   
 21292               sigchain.iced             1bb7c138f141efbe4221c7b0ffc1276907b19b53ac7ac31db538d198e21e685d
