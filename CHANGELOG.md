@@ -1,3 +1,8 @@
+## 1.2.16 (2015-08-05)
+
+Changes:
+  - A new assertion type for sig_seqnos
+
 ## 1.2.15 (2015-07-25)
 
 Changes:
