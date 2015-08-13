@@ -1,3 +1,8 @@
+## 1.2.17 (2015-08-13)
+
+Changes:
+  - Merge userids when merging PGP keys.
+
 ## 1.2.16 (2015-08-05)
 
 Changes:
