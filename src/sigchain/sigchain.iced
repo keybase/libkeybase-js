@@ -43,10 +43,11 @@ exports.ParsedKeys = ParsedKeys = class ParsedKeys
     cb null, parsed_keys, default_eldest_kid_for_testing
 
   constructor : ({kids_to_key_managers}) ->
-    # ParsedKeys should only be used as a map from KIDs to KeyManagers. It MUST
-    # NOT be interpreted as a set of valid KIDs for a user, because it's
-    # computed from untrusted data. To forestall that mistake, we keep the map
-    # _private and only expose the get_key_manager() method.
+    # Callers should use this class to get KeyManagers for KIDs they already
+    # have, but callers MUST NOT iterate over the set of KIDs here as though it
+    # were the valid set for a given user. The set of KIDs is *untrusted*
+    # because it comes from the server. We keep the map private to prevent that
+    # mistake.
     @_kids_to_key_managers = kids_to_key_managers
 
   get_key_manager : (kid) ->
