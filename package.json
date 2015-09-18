@@ -1,6 +1,6 @@
 {
   "name": "libkeybase",
-  "version": "1.2.18",
+  "version": "1.2.19",
   "description": "A library for processing Keybase's signature tree",
   "main": "lib/main.js",
   "scripts": {
