@@ -2,6 +2,7 @@
 
 Bugfix:
   - missing dependency in package.json
+  - callback accidentally called twice in error case
 
 ## 1.2.19 (2015-09-18)
 

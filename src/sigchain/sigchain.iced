@@ -157,6 +157,7 @@ class KeyState
   set_key_hash : ({kid, hash}, cb) ->
     if not @parsed_keys.get_pgp_key_manager_with_hash(kid, hash)?
       cb new E.NoKeyWithThisHashError "No PGP key with kid #{kid} and hash #{hash} exists"
+      return
     @_kid_to_hash[kid] = hash
     cb()
 
