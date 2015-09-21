@@ -1,3 +1,8 @@
+## 1.2.20
+
+Bugfix:
+  - missing dependency in package.json
+
 ## 1.2.19 (2015-09-18)
 
 Bugfix:

@@ -30,6 +30,7 @@
     "kbpgp": ">=2.0.41",
     "keybase-proofs": "^2.0.23",
     "merkle-tree": "0.0.14",
+    "pgp-utils": ">=0.0.28",
     "triplesec": "^3.0.19"
   },
   "devDependencies": {
