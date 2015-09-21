@@ -221,8 +221,8 @@ class ChainLink
 
     # See comment above about bad whitespace sigs from 15 Sep 2015
     hash_input = verified_buffer
-    if bad_whitespace_sig_ids[sig_id] and ((sig_blob.payload_json + "\n") is verified_buffer.toString())
-      hash_input = new Buffer sig_blob.payload_json, 'utf8'
+    if bad_whitespace_sig_ids[sig_id]
+      hash_input = new Buffer trim(payload_json), 'utf8'
     payload_hash = kbpgp.hash.SHA256(hash_input).toString("hex")
 
     cb null, payload, sig_id, payload_hash
