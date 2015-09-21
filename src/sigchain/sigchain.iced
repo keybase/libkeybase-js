@@ -64,9 +64,6 @@ bad_whitespace_sig_ids = {
   "062e6799f211177023bc310fd6e4e28a8e2e18f972d9b037d24434a203aca7240f" : true
   "db9a0afaab297048be0d44ffd6d89a3eb6a003256426d7fd87a60ab59880f8160f" : true
   "58bf751ddd23065a820449701f8a1a0a46019e1c54612ea0867086dbd405589a0f" : true
-}
-
-bad_hash_trimmed_body = {
   "062e6799f211177023bc310fd6e4e28a8e2e18f972d9b037d24434a203aca7240f" : true
   "10a45e10ff2585b03b9b5bc449cb1a7a44fbb7fcf25565286cb2d969ad9b89ae0f" : true
   "44847743878bd56f5cd74980475e8f4e95d0d6ec1dd8722fd7cfc7761698ec780f" : true
@@ -226,8 +223,6 @@ class ChainLink
     hash_input = verified_buffer
     if bad_whitespace_sig_ids[sig_id] and ((sig_blob.payload_json + "\n") is verified_buffer.toString())
       hash_input = new Buffer sig_blob.payload_json, 'utf8'
-    else if bad_hash_trimmed_body[sig_id]
-      hash_input = new Buffer (trim sig_blob.payload_json), 'utf8'
     payload_hash = kbpgp.hash.SHA256(hash_input).toString("hex")
 
     cb null, payload, sig_id, payload_hash

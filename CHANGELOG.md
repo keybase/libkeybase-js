@@ -1,3 +1,8 @@
+## 1.2.20
+
+Enhancement
+ - Simplified fix for 15 Sep 2015 bug.  There's only one case to consider.
+
 ## 1.2.19 (2015-09-18)
 
 Bugfix:
