@@ -80,11 +80,23 @@ bad_whitespace_sig_ids = {
 # links into a public chain. (Sorry Fred!) Skip reverse signature checking for
 # this fixed set of links.
 known_buggy_reverse_sigs = {
-  "2a0da9730f049133ce728ba30de8c91b6658b7a375e82c4b3528d7ddb1a21f7a0f": true,
-  "eb5c7e7d3cf8370bed8ab55c0d8833ce9d74fd2c614cf2cd2d4c30feca4518fa0f": true,
-  "0f175ef0d3b57a9991db5deb30f2432a85bc05922bbe727016f3fb660863a1890f": true,
+  "2a0da9730f049133ce728ba30de8c91b6658b7a375e82c4b3528d7ddb1a21f7a0f": true
+  "eb5c7e7d3cf8370bed8ab55c0d8833ce9d74fd2c614cf2cd2d4c30feca4518fa0f": true
+  "0f175ef0d3b57a9991db5deb30f2432a85bc05922bbe727016f3fb660863a1890f": true
   "48267f0e3484b2f97859829503e20c2f598529b42c1d840a8fc1eceda71458400f": true
 };
+
+# Some users (6) managed to reuse eldest keys after a sigchain reset, without
+# using the "eldest" link type, before the server prohibited this. To clients,
+# that means their chains don't appear to reset. We hardcode these cases.
+hardcoded_resets = {
+  "11111487aa193b9fafc92851176803af8ed005983cad1eaf5d6a49a459b8fffe0f": true
+  "df0005f6c61bd6efd2867b320013800781f7f047e83fd44d484c2cb2616f019f0f": true
+  "32eab86aa31796db3200f42f2553d330b8a68931544bbb98452a80ad2b0003d30f": true
+  "5ed7a3356fd0f759a4498fc6fed1dca7f62611eb14f782a2a9cda1b836c58db50f": true
+  "d5fe2c5e31958fe45a7f42b325375d5bd8916ef757f736a6faaa66a6b18bec780f": true
+  "1e116e81bc08b915d9df93dc35c202a75ead36c479327cdf49a15f3768ac58f80f": true
+}
 
 # For testing that caches are working properly. (Use a wrapper object instead
 # of a simple counter because main.iced copies things.)
@@ -463,7 +475,9 @@ exports.SigChain = class SigChain
     # (Otherwise we'd have to figure out how to maintain the KeyState, or else
     # we wouldn't even be able to verify link signatures [correctly, without
     # resorting to key merging].)
-    if link.eldest_kid isnt @_current_subchain_eldest or link.type is "eldest"
+    if (link.eldest_kid isnt @_current_subchain_eldest or
+        link.type is "eldest" or
+        hardcoded_resets[link.sig_id])
       log "| libkeybase: starting new subchain"
       @_reset_subchain(link.eldest_kid)
 
