@@ -1,3 +1,11 @@
+## 1.2.24 (2015-12-31)
+
+Rollback 1.2.23
+
+## 1.2.23 (2015-12-31)
+
+Mistaken release: an unneeded feature
+
 ## 1.2.22 (2015-10-20)
 
 Bugfix:
