@@ -21,13 +21,14 @@ lib/%.js: src/%.iced
 $(BUILD_STAMP): \
 	lib/assertion.js \
 	lib/assertion_parser.js \
+	lib/base64finder.js \
 	lib/constants.js \
 	lib/err.js \
 	lib/kvstore.js \
 	lib/main.js \
 	lib/merkle/leaf.js \
 	lib/merkle/pathcheck.js \
-	lib/sigchain/sigchain.js
+	lib/sigchain/sigchain.js 
 	date > $@
 
 clean:

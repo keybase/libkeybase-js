@@ -1,5 +1,5 @@
 
-exports.merkle = 
+exports.merkle =
   leaf : require('./merkle/leaf')
   pathcheck : require('./merkle/pathcheck')
 
@@ -14,6 +14,7 @@ exports[k] = v for k,v of {
 # Export the exports of these modules to the top level
 mods = [
   require('./sigchain/sigchain')
+  require('./base64finder')
 ]
 for mod in mods
   for k,v of mod
