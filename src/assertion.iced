@@ -29,7 +29,7 @@ exports.URI = class URI extends Expr
       throw new Error "Bad '#{@key}' assertion, no value found"
 
     throw new Error "Unknown assertion type '#{@key}'" unless @key in [
-      'twitter', 'github', 'hackernews', 'reddit', 'keybase', 'coinbase'
+      'twitter', 'github', 'hackernews', 'reddit', 'keybase', 'coinbase', 'facebook'
     ]
 
   #----------------------------------------
