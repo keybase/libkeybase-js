@@ -1,3 +1,8 @@
+## 1.2.25 (2016-08-29)
+
+Feature:
+  - Add trivial Facebook awareness.
+
 ## 1.2.24 (2015-12-31)
 
 Rollback 1.2.23
