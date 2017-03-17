@@ -41,6 +41,6 @@
     "icsify": "^0.6.0",
     "istanbul": "^0.3.2",
     "jison": "^0.4.15",
-    "keybase-test-vectors": "1.0.6"
+    "keybase-test-vectors": "1.0.11"
   }
 }
