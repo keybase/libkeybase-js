@@ -33,7 +33,6 @@ exports.test_v2_2 = (T,cb) ->
 
 #====================================================
 
-
 exports.test_v2_3 = (T,cb) ->
   bads = [
     [ ],
@@ -45,6 +44,11 @@ exports.test_v2_3 = (T,cb) ->
     [ 2, [ "a", "aaa" ] ],
     [ 2, [10, "aa", "bb"], null, "a"],
     [ 2, [10, "aa", "bb"], [], "a"]
+    [ 2, [10, "aa", "bb"], null, [2] ]
+    [ 2, [10, "aa", "bb"], null, [2, 2] ]
+    [ 2, [10, "aa", "bb"], null, ["aa", 2] ]
+    [ 2, [10, "aa", "bb"], null, ["aa", "bb"] ]
+    [ 2, null, [], "aa", [] ]
     [ 2, [1 ]  ],
     [ 2  ],
   ]
@@ -52,12 +56,13 @@ exports.test_v2_3 = (T,cb) ->
     [err,leaf] = Leaf.parse bad
     T.assert err?, "parse error on object #{i}"
 
-  goods = [ 
+  goods = [
     [ 2, [1, "", "" ]  ],
     [ 2, [], [], "aa" ]
     [ 2, null, null, "aa" ]
     [ 2, [], null, "aa" ]
     [ 2, null, [], "aa" ]
+    [ 2, [10, "aa", "bb"], null, null ]
   ]
   for good, i in goods
     [err,leaf] = Leaf.parse good
@@ -84,6 +89,8 @@ exports.test_v2_5 = (T,cb) ->
           [ 1, "aabb", "ccdd", "4455", "other", "stuff", [ 1,2,3 ], { a: 3} ],
           [ 2, "eeff", "0011" ],
           "112233"
+          [ 10, "eeff", 10 ]
+          [ 3, 4, 5, 6, 7]
         ]
   [err,leaf] = Leaf.parse raw
   T.no_error err
@@ -158,7 +165,28 @@ exports.test_seqno_assertion = (T,cb) ->
   T.assert ok, "assertion came back true no public chain"
   cb()
 
+#====================================================
 
+exports.test_v2_7 = (T,cb) ->
+  raw = [ 2, [ 1, "aabb", "ccdd" ], [ 2, "eeff", "0011" ], null, [ 3, 'aabb' ] ]
+  [err,leaf] = Leaf.parse raw
+  T.no_error err
+  T.equal leaf.get_public().to_json(), raw[1], "the right public leaf value came back"
+  T.equal leaf.get_semiprivate().to_json(), raw[2], "the right semiprivate leaf value came back"
+  T.equal leaf.get_reset().to_json(), raw[4], "the right reset chain"
+  cb()
+
+#====================================================
+
+exports.test_v2_8 = (T,cb) ->
+  raw = [ 2, [ 1, "aabb", "ccdd" ], [ 2, "eeff", "0011" ], 'cc00', [ 3, 'aabb' ] ]
+  [err,leaf] = Leaf.parse raw
+  T.no_error err
+  T.equal leaf.get_public().to_json(), raw[1], "the right public leaf value came back"
+  T.equal leaf.get_semiprivate().to_json(), raw[2], "the right semiprivate leaf value came back"
+  T.equal leaf.get_eldest_kid(), raw[3], "the right eldest kid"
+  T.equal leaf.get_reset().to_json(), raw[4], "the right reset chain"
+  cb()
 
 #====================================================
 
