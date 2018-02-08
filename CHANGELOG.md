@@ -1,3 +1,8 @@
+## 1.2.26 (2018-02-08)
+
+Feature
+  - Add a reset chain tail into position 4, to better capture reset sequence
+ 
 ## 1.2.25 (2016-08-29)
 
 Feature:
