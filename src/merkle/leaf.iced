@@ -9,6 +9,17 @@ exports.ChainTail = class ChainTail
 
 #--------------------------
 
+exports.ResetChainTail = class ResetChainTail
+  constructor : ({@seqno, @payload_hash}) ->
+  to_json : () -> [ @seqno, @payload_hash ]
+
+#--------------------------
+
+is_positive_int = (x) ->
+  return (typeof(x) is 'number') and (Math.floor(x) is x) and isFinite(x) and x >= 0
+
+#--------------------------
+
 class Parser
 
   constructor : (@val) ->
@@ -17,7 +28,7 @@ class Parser
 
     if not Array.isArray(@val) or @val.length < 1
       throw new Error "Expected an array of length 1 or more"
-    else if typeof(@val[0]) isnt 'number'
+    else if not is_positive_int @val[0]
       throw new Error "Need a number for first slot"
     else if typeof(@val[1]) is 'string'
       # We messed up and didn't version the initial leafs of the tree
@@ -39,7 +50,8 @@ class Parser
     pub = if (@val.length > 1 and @val[1]?.length) then @parse_chain_tail(@val[1]) else null
     semipriv = if (@val.length > 2) and @val[2]?.length then @parse_chain_tail(@val[2]) else null
     eldest_kid = if (@val.length > 3 and @val[3]?) then @parse_kid(@val[3]) else null
-    return new Leaf { pub, semipriv, eldest_kid }
+    reset = if (@val.length > 4 and @val[4]?) then @parse_reset_chain(@val[4]) else null
+    return new Leaf { pub, semipriv, eldest_kid, reset }
 
   match_hex : (s) ->
     (typeof(s) is 'string') and !!(s.match(/^([a-fA-F0-9]*)$/)) and (s.length % 2 is 0)
@@ -48,10 +60,19 @@ class Parser
     throw new Error "bad kid: #{x}" unless @match_hex x
     return x
 
+  parse_reset_chain : (val) ->
+    msg = null
+    if not val? then return null
+    if val.length < 2 then msg = "Bad reset chain tail with < 2 values"
+    else if not is_positive_int val[0] then msg = "Bad sequence #"
+    else if not @match_hex val[1] then msg = "bad hash value"
+    throw new Error msg if msg?
+    return new ResetChainTail { seqno : val[0], payload_hash : val[1] }
+
   parse_chain_tail : (val) ->
     msg = null
     if (val.length < 2) then msg = "Bad chain tail with < 2 values"
-    else if typeof(val[0]) isnt 'number' then msg = "Bad sequence #"
+    else if not is_positive_int val[0] then msg = "Bad sequence #"
     else
       # Slots #1,2 are both HexIds. We don't know what 3+ will be
       for v,i in val[1..2] when v? and v.length
@@ -65,11 +86,12 @@ class Parser
 
 exports.Leaf = class Leaf
 
-  constructor : ({@pub, @semipriv, @eldest_kid}) ->
+  constructor : ({@pub, @semipriv, @eldest_kid, @reset}) ->
 
   get_public : () -> @pub
   get_semiprivate: () -> @semipriv
   get_eldest_kid : () -> @eldest_kid
+  get_reset : () -> @reset
 
   to_json : () ->
     ret = [
@@ -77,6 +99,7 @@ exports.Leaf = class Leaf
       (if @pub then @pub.to_json() else []),
       (if @semipriv? then @semipriv.to_json() else []),
       @eldest_kid
+      @reset_chain
     ]
     return ret
 
