@@ -16,10 +16,7 @@ exports.ResetChainTail = class ResetChainTail
 #--------------------------
 
 is_positive_int = (x) ->
-  return false unless typeof(x) is 'number'
-  return false unless Math.floor(x) is x
-  return false if x < 0
-  return true
+  return (typeof(x) is 'number') and (Math.floor(x) is x) and isFinite(x) and x >= 0
 
 #--------------------------
 
