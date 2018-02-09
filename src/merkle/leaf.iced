@@ -99,7 +99,7 @@ exports.Leaf = class Leaf
       (if @pub then @pub.to_json() else []),
       (if @semipriv? then @semipriv.to_json() else []),
       @eldest_kid
-      (if @reset? then @reset.to_json() else [])
+      (if @reset? then @reset.to_json() else null)
     ]
     return ret
 

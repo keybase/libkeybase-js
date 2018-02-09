@@ -1,3 +1,7 @@
+## 1.2.27 (2018-02-08)
+
+Bugfix: fix some bugs with reset accounts in 1.2.26
+
 ## 1.2.26 (2018-02-08)
 
 Feature
