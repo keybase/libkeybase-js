@@ -99,7 +99,7 @@ exports.Leaf = class Leaf
       (if @pub then @pub.to_json() else []),
       (if @semipriv? then @semipriv.to_json() else []),
       @eldest_kid
-      @reset_chain
+      (if @reset? then @reset.to_json() else [])
     ]
     return ret
 
@@ -129,6 +129,13 @@ exports.Leaf = class Leaf
     if @pub?.seqno and (not found[C.seqno_types.PUBLIC]) then return false
 
     return true
+
+  reset_assertion : (rows) ->
+    if rows.length is 0 then not(@reset?)
+    else if rows.length and @reset?
+      (@reset.seqno is rows[0].seqno) and (@reset.payload_hash is rows[0].payload_hash)
+    else
+      false
 
   seqno_and_prev_assertion : (typ) -> (rows) =>
     chain_tail = switch typ
