@@ -1,3 +1,7 @@
+## 1.2.28 (2018-02-12)
+
+- Update iced error to '^0.0.9' so that modern versions can be used
+
 ## 1.2.27 (2018-02-08)
 
 Bugfix: fix some bugs with reset accounts in 1.2.26
