@@ -127,7 +127,7 @@ class BaseTree extends merkle.Base
   constructor : ({@root, @nodes}) ->
     super {}
 
-  lookup_root : (cb) ->
+  lookup_root : ({txinfo}, cb) ->
     cb null, @root
 
   lookup_node : ({key}, cb) ->

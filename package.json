@@ -29,17 +29,17 @@
     "iced-utils": "^0.1.22",
     "kbpgp": ">=2.0.41",
     "keybase-proofs": "^2.0.23",
-    "merkle-tree": "0.0.14",
+    "merkle-tree": "^1.0.4",
     "pgp-utils": ">=0.0.28",
     "triplesec": "^3.0.19"
   },
   "devDependencies": {
-    "browserify": "^5.10.1",
+    "browserify": "^16.2.3",
     "forge-sigchain": "keybase/node-forge-sigchain#cson",
     "iced-coffee-script": "^1.7.1-f",
     "iced-test": "0.0.22",
     "icsify": "^0.6.0",
-    "istanbul": "^0.3.2",
+    "istanbul": "^0.4.5",
     "jison": "^0.4.15",
     "keybase-test-vectors": "1.0.11"
   }

@@ -1,3 +1,7 @@
+## 1.2.29 (2018-11-16)
+
+- Upgrade merkle-tree to 1.0.4
+
 ## 1.2.28 (2018-02-12)
 
 - Update iced error to '^0.0.9' so that modern versions can be used
