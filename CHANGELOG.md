@@ -1,3 +1,7 @@
+## 1.2.30 (2018-11-16)
+
+- Update triplesec version
+
 ## 1.2.29 (2018-11-16)
 
 - Upgrade merkle-tree to 1.0.4
