@@ -10,7 +10,7 @@ exports.SIG_ID_SUFFIX = SIG_ID_SUFFIX = "0f"
 
 strip_final_newline = (buf) ->
   s = buf.toString('utf8')
-  if s[-1...] is "\n" then new Buffer s[0...-1], "utf8"
+  if s[-1...] is "\n" then Buffer.from s[0...-1], "utf8"
   else buf
 
 # On 15 Sep 2015, a day that will live in infamy, some users made bad

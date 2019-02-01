@@ -45,7 +45,7 @@ exports.test_chain_link_format = (T, cb) ->
 exports.test_check_buffers_equal = (T, cb) ->
   # Test coverage for check_buffers_equal, which can never fail under normal
   # circumstances.
-  await node_sigchain.check_buffers_equal (new Buffer('0')), (new Buffer('1')), defer err
+  await node_sigchain.check_buffers_equal (Buffer.from('0')), (Buffer.from('1')), defer err
   T.assert err?
   cb()
 

@@ -6,8 +6,8 @@ merkle = require 'merkle-tree'
 {a_json_parse} = require('iced-utils').util
 {Leaf} = require './leaf'
 
-sha256 = (s) -> (new hash.SHA256).bufhash(new Buffer s, 'utf8').toString('hex')
-sha512 = (s) -> (new hash.SHA512).bufhash(new Buffer s, 'utf8').toString('hex')
+sha256 = (s) -> (new hash.SHA256).bufhash(Buffer.from s, 'utf8').toString('hex')
+sha512 = (s) -> (new hash.SHA512).bufhash(Buffer.from s, 'utf8').toString('hex')
 
 #===========================================================
 
@@ -114,7 +114,7 @@ class PathChecker
   #-----------
 
   _verify_username_hash : ( {uid, username}) ->
-    h = (new hash.SHA256).bufhash (new Buffer username, "utf8")
+    h = (new hash.SHA256).bufhash (Buffer.from username, "utf8")
     uid2 = h[0...15].toString('hex') + '19'
     if (uid isnt uid2)
       err = new Error "bad UID: #{uid} != #{uid2} for username #{username}"
