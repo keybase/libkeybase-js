@@ -1,3 +1,7 @@
+## 1.2.31 (2019-02-01)
+
+- Change (new Buffer) to Buffer.from
+
 ## 1.2.30 (2018-11-16)
 
 - Update triplesec version
