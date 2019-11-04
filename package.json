@@ -22,25 +22,25 @@
   },
   "homepage": "https://github.com/keybase/node-sig-tree",
   "dependencies": {
-    "iced-error": "^0.0.9",
-    "iced-lock": "^1.0.1",
-    "iced-logger": "0.0.5",
-    "iced-runtime": "^1.0.1",
-    "iced-utils": "^0.1.22",
-    "kbpgp": ">=2.0.41",
-    "keybase-proofs": "^2.0.23",
+    "iced-error": "0.0.13",
+    "iced-lock": "^2.0.1",
+    "iced-logger": "0.0.6",
+    "iced-runtime": "^1.0.4",
+    "iced-utils": "^0.1.27",
+    "kbpgp": "^2.1.4",
+    "keybase-proofs": "^2.3.10",
     "merkle-tree": "^1.0.4",
-    "pgp-utils": ">=0.0.28",
-    "triplesec": "^4.0.1"
+    "pgp-utils": "0.0.35",
+    "triplesec": "^4.0.3"
   },
   "devDependencies": {
     "browserify": "^16.2.3",
     "forge-sigchain": "keybase/node-forge-sigchain#cson",
-    "iced-coffee-script": "^1.7.1-f",
+    "iced-coffee-script": "^108.0.13",
     "iced-test": "0.0.22",
     "icsify": "^0.6.0",
-    "istanbul": "^0.4.5",
     "jison": "^0.4.15",
-    "keybase-test-vectors": "1.0.11"
+    "keybase-test-vectors": "1.0.11",
+    "nyc": "^14.1.1"
   }
 }
