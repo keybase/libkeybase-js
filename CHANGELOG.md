@@ -1,3 +1,7 @@
+## 1.2.32 (2019-11-04)
+
+- Upgrade libraries
+
 ## 1.2.31 (2019-02-01)
 
 - Change (new Buffer) to Buffer.from
