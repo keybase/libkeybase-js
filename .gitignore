@@ -1,5 +1,5 @@
-coverage
 build-stamp
 node_modules/
 test-stamp
 test/browser/test.js
+.nyc_output
